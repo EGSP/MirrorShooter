@@ -3,6 +3,7 @@ using System.Collections;
 using System.Threading.Tasks;
 using Game.Net;
 using Gasanov.Core;
+using Mirror;
 using UnityEngine;
 
 namespace Game
@@ -20,13 +21,19 @@ namespace Game
         public void StartClient(string address, string port)
         {
             var lobby = ClientLobby.Instance;
+            var networkManager = NetworkManager.singleton as EventNetworkManager;
+            if (networkManager == null)
+                throw new InvalidCastException();
 
+            lobby.NetworkManager = networkManager;
+            lobby.Initialize();
+            
             lobby.OnConnected += OnSuccessfulConnection;
             lobby.TryConnectToServer(address,port);
 
             if(_checkRoutine != null)
                 StopCoroutine(_checkRoutine);
-            _checkRoutine = CheckConnection(lobby);
+            _checkRoutine = CheckClientConnection(lobby);
             StartCoroutine(_checkRoutine);
         }
 
@@ -38,6 +45,12 @@ namespace Game
         public void StartServer(string port)
         {
             var lobby = ServerLobby.Instance;
+            var networkManager = NetworkManager.singleton as EventNetworkManager;
+            if (networkManager == null)
+                throw new InvalidCastException();
+
+            lobby.NetworkManager = networkManager;
+            lobby.Initialize();
 
             lobby.OnStarted += OnServerStarted;
             lobby.StartServer(port);
@@ -57,14 +70,18 @@ namespace Game
         {
             if (_checkRoutine != null)
                 StopCoroutine(_checkRoutine);
+            
+            // На всякий случай нужно сделать дисконнект.
+            ClientLobby.Instance.Disconnect();
         }
 
-        private IEnumerator CheckConnection(ClientLobby lobby)
+        private IEnumerator CheckClientConnection(ClientLobby lobby)
         {
             yield return new WaitForSeconds(5f);
             Debug.Log($"Delayed: lobby status {lobby.isConnected}");
             if (!lobby.isConnected)
             {
+                lobby.Disconnect();
                 OnMainLobby();
                 OnFailedConnection();
             }

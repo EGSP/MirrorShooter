@@ -23,22 +23,6 @@ namespace Game.Presenters
             base.Awake();
 
             Share();
-
-            Model = this.ValidateComponent(Model);
-            if(Model == null)
-                throw new NullReferenceException();
-            
-            if(View == null)
-                throw new NullReferenceException();
-        }
-
-        private void Start()
-        {
-            View.OnDisconnect += DisconnectInput;
-            
-            Model.OnAddUser += (x) => View.AddUser(x);
-            Model.OnDisconnectUser += (x) => View.RemoveUser(x);
-            Model.OnDisconnect += Disconnect;
         }
 
         /// <summary>
@@ -79,12 +63,30 @@ namespace Game.Presenters
         {
             if (key == "client_lobby")
             {
-                View.Enable();
-                View.SetStatus("Connected: Online!");
+                OnResponse();
                 return true;
             }
 
             return false;
+        }
+
+        private void OnResponse()
+        {
+            Model = ClientLobby.Instance;
+            if(Model == null)
+                throw new NullReferenceException();
+            
+            if(View == null)
+                throw new NullReferenceException();
+            
+            View.OnDisconnect += DisconnectInput;
+            
+            Model.OnAddUser += (x) => View.AddUser(x);
+            Model.OnDisconnectUser += (x) => View.RemoveUser(x);
+            Model.OnDisconnect += Disconnect;
+            
+            View.Enable();
+            View.SetStatus("Connected: Online!");
         }
 
     }

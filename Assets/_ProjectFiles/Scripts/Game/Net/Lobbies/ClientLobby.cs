@@ -17,8 +17,10 @@ namespace Game.Net
         /// </summary>
         [NonSerialized] public bool isConnected = NetworkClient.isConnected;
         
+        public bool IsInitialized { get; private set; }
+
         [OdinSerialize]
-        public EventNetworkManager NetworkManager { get; private set; }
+        public EventNetworkManager NetworkManager { get; set; }
         
         public event Action OnConnected = delegate {  };
         public event Action OnDisconnect = delegate {  };
@@ -41,15 +43,20 @@ namespace Game.Net
             AlwaysExist = true;
             _lobbyUsers = new List<User>();
             
-            NetworkManager = this.ValidateComponent(NetworkManager);
-            if (NetworkManager == null)
-                throw new NullReferenceException();
+            // NetworkManager = this.ValidateComponent(NetworkManager);
+            // if (NetworkManager == null)
+            //     throw new NullReferenceException();
         }
 
-        private void Start()
+        public void Initialize()
         {
+            if (IsInitialized == true)
+                return;
+            
             NetworkManager.OnConnectedToServer += Connected;
-            NetworkManager.OnDisconnectedFromServer += Disconnected;
+            NetworkManager.OnDisconnectedFromServer += DisconnectedFromServer;
+
+            IsInitialized = true;
         }
 
         /// <summary>
@@ -103,7 +110,7 @@ namespace Game.Net
         /// Вызывается после отключения от сервера.
         /// </summary>
         /// <param name="conn"></param>
-        private void Disconnected(NetworkConnection conn)
+        private void DisconnectedFromServer(NetworkConnection conn)
         {
             ClearLobby();
             OnDisconnect();

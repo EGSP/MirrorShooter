@@ -437,6 +437,12 @@ namespace Mirror
                                 MirrorClientIncomingQueue.Enqueue(connPkt);
                                 break;
                             case EventType.Timeout:
+                                print("Ignorance: connection timeout");
+                                // Client disconnected.
+                                IncomingPacket timeoutPkt = default;
+                                timeoutPkt.type = MirrorPacketType.ClientDisconnected;
+                                MirrorClientIncomingQueue.Enqueue(timeoutPkt);
+                                break;
                             case EventType.Disconnect:
                                 // Client disconnected.
                                 IncomingPacket disconnPkt = default;

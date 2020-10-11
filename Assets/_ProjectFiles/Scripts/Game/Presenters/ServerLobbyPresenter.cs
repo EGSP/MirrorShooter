@@ -22,27 +22,16 @@ namespace Game.Presenters
             base.Awake();
 
             Share();
-
-            Model = this.ValidateComponent(Model);
-            if(Model == null)
-                throw new NullReferenceException();
-            
-            if(View == null)
-                throw new NullReferenceException();
-        }
-
-        private void Start()
-        {
-            View.OnShutdown += Shutdown;
-
-            Model.OnClientConnected += ClientConnected;
-            Model.OnUserConnected += AddUser;
-            Model.OnUserDisconnected += RemoveUser;
         }
 
         private void ClientConnected()
         {
             // View.SetStatus("Someone connected!");
+        }
+
+        private void LoadScene(string sceneName)
+        {
+            Model.Session.ChangeScene(sceneName);
         }
 
         private void Shutdown()
@@ -53,6 +42,13 @@ namespace Game.Presenters
             View.Disable();
             
             PresenterMediator.Request(this,"main_menu",null);
+            
+            View.OnShutdown -= Shutdown;
+            View.OnLoadScene -= LoadScene;
+
+            Model.OnClientConnected -= ClientConnected;
+            Model.OnUserConnected -= AddUser;
+            Model.OnUserDisconnected -= RemoveUser;
         }
 
         private void AddUser(User user)
@@ -79,12 +75,33 @@ namespace Game.Presenters
         {
             if (key == "server_lobby")
             {
-                View.Enable();
-                View.SetStatus("Server has started..");
+                OnResponse();
                 return true;
             }
-
+            
             return false;
+        }
+
+        private void OnResponse()
+        {
+            Model = ServerLobby.Instance;
+            if(Model == null)
+                throw new NullReferenceException();
+            
+            if(View == null)
+                throw new NullReferenceException();
+            
+            
+            View.OnShutdown += Shutdown;
+            View.OnLoadScene += LoadScene;
+
+            Model.OnClientConnected += ClientConnected;
+            Model.OnUserConnected += AddUser;
+            Model.OnUserDisconnected += RemoveUser;
+            
+            View.Enable();
+            Debug.Log("enabled");
+            View.SetStatus("Server has started..");
         }
     }
 }

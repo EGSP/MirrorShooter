@@ -12,11 +12,6 @@ namespace Game.Net
     
     public class ServerLobby : SerializedSingleton<ServerLobby>
     {
-        [OdinSerialize]
-        public EventNetworkManager NetworkManager { get; private set; }
-
-        public bool HasStarted { get ; private set; }
-        
         public event Action OnStarted = delegate {  };
         public event Action OnShutdown = delegate {  };
         
@@ -32,29 +27,50 @@ namespace Game.Net
         /// </summary>
         public event Action<User> OnUserDisconnected = delegate(User user) {  };
 
+        [OdinSerialize]
+        public EventNetworkManager NetworkManager { get; set; }
+
+        public bool HasStarted { get ; private set; }
+
+        public bool IsInitialized { get; private set; }
+        
+        /// <summary>
+        /// Все текущие пользователи.
+        /// </summary>
         public List<UserConnection> Connections { get; private set; }
+
+        /// <summary>
+        /// Текущая сессия сервера.
+        /// </summary>
+        public ServerSession Session { get; private set; }
         
         protected override void Awake()
         {
             base.Awake();
             AlwaysExist = true;
             
-            NetworkManager = this.ValidateComponent(NetworkManager);
-            if (NetworkManager == null)
-                throw new NullReferenceException();
+            // NetworkManager = this.ValidateComponent(NetworkManager);
+            // if (NetworkManager == null)
+            //     throw new NullReferenceException();
 
             Connections = new List<UserConnection>();
         }
 
-        private void Start()
+        public void Initialize()
         {
+            if (IsInitialized == true) 
+                return;
+            
             NetworkManager.OnServerStarted += Started;
             NetworkManager.OnServerStopped += Stopped;
             NetworkManager.OnClientConnected += ClientConnected;
             NetworkManager.OnClientDisconnected += ClientDisconnected;
             
-            
+            Session = new ServerSession(NetworkManager);
+            IsInitialized = true;
         }
+
+        #region Base work
 
         public void StartServer(string port)
         {
@@ -82,7 +98,11 @@ namespace Game.Net
             OnShutdown();
             HasStarted = false;
         }
+        
+        #endregion
 
+        #region Client processing
+        
         private void ClientConnected(NetworkConnection clientConnection)
         {
             Debug.Log("Server lobby: someone connected!");
@@ -213,6 +233,10 @@ namespace Game.Net
             userConnection.Connection.Send<LobbyUsersMessage>(lobbyMessage);
         }
 
+        #endregion
+
+        #region Communication
+
         /// <summary>
         /// Отправка сообщения всем пользователям.
         /// </summary>
@@ -248,5 +272,7 @@ namespace Game.Net
                 }
             }
         }
+        
+        #endregion
     }
 }
