@@ -34,16 +34,31 @@ namespace Game.Presenters
 
         private void Start()
         {
-            View.OnDisconnect += Disconnect;
+            View.OnDisconnect += DisconnectInput;
+            
             Model.OnAddUser += (x) => View.AddUser(x);
             Model.OnDisconnectUser += (x) => View.RemoveUser(x);
-
+            Model.OnDisconnect += Disconnect;
         }
 
-        public void Disconnect()
+        /// <summary>
+        /// Пользователь запросил отключение.
+        /// </summary>
+        public void DisconnectInput()
         {
             Model.Disconnect();
-            
+        }
+
+        /// <summary>
+        /// Отключение произошло по техниеским причинам.
+        /// </summary>
+        private void Disconnect()
+        {
+            GoToMenu();
+        }
+
+        private void GoToMenu()
+        {
             View.ClearUsers();
             View.Disable();
             

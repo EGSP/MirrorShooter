@@ -30,6 +30,7 @@ namespace Game.Presenters.Chat
         private void Start()
         {
             Model.OnMessage += (x) => View.AddMessage(x);
+            Model.OnShutdown += () => View.ClearChatFlow();
         }
         
         public void Dispose()

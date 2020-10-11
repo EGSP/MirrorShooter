@@ -1,5 +1,6 @@
 ﻿using Game.Net;
 using Gasanov.Core.Mvp;
+using Gasanov.Utils.GameObjectUtilities;
 using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
@@ -24,6 +25,11 @@ namespace Game.Views.Chat
             {
                 Destroy(chatFlow.transform.GetChild(0).gameObject);
             }
+        }
+        
+        public void ClearChatFlow()
+        {
+            GameObjectUtils.DestroyAllChildrens(chatFlow.transform);
         }
         
         public void Enable()

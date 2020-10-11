@@ -11,6 +11,8 @@ namespace Game.Chat
         
         private ClientLobby _clientLobby;
         
+        public event Action OnDisconnect = delegate {  };
+        
         private void Awake()
         {
             _clientLobby = ClientLobby.Instance;
@@ -19,6 +21,8 @@ namespace Game.Chat
             {
                 NetworkClient.RegisterHandler<UserChatMessage>(OnUserMessage);
             };
+
+            _clientLobby.OnDisconnect += () => OnDisconnect();
         }
 
         private void OnUserMessage(UserChatMessage message)

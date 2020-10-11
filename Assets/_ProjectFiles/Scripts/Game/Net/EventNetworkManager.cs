@@ -12,6 +12,8 @@ namespace Game.Net
         /// </summary>
         public event Action<NetworkConnection> OnConnectedToServer = delegate(NetworkConnection connection) {  };
         
+        public event Action<NetworkConnection> OnDisconnectedFromServer = delegate(NetworkConnection connection) {  };
+        
         // SERVER
 
         /// <summary>
@@ -36,6 +38,12 @@ namespace Game.Net
         {
             base.OnClientConnect(conn);
             OnConnectedToServer(conn);
+        }
+
+        public override void OnClientDisconnect(NetworkConnection conn)
+        {
+            base.OnClientDisconnect(conn);
+            OnDisconnectedFromServer(conn);
         }
 
         public override void OnStartServer()

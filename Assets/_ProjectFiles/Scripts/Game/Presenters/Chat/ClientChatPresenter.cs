@@ -19,6 +19,7 @@ namespace Game.Presenters.Chat
         private void Start()
         {
             Model.OnMessage += (x) => View.AddMessage(x);
+            Model.OnDisconnect += () => View.ClearChatFlow();
 
             View.OnMessageSend += SendMessage;
         }

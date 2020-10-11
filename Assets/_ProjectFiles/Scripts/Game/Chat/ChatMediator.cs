@@ -11,6 +11,8 @@ namespace Game.Chat
         /// Вызывается при получении сообщения.
         /// </summary>
         public event Action<UserChatMessage> OnMessage = delegate(UserChatMessage message) {  };
+        
+        public event Action OnShutdown = delegate {  };
 
         private ServerLobby _serverLobby;
         
@@ -23,6 +25,8 @@ namespace Game.Chat
             {
                 NetworkServer.RegisterHandler<UserChatMessage>(OnUserMessage);
             };
+
+            _serverLobby.OnShutdown += () => OnShutdown();
         }
 
         /// <summary>
@@ -33,7 +37,7 @@ namespace Game.Chat
         {
             OnMessage(message);
             
-            _serverLobby.SendToAll<UserChatMessage>(message, x=>x.Name != message.From);
+            _serverLobby.SendToAll<UserChatMessage>(message, x=>x.Name == message.From);
         }
     }
 }

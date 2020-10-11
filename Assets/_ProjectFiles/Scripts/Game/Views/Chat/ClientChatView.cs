@@ -1,6 +1,7 @@
 ﻿using System;
 using Game.Net;
 using Gasanov.Core.Mvp;
+using Gasanov.Utils.GameObjectUtilities;
 using Sirenix.OdinInspector;
 using Sirenix.Utilities;
 using TMPro;
@@ -39,13 +40,18 @@ namespace Game.Views.Chat
             }
         }
         
-        public void SendMessage()
+        public void SendMessageToServer()
         {
             if (messageInput.text.IsNullOrWhitespace())
                 return;
 
             OnMessageSend(messageInput.text);
             messageInput.text = null;
+        }
+
+        public void ClearChatFlow()
+        {
+            GameObjectUtils.DestroyAllChildrens(chatFlow.transform);
         }
         
         public void Enable()

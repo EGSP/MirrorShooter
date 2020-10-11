@@ -49,6 +49,7 @@ namespace Game.Net
         private void Start()
         {
             NetworkManager.OnConnectedToServer += Connected;
+            NetworkManager.OnDisconnectedFromServer += Disconnected;
         }
 
         /// <summary>
@@ -94,7 +95,17 @@ namespace Game.Net
         public void Disconnect()
         {
             NetworkManager.StopClient();
-            _lobbyUsers.Clear();
+            ClearLobby();
+            OnDisconnect();
+        }
+
+        /// <summary>
+        /// Вызывается после отключения от сервера.
+        /// </summary>
+        /// <param name="conn"></param>
+        private void Disconnected(NetworkConnection conn)
+        {
+            ClearLobby();
             OnDisconnect();
         }
 
@@ -142,6 +153,14 @@ namespace Game.Net
                 _lobbyUsers.Remove(coincidence);
                 OnDisconnectUser(coincidence);
             }
+        }
+
+        /// <summary>
+        /// Очищение данных лобби.
+        /// </summary>
+        private void ClearLobby()
+        {
+            _lobbyUsers.Clear();
         }
     }
 }
