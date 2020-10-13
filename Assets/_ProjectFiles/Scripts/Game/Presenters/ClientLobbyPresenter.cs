@@ -46,12 +46,27 @@ namespace Game.Presenters
             View.ClearUsers();
             View.Disable();
             
+            Dispose();
             PresenterMediator.Request(this, "main_menu", null);
+        }
+
+        private void AddUser(User user)
+        {
+            View.AddUser(user);
+        }
+
+        private void RemoveUser(User user)
+        {
+            View.RemoveUser(user);
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            View.OnDisconnect -= DisconnectInput;
+            
+            Model.OnAddUser -= AddUser;
+            Model.OnDisconnectUser -= RemoveUser;
+            Model.OnDisconnect -= Disconnect;
         }
         
         public void Share()
@@ -81,8 +96,8 @@ namespace Game.Presenters
             
             View.OnDisconnect += DisconnectInput;
             
-            Model.OnAddUser += (x) => View.AddUser(x);
-            Model.OnDisconnectUser += (x) => View.RemoveUser(x);
+            Model.OnAddUser += AddUser;
+            Model.OnDisconnectUser += RemoveUser;
             Model.OnDisconnect += Disconnect;
             
             View.Enable();

@@ -100,7 +100,6 @@ namespace Game.Presenters
             Model.OnUserDisconnected += RemoveUser;
             
             View.Enable();
-            Debug.Log("enabled");
             View.SetStatus("Server has started..");
         }
     }

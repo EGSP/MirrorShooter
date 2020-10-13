@@ -11,8 +11,15 @@ namespace Game.Net
         /// Вызывается при успешном подключении к серверу.
         /// </summary>
         public event Action<NetworkConnection> OnConnectedToServer = delegate(NetworkConnection connection) {  };
-        
         public event Action<NetworkConnection> OnDisconnectedFromServer = delegate(NetworkConnection connection) {  };
+        /// <summary>
+        /// Вызывается перед изменением сцены.
+        /// </summary>
+        public event Action OnClientChangeSceneEvent = delegate {  };
+        /// <summary>
+        /// Вызывается после смены сцены.
+        /// </summary>
+        public event Action OnClientSceneChangedEvent = delegate {  };
         
         // SERVER
 
@@ -25,6 +32,10 @@ namespace Game.Net
         /// </summary>
         public event Action<NetworkConnection> OnClientDisconnected = delegate(NetworkConnection connection) {  };
         /// <summary>
+        /// Вызывается при готовности клиента продолжать связь.
+        /// </summary>
+        public event Action<NetworkConnection> OnClientReady = delegate(NetworkConnection connection) {  };
+        /// <summary>
         /// Вызывается при старте сервера на текущем пк.
         /// </summary>
         public event Action OnServerStarted = delegate {  };
@@ -33,6 +44,7 @@ namespace Game.Net
         /// </summary>
         public event Action OnServerStopped = delegate {  };
         
+        // CLIENT
         
         public override void OnClientConnect(NetworkConnection conn)
         {
@@ -45,6 +57,21 @@ namespace Game.Net
             base.OnClientDisconnect(conn);
             OnDisconnectedFromServer(conn);
         }
+
+        public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation,
+            bool customHandling)
+        {
+            OnClientChangeSceneEvent();
+            base.OnClientChangeScene(newSceneName, sceneOperation, customHandling);
+        }
+
+        public override void OnClientSceneChanged(NetworkConnection conn)
+        {
+            base.OnClientSceneChanged(conn);
+            OnClientSceneChangedEvent();
+        }
+
+        // SERVER
 
         public override void OnStartServer()
         {
@@ -68,6 +95,12 @@ namespace Game.Net
         {
             base.OnServerDisconnect(conn);
             OnClientDisconnected(conn);
+        }
+
+        public override void OnServerReady(NetworkConnection conn)
+        {
+            base.OnServerReady(conn);
+            OnClientReady(conn);
         }
     }
 }

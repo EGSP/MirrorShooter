@@ -1,12 +1,28 @@
-﻿namespace Game.Net
+﻿using System;
+
+namespace Game.Net
 {
+    [Serializable]
     public sealed class User
     {
-        public User(string name)
+        /// <summary>
+        /// Используется только для Weaver
+        /// </summary>
+        public User()
         {
-            Name = name;
+            
         }
         
-        public string Name { get; private set; }
+        public User(string name)
+        {
+            this.name = name;
+        }
+
+        public string name;
+
+        /// <summary>
+        /// Уникальный идентификатор.
+        /// </summary>
+        public int id;
     }
 }

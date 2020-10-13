@@ -18,7 +18,14 @@ namespace Game
 
         private IEnumerator _checkRoutine;
 
-        public void StartClient(string address, string port)
+        private Action _clearLastLobby;
+
+        public void CleanUpLobbies()
+        {
+            _clearLastLobby?.Invoke();
+        }
+        
+        public void CreateClientLobby()
         {
             var lobby = ClientLobby.Instance;
             var networkManager = NetworkManager.singleton as EventNetworkManager;
@@ -29,6 +36,15 @@ namespace Game
             lobby.Initialize();
             
             lobby.OnConnected += OnSuccessfulConnection;
+            _clearLastLobby = () =>
+            {
+                Destroy(lobby.gameObject);
+            };
+        }
+
+        public void StartClient(string address, string port)
+        {
+            var lobby = ClientLobby.Instance;
             lobby.TryConnectToServer(address,port);
 
             if(_checkRoutine != null)
@@ -42,7 +58,7 @@ namespace Game
             OnClientLobby();
         }
 
-        public void StartServer(string port)
+        public void CreateServerLobby()
         {
             var lobby = ServerLobby.Instance;
             var networkManager = NetworkManager.singleton as EventNetworkManager;
@@ -53,6 +69,15 @@ namespace Game
             lobby.Initialize();
 
             lobby.OnStarted += OnServerStarted;
+            _clearLastLobby = () =>
+            {
+                Destroy(lobby.gameObject);
+            };
+        }
+
+        public void StartServer(string port)
+        {
+            var lobby = ServerLobby.Instance;
             lobby.StartServer(port);
         }
 
@@ -70,8 +95,10 @@ namespace Game
         {
             if (_checkRoutine != null)
                 StopCoroutine(_checkRoutine);
-            
-            // На всякий случай нужно сделать дисконнект.
+        }
+        
+        public void StopClientConnection()
+        {
             ClientLobby.Instance.Disconnect();
         }
 

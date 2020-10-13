@@ -687,6 +687,7 @@ namespace Mirror
         /// </summary>
         public static void ClearHandlers()
         {
+            logger.Log("ON CLEAR HANDLERS");
             handlers.Clear();
         }
 

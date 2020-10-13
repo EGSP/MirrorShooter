@@ -12,36 +12,44 @@ namespace Game.Net
     
     public class ClientLobby : SerializedSingleton<ClientLobby>
     {
-        /// <summary>
-        /// Подключен ли клиент к лобби.
-        /// </summary>
-        [NonSerialized] public bool isConnected = NetworkClient.isConnected;
-        
-        public bool IsInitialized { get; private set; }
-
-        [OdinSerialize]
-        public EventNetworkManager NetworkManager { get; set; }
-        
         public event Action OnConnected = delegate {  };
         public event Action OnDisconnect = delegate {  };
         
         public event Action<User> OnAddUser = delegate(User user) {  };
         public event Action<User> OnDisconnectUser = delegate(User user) {  };
-
         
+        /// <summary>
+        /// Подключен ли клиент к лобби.
+        /// </summary>
+        [NonSerialized] public bool isConnected = NetworkClient.isConnected;
+        
+        /// <summary>
+        /// Инициализировано ли лобби.
+        /// </summary>
+        public bool IsInitialized { get; private set; }
+        
+        public ClientSession Session { get; private set; }
 
+        [OdinSerialize]
+        public EventNetworkManager NetworkManager { get; set; }
+        
         /// <summary>
         /// Пользователь процесса игры.
         /// </summary>
-        public User MainUser => LaunchInfo.User;
-        
-        private List<User> _lobbyUsers;
-        
+        public User MainUser
+        {
+            get => LaunchInfo.User;
+            set => LaunchInfo.User = value;
+        }
+
+        [OdinSerialize]
+        public List<User> LobbyUsers { get; private set; }
+
         protected override void Awake()
         {
             base.Awake();
             AlwaysExist = true;
-            _lobbyUsers = new List<User>();
+            LobbyUsers = new List<User>();
             
             // NetworkManager = this.ValidateComponent(NetworkManager);
             // if (NetworkManager == null)
@@ -55,6 +63,13 @@ namespace Game.Net
             
             NetworkManager.OnConnectedToServer += Connected;
             NetworkManager.OnDisconnectedFromServer += DisconnectedFromServer;
+            NetworkManager.OnClientChangeSceneEvent += () =>
+            {
+                Session = gameObject.AddComponent<ClientSession>();
+                Session.NetworkManager = NetworkManager;
+            };
+            NetworkManager.OnClientSceneChangedEvent += () => Session.StartSession();
+            
 
             IsInitialized = true;
         }
@@ -71,6 +86,7 @@ namespace Game.Net
             NetworkClient.RegisterHandler<LobbyUsersMessage>(OnLobbyUsersMessage);
             NetworkClient.RegisterHandler<AddUserMessage>(AddUser);
             NetworkClient.RegisterHandler<DisconnectUserMessage>(DisconnectUser);
+            NetworkClient.RegisterHandler<UpdateUserMessage>(UpdateUserInfo);
 
             NetworkManager.StartClient();
         }
@@ -89,7 +105,7 @@ namespace Game.Net
 
         private void ConnectAsUser()
         {
-            var message = new AddUserMessage(){Name = LaunchInfo.User.Name};
+            var message = new AddUserMessage(){Name = LaunchInfo.User.name};
             NetworkClient.Send<AddUserMessage>(message);
 
             // Локальное добавления самого себя.
@@ -133,13 +149,13 @@ namespace Game.Net
         public void AddUser(AddUserMessage message)
         {
             // Если пользователь новый
-            if (!_lobbyUsers.Exists(x => x.Name == message.Name))
+            if (!LobbyUsers.Exists(x => x.name == message.Name))
             {
                 var user = new User(message.Name);
-                _lobbyUsers.Add(user);
+                LobbyUsers.Add(user);
                 
                 
-                Debug.Log($"New User {message.Name} : {_lobbyUsers.Count}");
+                Debug.Log($"New User {message.Name} : {LobbyUsers.Count}");
                 OnAddUser(user);
                 return;
             }
@@ -153,13 +169,21 @@ namespace Game.Net
         /// </summary>
         public void DisconnectUser(DisconnectUserMessage message)
         {
-            var coincidence = _lobbyUsers.FirstOrDefault(x => x.Name == message.Name);
+            var coincidence = LobbyUsers.FirstOrDefault(x => x.name == message.Name);
 
             if (coincidence != null)
             {
-                _lobbyUsers.Remove(coincidence);
+                LobbyUsers.Remove(coincidence);
                 OnDisconnectUser(coincidence);
             }
+        }
+
+        /// <summary>
+        /// Обновление информации о текущем пользователе.
+        /// </summary>
+        public void UpdateUserInfo(UpdateUserMessage message)
+        {
+            MainUser = message.updatedUser;
         }
 
         /// <summary>
@@ -167,7 +191,7 @@ namespace Game.Net
         /// </summary>
         private void ClearLobby()
         {
-            _lobbyUsers.Clear();
+            LobbyUsers.Clear();
         }
     }
 }

@@ -37,10 +37,14 @@ namespace Game.Presenters
             View.OnLogin += Login;
             View.OnRelogin += ShowLoginWindow;
             View.OnClientMode += ShowClientWindow;
-            View.OnServerMode += View.ShowServerWindow;
+            View.OnServerMode += ShowServerWindow;
 
             View.OnConnect += Connect;
-            View.OnConnectionQuit += () => Model.StopCheckingConnection();
+            View.OnConnectionQuit += () =>
+            {
+                Model.StopCheckingConnection();
+                Model.StopClientConnection();
+            };
             View.OnStartServer += StartServer;
             View.OnExit += ExitFromGame;
 
@@ -55,6 +59,7 @@ namespace Game.Presenters
         private void Login(string name)
         { 
             LaunchInfo.User = new User(name);
+            
             View.ShowModeSelectWindow();
             View.ShowInfo($"Logged as \"{name}\"");
         }
@@ -65,6 +70,12 @@ namespace Game.Presenters
             View.SetStatus("Connecting");
         }
 
+        private void ConnectionQuit()
+        {
+            Model.StopCheckingConnection();
+            Model.StopClientConnection();
+        }
+
         private void StartServer(string port)
         {
             Model.StartServer(port);
@@ -72,6 +83,8 @@ namespace Game.Presenters
 
         private void ShowLoginWindow()
         {
+            Model.CleanUpLobbies();
+            
             View.ClearInfo();
             View.ShowLoginWindow();
         }
@@ -83,11 +96,13 @@ namespace Game.Presenters
 
         private void ShowClientWindow()
         {
+            Model.CreateClientLobby();
             View.ShowConnectWindow();
         }
 
         private void ShowServerWindow()
         {
+            Model.CreateServerLobby();
             View.ShowServerWindow();
         }
 
@@ -103,18 +118,33 @@ namespace Game.Presenters
         
         public void Dispose()
         {
-            throw new NotImplementedException();
+            View.OnLogin -= Login;
+            View.OnRelogin -= ShowLoginWindow;
+            View.OnClientMode -= ShowClientWindow;
+            View.OnServerMode -= ShowServerWindow;
+
+            View.OnConnect -= Connect;
+            View.OnConnectionQuit -= ConnectionQuit;
+            View.OnStartServer -= StartServer;
+            View.OnExit -= ExitFromGame;
+
+            Model.OnClientLobby -= RequestClientLobby;
+            Model.OnServerLobby -= RequestServerLobby;
+            Model.OnMainLobby -= ShowSelectModeWindow;
+            Model.OnFailedConnection -= NotifyFailedConnection;
         }
 
         private void RequestClientLobby()
         {
-            PresenterMediator.Request(this, "client_lobby", null);
             Model.StopCheckingConnection();
+            Dispose();
+            PresenterMediator.Request(this, "client_lobby", null);
             View.Disable();
         }
 
         private void RequestServerLobby()
         {
+            Dispose();
             PresenterMediator.Request(this, "server_lobby", null);
             View.Disable();
         }
@@ -128,12 +158,33 @@ namespace Game.Presenters
         {
             if (key == "main_menu")
             {
-                View.Enable();
-                ShowSelectModeWindow();
+                OnResponse();
                 return true;
             }
 
             return false;
+        }
+
+        private void OnResponse()
+        {
+            View.Enable();
+
+            View.OnLogin += Login;
+            View.OnRelogin += ShowLoginWindow;
+            View.OnClientMode += ShowClientWindow;
+            View.OnServerMode += ShowServerWindow;
+
+            View.OnConnect += Connect;
+            View.OnConnectionQuit += ConnectionQuit;
+            View.OnStartServer += StartServer;
+            View.OnExit += ExitFromGame;
+
+            Model.OnClientLobby += RequestClientLobby;
+            Model.OnServerLobby += RequestServerLobby;
+            Model.OnMainLobby += ShowSelectModeWindow;
+            Model.OnFailedConnection += NotifyFailedConnection;
+            
+            ShowSelectModeWindow();
         }
     }
 }

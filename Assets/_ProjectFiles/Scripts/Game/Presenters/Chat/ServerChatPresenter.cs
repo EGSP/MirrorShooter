@@ -1,5 +1,6 @@
 ﻿using System;
 using Game.Chat;
+using Game.Net;
 using Game.Views.Chat;
 using Gasanov.Core.Mvp;
 using Gasanov.Extensions.Mono;
@@ -27,12 +28,29 @@ namespace Game.Presenters.Chat
                 throw new NullReferenceException();
         }
         
-        private void Start()
+
+        private void OnEnable()
         {
-            Model.OnMessage += (x) => View.AddMessage(x);
-            Model.OnShutdown += () => View.ClearChatFlow();
+            Model.OnMessage += AddMessage;
+            Model.OnStart += ClearChat;
         }
-        
+
+        private void OnDisable()
+        {
+            Model.OnMessage -= AddMessage;
+            Model.OnStart -= ClearChat;
+        }
+
+        private void AddMessage(UserChatMessage message)
+        {
+            View.AddMessage(message);
+        }
+
+        private void ClearChat()
+        {
+            View.ClearChatFlow();
+        }
+
         public void Dispose()
         {
             throw new NotImplementedException();

@@ -6,6 +6,7 @@ using Gasanov.Extensions.Mono;
 using Mirror;
 using Sirenix.Serialization;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Game.Net
 {
@@ -34,6 +35,7 @@ namespace Game.Net
 
         public bool IsInitialized { get; private set; }
         
+        [OdinSerialize]
         /// <summary>
         /// Все текущие пользователи.
         /// </summary>
@@ -43,7 +45,8 @@ namespace Game.Net
         /// Текущая сессия сервера.
         /// </summary>
         public ServerSession Session { get; private set; }
-        
+
+        #region Setup
         protected override void Awake()
         {
             base.Awake();
@@ -65,11 +68,14 @@ namespace Game.Net
             NetworkManager.OnServerStopped += Stopped;
             NetworkManager.OnClientConnected += ClientConnected;
             NetworkManager.OnClientDisconnected += ClientDisconnected;
-            
-            Session = new ServerSession(NetworkManager);
+
+            Session = gameObject.AddComponent<ServerSession>();
+            Session.NetworkManager = NetworkManager;
+            Session.ServerLobby = this;
             IsInitialized = true;
         }
-
+        #endregion
+        
         #region Base work
 
         public void StartServer(string port)
@@ -138,7 +144,9 @@ namespace Game.Net
             
             coincidence.User = new User(message.Name);
             
+            UpdateUserInfo(coincidence);
             GiveUserInfoAboutLobby(coincidence);
+            
             NotifyClientsNewOne(coincidence.User);
             OnUserConnected(coincidence.User);
         }
@@ -170,7 +178,7 @@ namespace Game.Net
                     if (userConn.User != newUser)
                     {
                         // Оповещаем остальных пользователей.
-                        userConn.Connection.Send<AddUserMessage>(new AddUserMessage() {Name = newUser.Name});
+                        userConn.Connection.Send<AddUserMessage>(new AddUserMessage() {Name = newUser.name});
                     }
                 }
             }
@@ -193,7 +201,7 @@ namespace Game.Net
                     {
                         // Оповещаем остальных пользователей.
                         userConn.Connection.Send<DisconnectUserMessage>(
-                            new DisconnectUserMessage() {Name = disconnectedUser.Name});
+                            new DisconnectUserMessage() {Name = disconnectedUser.name});
                     }
                 }
             }
@@ -223,7 +231,7 @@ namespace Game.Net
                         //     new AddUserMessage(){Name = anotherUserConnection.User.Name});
 
                         lobbyMessage.AddUserMessages.Add(
-                            new AddUserMessage() {Name = anotherUserConnection.User.Name});
+                            new AddUserMessage() {Name = anotherUserConnection.User.name});
                     }
                 }
             }
@@ -231,6 +239,34 @@ namespace Game.Net
             Debug.Log($"Sended lobby users : {lobbyMessage.AddUserMessages.Count}");
             
             userConnection.Connection.Send<LobbyUsersMessage>(lobbyMessage);
+        }
+
+        private void UpdateUserInfo(UserConnection userConnection)
+        {
+            int exc = 0;
+            bool uniqueId = false;
+
+            while (uniqueId != true)
+            {
+                exc++;
+                if(exc > 1_00)
+                    throw new ArgumentOutOfRangeException();
+                
+                var id = Random.Range(1, int.MaxValue);
+                
+                // Если хоть один номер совпал.
+                if(Connections.Exists(x=>x.User.id == id))
+                    continue;
+
+                // Создан уникальный идентификатор.
+                uniqueId = true;
+                userConnection.User.id = id;
+            }
+
+            var message = new UpdateUserMessage();
+            message.updatedUser = userConnection.User;
+
+            userConnection.Connection.Send<UpdateUserMessage>(message);
         }
 
         #endregion
@@ -274,5 +310,17 @@ namespace Game.Net
         }
         
         #endregion
+
+        /// <summary>
+        /// Ищет пользовательское соединение связанное с этим NetworkConnection.
+        /// При отсутствии возвращает null.
+        /// </summary>
+        public UserConnection Val(NetworkConnection conn)
+        {
+            var coincidence = Connections.FirstOrDefault(x 
+                => x.Connection == conn);
+
+            return coincidence;
+        }
     }
 }

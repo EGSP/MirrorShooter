@@ -4847,7 +4847,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -447.7, y: 95.7}
+  m_AnchoredPosition: {x: -447.69998, y: 95.7}
   m_SizeDelta: {x: -895.3549, y: -690.75616}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1011615763
@@ -6685,7 +6685,7 @@ GameObject:
   - component: {fileID: 1359345518}
   - component: {fileID: 1359345519}
   m_Layer: 0
-  m_Name: Client Presenter
+  m_Name: Server Pres
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9580,7 +9580,7 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 0
+  orthographic: 1
   orthographic size: 5
   m_Depth: -1
   m_CullingMask:
@@ -10177,7 +10177,7 @@ GameObject:
   - component: {fileID: 1895761936}
   - component: {fileID: 1895761937}
   m_Layer: 0
-  m_Name: Server Presenter
+  m_Name: Client Pres
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

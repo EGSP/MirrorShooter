@@ -1,5 +1,6 @@
 ﻿using System;
 using Game.Chat;
+using Game.Net;
 using Game.Views.Chat;
 using Gasanov.Core.Mvp;
 using Sirenix.OdinInspector;
@@ -16,12 +17,29 @@ namespace Game.Presenters.Chat
         
         public event Action OnDispose;
         
-        private void Start()
+        
+        private void OnEnable()
         {
-            Model.OnMessage += (x) => View.AddMessage(x);
-            Model.OnDisconnect += () => View.ClearChatFlow();
-
+            Model.OnMessage += AddMessage;
+            Model.OnDisconnect += ClearChat;
             View.OnMessageSend += SendMessage;
+        }
+
+        private void OnDisable()
+        {
+            Model.OnMessage -= AddMessage;
+            Model.OnDisconnect -= ClearChat;
+            View.OnMessageSend -= SendMessage;
+        }
+
+        private void AddMessage(UserChatMessage message)
+        {
+            View.AddMessage(message);
+        }
+
+        private void ClearChat()
+        {
+            View.ClearChatFlow();
         }
 
         private void SendMessage(string message)

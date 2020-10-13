@@ -17,12 +17,26 @@ namespace Game.Chat
         {
             _clientLobby = ClientLobby.Instance;
 
-            _clientLobby.OnConnected += () =>
-            {
-                NetworkClient.RegisterHandler<UserChatMessage>(OnUserMessage);
-            };
+            RegisterHandlers();
+            // В первый раз он уже может быть соединенным.
+            _clientLobby.OnConnected += RegisterHandlers;
+            _clientLobby.OnDisconnect += Disconnect;
+        }
 
-            _clientLobby.OnDisconnect += () => OnDisconnect();
+        private void OnDisable()
+        {
+            _clientLobby.OnConnected -= RegisterHandlers;
+            _clientLobby.OnDisconnect -= Disconnect;
+        }
+
+        private void Disconnect()
+        {
+            OnDisconnect();
+        }
+
+        private void RegisterHandlers()
+        {
+            NetworkClient.RegisterHandler<UserChatMessage>(OnUserMessage);
         }
 
         private void OnUserMessage(UserChatMessage message)
@@ -36,7 +50,7 @@ namespace Game.Chat
         public void SendMessageToServer(string message)
         {
             var mes = new UserChatMessage();
-            mes.From = _clientLobby.MainUser.Name;
+            mes.From = _clientLobby.MainUser.name;
             mes.Text = message;
 
             // Отправляем самому себе.

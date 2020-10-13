@@ -41,14 +41,14 @@ public class ServerLobbyView : MonoBehaviour, IView
     public void AddUser(User user)
     {
         var inst = Instantiate(playerBoxPrefab, playerGrid.transform, false);
-        inst.GetComponentInChildren<TMP_Text>().text = user.Name;
+        inst.GetComponentInChildren<TMP_Text>().text = user.name;
         _playerBoxBinding.Add(new Tuple<GameObject, User>(inst, user));
     }
 
     public void RemoveUser(User user)
     {
         var coincidence = _playerBoxBinding.FirstOrDefault(x =>
-            x.Item2.Name == user.Name);
+            x.Item2.name == user.name);
 
         if (coincidence == null)
             return;
