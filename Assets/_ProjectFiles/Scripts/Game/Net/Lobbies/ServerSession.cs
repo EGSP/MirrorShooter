@@ -52,7 +52,7 @@ namespace Game.Net
             {
                 var inst = Instantiate(_playerEntityPrefab);
                 inst.userName = uc.User.name;
-                NetworkServer.Spawn(inst.gameObject);
+                NetworkServer.SpawnFor(inst.gameObject, conn);
             }
             else
             {
