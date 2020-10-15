@@ -1,5 +1,7 @@
 ﻿using System;
 using Game.Entities;
+using Game.World;
+using Gasanov.Extensions.Linq;
 using Mirror;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -51,6 +53,7 @@ namespace Game.Net
             if (uc != null)
             {
                 var inst = Instantiate(_playerEntityPrefab);
+                inst.gameObject.transform.position = SpawnPoint.SpawnPoints.Random().transform.position;
                 inst.userName = uc.User.name;
                 NetworkServer.SpawnFor(inst.gameObject, conn);
             }

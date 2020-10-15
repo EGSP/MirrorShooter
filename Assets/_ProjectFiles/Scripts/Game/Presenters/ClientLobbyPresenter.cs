@@ -68,7 +68,12 @@ namespace Game.Presenters
             Model.OnDisconnectUser -= RemoveUser;
             Model.OnDisconnect -= Disconnect;
         }
-        
+
+        private void OnDestroy()
+        {
+            Dispose();
+        }
+
         public void Share()
         {
             PresenterMediator.Register(this);

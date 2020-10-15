@@ -4,11 +4,8 @@ namespace Game.Net
 {
     public class UserChatMessage : MessageBase
     {
-        /// <summary>
-        /// От какого пользователя сообщение.
-        /// </summary>
-        public string From;
-        
+        public User From;
+
         /// <summary>
         /// Текст сообщения.
         /// </summary>

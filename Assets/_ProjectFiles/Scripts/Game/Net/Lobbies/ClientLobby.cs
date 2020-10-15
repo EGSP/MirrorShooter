@@ -105,7 +105,7 @@ namespace Game.Net
 
         private void ConnectAsUser()
         {
-            var message = new AddUserMessage(){Name = LaunchInfo.User.name};
+            var message = new AddUserMessage(){user = LaunchInfo.User};
             NetworkClient.Send<AddUserMessage>(message);
 
             // Локальное добавления самого себя.
@@ -149,19 +149,19 @@ namespace Game.Net
         public void AddUser(AddUserMessage message)
         {
             // Если пользователь новый
-            if (!LobbyUsers.Exists(x => x.name == message.Name))
+            if (!LobbyUsers.Exists(x => x.id == message.user.id))
             {
-                var user = new User(message.Name);
-                LobbyUsers.Add(user);
+                
+                LobbyUsers.Add(message.user);
                 
                 
-                Debug.Log($"New User {message.Name} : {LobbyUsers.Count}");
-                OnAddUser(user);
+                Debug.Log($"New User {message.user.name} : {LobbyUsers.Count}");
+                OnAddUser(message.user);
                 return;
             }
             
 
-            Debug.Log($"Пользователь уже был занесен в список {message.Name}");
+            Debug.Log($"Пользователь уже был занесен в список {message.user.name}");
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace Game.Net
         /// </summary>
         public void DisconnectUser(DisconnectUserMessage message)
         {
-            var coincidence = LobbyUsers.FirstOrDefault(x => x.name == message.Name);
+            var coincidence = LobbyUsers.FirstOrDefault(x => x.id == message.user.id);
 
             if (coincidence != null)
             {

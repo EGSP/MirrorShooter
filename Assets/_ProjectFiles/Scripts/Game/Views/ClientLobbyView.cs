@@ -38,7 +38,7 @@ public class ClientLobbyView : MonoBehaviour, IView
     public void RemoveUser(User user)
     {
         var coincidence = _playerBoxBinding.FirstOrDefault(x =>
-            x.Item2.name == user.name);
+            x.Item2.id == user.id);
 
         if (coincidence == null)
             return;

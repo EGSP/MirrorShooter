@@ -50,7 +50,7 @@ namespace Game.Chat
         public void SendMessageToServer(string message)
         {
             var mes = new UserChatMessage();
-            mes.From = _clientLobby.MainUser.name;
+            mes.From = _clientLobby.MainUser;
             mes.Text = message;
 
             // Отправляем самому себе.

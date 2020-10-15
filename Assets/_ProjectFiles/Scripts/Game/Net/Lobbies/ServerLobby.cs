@@ -142,7 +142,7 @@ namespace Game.Net
             var coincidence = Connections.FirstOrDefault(x 
                 => x.Connection == conn);
             
-            coincidence.User = new User(message.Name);
+            coincidence.User = message.user;
             
             UpdateUserInfo(coincidence);
             GiveUserInfoAboutLobby(coincidence);
@@ -178,7 +178,7 @@ namespace Game.Net
                     if (userConn.User != newUser)
                     {
                         // Оповещаем остальных пользователей.
-                        userConn.Connection.Send<AddUserMessage>(new AddUserMessage() {Name = newUser.name});
+                        userConn.Connection.Send<AddUserMessage>(new AddUserMessage() {user = newUser});
                     }
                 }
             }
@@ -201,7 +201,7 @@ namespace Game.Net
                     {
                         // Оповещаем остальных пользователей.
                         userConn.Connection.Send<DisconnectUserMessage>(
-                            new DisconnectUserMessage() {Name = disconnectedUser.name});
+                            new DisconnectUserMessage() {user = disconnectedUser});
                     }
                 }
             }
@@ -231,7 +231,7 @@ namespace Game.Net
                         //     new AddUserMessage(){Name = anotherUserConnection.User.Name});
 
                         lobbyMessage.AddUserMessages.Add(
-                            new AddUserMessage() {Name = anotherUserConnection.User.name});
+                            new AddUserMessage() {user = anotherUserConnection.User});
                     }
                 }
             }

@@ -49,7 +49,7 @@ namespace Game.Chat
         {
             OnMessage(message);
             
-            _serverLobby.SendToAll<UserChatMessage>(message, x=>x.name == message.From);
+            _serverLobby.SendToAll<UserChatMessage>(message, x=>x.id == message.From.id);
         }
 
         private void Shutdown()
