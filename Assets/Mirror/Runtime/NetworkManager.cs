@@ -24,7 +24,7 @@ namespace Mirror
     [HelpURL("https://mirror-networking.com/docs/Components/NetworkManager.html")]
     public class NetworkManager : MonoBehaviour
     {
-        static readonly ILogger logger = LogFactory.GetLogger<NetworkManager>();
+        protected static readonly ILogger logger = LogFactory.GetLogger<NetworkManager>();
 
         /// <summary>
         /// A flag to control whether the NetworkManager object is destroyed when the scene changes.
@@ -1158,8 +1158,9 @@ namespace Mirror
             // proceed with the login handshake by calling OnServerConnect
             if (networkSceneName != "" && networkSceneName != offlineScene)
             {
-                SceneMessage msg = new SceneMessage() { sceneName = networkSceneName };
-                conn.Send(msg);
+                // Загрузка определенной сцены определяется внешними средствами.
+                // SceneMessage msg = new SceneMessage() { sceneName = networkSceneName };
+                // conn.Send(msg);
             }
 
             OnServerConnect(conn);
@@ -1384,12 +1385,13 @@ namespace Mirror
             // clientLoadedScene flag to prevent it.
             if (!clientLoadedScene)
             {
+                // ------------------------ Готовность теперь управляется вручную. ------------------------------------
                 // Ready/AddPlayer is usually triggered by a scene load completing. if no scene was loaded, then Ready/AddPlayer it here instead.
-                if (!ClientScene.ready) ClientScene.Ready(conn);
-                if (autoCreatePlayer)
-                {
-                    ClientScene.AddPlayer(conn);
-                }
+                // if (!ClientScene.ready) ClientScene.Ready(conn);
+                // if (autoCreatePlayer)
+                // {
+                //     ClientScene.AddPlayer(conn);
+                // }
             }
         }
 

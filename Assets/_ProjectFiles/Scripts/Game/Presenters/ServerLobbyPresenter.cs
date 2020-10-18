@@ -63,7 +63,20 @@ namespace Game.Presenters
         
         public void Dispose()
         {
-            throw new NotImplementedException();
+            View.OnShutdown -= Shutdown;
+            View.OnLoadScene -= LoadScene;
+
+            if (Model != null)
+            {
+                Model.OnClientConnected -= ClientConnected;
+                Model.OnUserConnected -= AddUser;
+                Model.OnUserDisconnected -= RemoveUser;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            Dispose();
         }
 
         public void Share()

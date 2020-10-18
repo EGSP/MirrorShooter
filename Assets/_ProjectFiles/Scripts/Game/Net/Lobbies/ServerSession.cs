@@ -12,8 +12,25 @@ namespace Game.Net
     {
         [NonSerialized] public EventNetworkManager NetworkManager;
         [NonSerialized] public ServerLobby ServerLobby;
+        
+        /// <summary>
+        /// Началась ли сессия.
+        /// </summary>
+        public bool IsStarted { get; private set; }
 
         private PlayerEntity _playerEntityPrefab;
+
+        /// <summary>
+        /// Создает сообщение о сессии на основе текущего состояния.
+        /// </summary>
+        public SessionStateMessage StateMessage
+        {
+            get
+            {
+                var msg = new SessionStateMessage(){IsStarted = this.IsStarted};
+                return msg;
+            }
+        }
 
         private void Start()
         {
@@ -21,18 +38,30 @@ namespace Game.Net
             
             if(_playerEntityPrefab == null)
                 throw new NullReferenceException();
+            
+           
         }
 
         public void StartSession()
         {
-            
+            ServerLobby.OnUserReady += ProcessReadyUser;
+            IsStarted = true;
+            ServerLobby.ShareServerSessionForConnections(StateMessage);
         }
 
         public void StopSession()
         {
-            
+            ServerLobby.OnUserReady -= ProcessReadyUser;
+            IsStarted = false;
+            ServerLobby.ShareServerSessionForConnections(StateMessage);
         }
+
+       
         
+        /// <summary>
+        /// Смена сцены сервера.
+        /// </summary>
+        /// <param name="sceneName"></param>
         public void ChangeScene(string sceneName)
         {
             if (Application.CanStreamedLevelBeLoaded(sceneName) == false)
@@ -41,26 +70,38 @@ namespace Game.Net
                           $" But you are trying to access it!");
                 return;
             }
+            
+            NetworkServer.RegisterHandler<SceneLoadedMessage>(ProcessLoadedUser);
 
-            NetworkManager.ServerChangeScene(sceneName);
-            NetworkManager.OnClientReady += SpawnUser;
+            NetworkManager.OnServerSceneChangedEvent += StartSession;
+            NetworkManager.ServerChangeSceneUsers(sceneName, ServerLobby.FullValReadyConnections);
         }
 
-        public void SpawnUser(NetworkConnection conn)
+        /// <summary>
+        /// Обработка готового пользователя.
+        /// </summary>
+        private void ProcessReadyUser(UserConnection uc)
         {
-            var uc = ServerLobby.Val(conn);
+            Debug.Log("PROCESS_USER_READY");
+            
+            ServerLobby.ChangeUserScene(uc);
+        }
+        
+        /// <summary>
+        /// Обработка загрузившегося пользователя.
+        /// </summary>
+        private void ProcessLoadedUser(NetworkConnection conn, SceneLoadedMessage msg)
+        {
+            Debug.Log("PROCESS_USER_LOADED");
 
-            if (uc != null)
-            {
-                var inst = Instantiate(_playerEntityPrefab);
-                inst.gameObject.transform.position = SpawnPoint.SpawnPoints.Random().transform.position;
-                inst.userName = uc.User.name;
-                NetworkServer.SpawnFor(inst.gameObject, conn);
-            }
-            else
-            {
-                Debug.Log("Поптыка создать игрока пользователем без регистрации!");
-            }
+            var uc = ServerLobby.Val(conn);
+            if (uc == null)
+                return;
+            
+            var inst = Instantiate(_playerEntityPrefab);
+            inst.gameObject.transform.position = SpawnPoint.SpawnPoints.Random().transform.position;
+            inst.userName = uc.User.name;
+            NetworkServer.SpawnFor(inst.gameObject, uc.Connection);
         }
     }
 }

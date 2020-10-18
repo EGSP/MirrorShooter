@@ -6,6 +6,7 @@ using Gasanov.Extensions.Mono;
 using Mirror;
 using Sirenix.Serialization;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 namespace Game.Net
@@ -27,6 +28,10 @@ namespace Game.Net
         /// Вызывается когда пользователь отключается от сервера.
         /// </summary>
         public event Action<User> OnUserDisconnected = delegate(User user) {  };
+        /// <summary>
+        /// Вызывается когда пользователь готов принимать данные.
+        /// </summary>
+        public event Action<UserConnection> OnUserReady = delegate(UserConnection user) {  };
 
         [OdinSerialize]
         public EventNetworkManager NetworkManager { get; set; }
@@ -40,6 +45,18 @@ namespace Game.Net
         /// Все текущие пользователи.
         /// </summary>
         public List<UserConnection> Connections { get; private set; }
+
+        /// <summary>
+        /// Все обработанные подключения подключения.
+        /// </summary>
+        public IEnumerable<UserConnection> FullValConnections =>
+            Connections.Where(x => x.FullVal);
+
+        /// <summary>
+        /// Все обработанные и готовые подключения.
+        /// </summary>
+        public IEnumerable<NetworkConnection> FullValReadyConnections =>
+            Connections.Where(x => x.FullVal && x.User.IsReady).Select(x=>x.Connection);
 
         /// <summary>
         /// Текущая сессия сервера.
@@ -66,8 +83,9 @@ namespace Game.Net
             
             NetworkManager.OnServerStarted += Started;
             NetworkManager.OnServerStopped += Stopped;
-            NetworkManager.OnClientConnected += ClientConnected;
-            NetworkManager.OnClientDisconnected += ClientDisconnected;
+            NetworkManager.OnServerConnectEvent += ClientConnected;
+            NetworkManager.OnServerDisconnectEvent += ClientDisconnected;
+            NetworkManager.OnServerReadyEvent += ClientReady;
 
             Session = gameObject.AddComponent<ServerSession>();
             Session.NetworkManager = NetworkManager;
@@ -84,6 +102,9 @@ namespace Game.Net
             transportAdapter.SetPort(port);
 
             NetworkServer.RegisterHandler<AddUserMessage>(RegisterUser);
+            
+            NetworkServer.RegisterHandler<SessionStateMessage>(ShareServerSession);
+            
             NetworkManager.StartServer();
         }
 
@@ -134,6 +155,24 @@ namespace Game.Net
             OnClientDisconnected();
         }
 
+        private void ClientReady(NetworkConnection clientConnection)
+        {
+            // Если готовый клиент - пользователь
+            var uc = Val(clientConnection);
+
+            if (uc.FullVal)
+            {
+                uc.User.IsReady = true;
+                OnUserReady(uc);
+                return;
+            }
+            
+        }
+        
+        #endregion
+
+        #region User processing
+
         /// <summary>
         /// Связывает пользователя с подключением.
         /// </summary>
@@ -144,7 +183,9 @@ namespace Game.Net
             
             coincidence.User = message.user;
             
+            // Даем пользователю идентификатор. Это говорит о том, что пользователь полностью проверен.
             UpdateUserInfo(coincidence);
+            
             GiveUserInfoAboutLobby(coincidence);
             
             NotifyClientsNewOne(coincidence.User);
@@ -269,6 +310,18 @@ namespace Game.Net
             userConnection.Connection.Send<UpdateUserMessage>(message);
         }
 
+        /// <summary>
+        /// Меняет сцену пользователю. Посылает SceneMessage с текущей открытой сценой на сервере.
+        /// Соединение должно иметь флаг isReady == true.
+        /// </summary>
+        public void ChangeUserScene(UserConnection uc)
+        {
+            var msg = new SceneMessage() { sceneName = SceneManager.GetActiveScene().name};
+
+            if (uc.Connection.isReady)
+                uc.Connection.Send(msg);
+        }
+
         #endregion
 
         #region Communication
@@ -311,6 +364,28 @@ namespace Game.Net
         
         #endregion
 
+        /// <summary>
+        /// Обновляет информацию о сессии у пользователя.
+        /// </summary>
+        private void ShareServerSession(NetworkConnection clientConnection, SessionStateMessage msg)
+        {
+            if (Session == null)
+                return;
+
+            clientConnection.Send<SessionStateMessage>(Session.StateMessage);
+        }
+
+        /// <summary>
+        /// Передает всем клиентам информацию о сессии.
+        /// </summary>
+        public void ShareServerSessionForConnections(SessionStateMessage msg)
+        {
+            foreach (var userConnection in Connections)
+            {
+                userConnection.Connection.Send<SessionStateMessage>(msg);
+            }
+        }
+        
         /// <summary>
         /// Ищет пользовательское соединение связанное с этим NetworkConnection.
         /// При отсутствии возвращает null.

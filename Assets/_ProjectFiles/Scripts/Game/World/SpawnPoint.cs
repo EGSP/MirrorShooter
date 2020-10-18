@@ -9,7 +9,7 @@ namespace Game.World
         /// <summary>
         /// Все текущие точки спавна.
         /// </summary>
-        public static List<SpawnPoint> SpawnPoints { get; private set; }
+        public static List<SpawnPoint> SpawnPoints { get; private set; } = new List<SpawnPoint>();
 
         public void OnEnable()
         {

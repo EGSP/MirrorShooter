@@ -17,11 +17,20 @@ namespace Game.Net
         
         public event Action<User> OnAddUser = delegate(User user) {  };
         public event Action<User> OnDisconnectUser = delegate(User user) {  };
+        /// <summary>
+        /// Вызывается при получении информации о сессии с сервера.
+        /// </summary>
+        public event Action<SessionStateMessage> OnServerSession = delegate(SessionStateMessage message) {  };
         
         /// <summary>
         /// Подключен ли клиент к лобби.
         /// </summary>
         [NonSerialized] public bool isConnected = NetworkClient.isConnected;
+        
+        /// <summary>
+        /// Принят ли пользователь сервером на данный момент.
+        /// </summary>
+        public bool IsAcceptedUser { get; private set; }
         
         /// <summary>
         /// Инициализировано ли лобби.
@@ -44,16 +53,15 @@ namespace Game.Net
 
         [OdinSerialize]
         public List<User> LobbyUsers { get; private set; }
+        
+        
+        
 
         protected override void Awake()
         {
             base.Awake();
             AlwaysExist = true;
             LobbyUsers = new List<User>();
-            
-            // NetworkManager = this.ValidateComponent(NetworkManager);
-            // if (NetworkManager == null)
-            //     throw new NullReferenceException();
         }
 
         public void Initialize()
@@ -63,12 +71,9 @@ namespace Game.Net
             
             NetworkManager.OnConnectedToServer += Connected;
             NetworkManager.OnDisconnectedFromServer += DisconnectedFromServer;
-            NetworkManager.OnClientChangeSceneEvent += () =>
-            {
-                Session = gameObject.AddComponent<ClientSession>();
-                Session.NetworkManager = NetworkManager;
-            };
-            NetworkManager.OnClientSceneChangedEvent += () => Session.StartSession();
+            NetworkManager.OnClientChangeSceneEvent += CreateSession;
+            NetworkManager.OnClientSceneChangedEvent += StartSession;
+            NetworkManager.OnClientSceneChangedEvent += SceneChanged;
             
 
             IsInitialized = true;
@@ -77,7 +82,7 @@ namespace Game.Net
         /// <summary>
         /// Попытка присоединения к серверу.
         /// </summary>
-        public void TryConnectToServer(string address, string port)
+        public void ConnectToServer(string address, string port)
         {
             NetworkManager.networkAddress = address;
             var transportAdapter = NetworkManager.GetComponent<TransportAdapter>();
@@ -87,6 +92,8 @@ namespace Game.Net
             NetworkClient.RegisterHandler<AddUserMessage>(AddUser);
             NetworkClient.RegisterHandler<DisconnectUserMessage>(DisconnectUser);
             NetworkClient.RegisterHandler<UpdateUserMessage>(UpdateUserInfo);
+            
+            NetworkClient.RegisterHandler<SessionStateMessage>(OnServerSessionChanged);
 
             NetworkManager.StartClient();
         }
@@ -118,7 +125,7 @@ namespace Game.Net
         public void Disconnect()
         {
             NetworkManager.StopClient();
-            ClearLobby();
+            ClearData();
             OnDisconnect();
         }
 
@@ -128,9 +135,16 @@ namespace Game.Net
         /// <param name="conn"></param>
         private void DisconnectedFromServer(NetworkConnection conn)
         {
-            ClearLobby();
+            ClearData();
             OnDisconnect();
         }
+
+        private void SceneChanged()
+        {
+            NetworkClient.Send<SceneLoadedMessage>(new SceneLoadedMessage());
+        }
+
+        #region User processing
 
         /// <summary>
         /// Обработка информации о лобби. 
@@ -180,18 +194,86 @@ namespace Game.Net
 
         /// <summary>
         /// Обновление информации о текущем пользователе.
+        /// При первом подключении сервер дает пользователю идентификатор.
         /// </summary>
         public void UpdateUserInfo(UpdateUserMessage message)
         {
             MainUser = message.updatedUser;
+
+            // Пользователь принят сервером.
+            if (MainUser.id != -1)
+                IsAcceptedUser = true;
+        }
+        
+        #endregion
+
+        /// <summary>
+        /// Устанавливает флаг NetworkScene.isReady = true.
+        /// </summary>
+        public void Ready()
+        {
+            if (!IsAcceptedUser)
+                return;
+
+            ClientScene.Ready(NetworkClient.connection);
         }
 
         /// <summary>
         /// Очищение данных лобби.
         /// </summary>
-        private void ClearLobby()
+        private void ClearData()
         {
             LobbyUsers.Clear();
         }
+
+        /// <summary>
+        /// Уничтожает лобби и сессию.
+        /// </summary>
+        public void DestroyLobby()
+        {
+            NetworkManager.OnConnectedToServer -= Connected;
+            NetworkManager.OnDisconnectedFromServer -= DisconnectedFromServer;
+            NetworkManager.OnClientChangeSceneEvent -= CreateSession;
+            NetworkManager.OnClientSceneChangedEvent -= StartSession;
+            NetworkManager.OnClientSceneChangedEvent -= SceneChanged;
+            
+            DestroySession();
+            Destroy(gameObject);
+        }
+
+        #region Session setup
+
+        public void GetServerSession()
+        {
+            NetworkClient.Send<SessionStateMessage>(new SessionStateMessage());
+        }
+        
+        private void OnServerSessionChanged(SessionStateMessage msg)
+        {
+            OnServerSession(msg);
+        }
+        
+        private void CreateSession()
+        {
+            Session = gameObject.AddComponent<ClientSession>();
+            Session.NetworkManager = NetworkManager;
+        }
+
+        private void DestroySession()
+        {
+            Destroy(Session.gameObject);
+        }
+
+        private void StartSession()
+        {
+            if (Session == null)
+            {
+                throw new NullReferenceException();
+            }
+
+            Session.StartSession();
+        }
+
+        #endregion
     }
 }

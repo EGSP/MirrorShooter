@@ -155,11 +155,11 @@ namespace Mirror
         /// <returns>True if succcessful</returns>
         public static bool Ready(NetworkConnection conn)
         {
-            if (ready)
-            {
-                logger.LogError("A connection has already been set as ready. There can only be one.");
-                return false;
-            }
+            // if (ready)
+            // {
+            //     logger.LogError("A connection has already been set as ready. There can only be one.");
+            //     return false;
+            // }
 
             if (logger.LogEnabled()) logger.Log("ClientScene.Ready() called with connection [" + conn + "]");
 

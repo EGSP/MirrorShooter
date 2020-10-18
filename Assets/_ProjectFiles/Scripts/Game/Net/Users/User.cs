@@ -16,6 +16,7 @@ namespace Game.Net
         public User(string name)
         {
             this.name = name;
+            id = -1;
         }
 
         public string name;
@@ -24,5 +25,10 @@ namespace Game.Net
         /// Уникальный идентификатор.
         /// </summary>
         public int id;
+        
+        /// <summary>
+        /// Готов ли пользователь ко входу в игру.
+        /// </summary>
+        public bool IsReady { get; set; }
     }
 }

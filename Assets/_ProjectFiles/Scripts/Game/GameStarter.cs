@@ -45,7 +45,7 @@ namespace Game
         public void StartClient(string address, string port)
         {
             var lobby = ClientLobby.Instance;
-            lobby.TryConnectToServer(address,port);
+            lobby.ConnectToServer(address,port);
 
             if(_checkRoutine != null)
                 StopCoroutine(_checkRoutine);

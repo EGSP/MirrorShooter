@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Mirror;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Game.Net
 {
@@ -26,15 +29,15 @@ namespace Game.Net
         /// <summary>
         /// Вызывается при подключении нового клиента к серверу.
         /// </summary>
-        public event Action<NetworkConnection> OnClientConnected = delegate(NetworkConnection connection) {  };
+        public event Action<NetworkConnection> OnServerConnectEvent = delegate(NetworkConnection connection) {  };
         /// <summary>
         /// Вызывается при потере связи с клиентом.
         /// </summary>
-        public event Action<NetworkConnection> OnClientDisconnected = delegate(NetworkConnection connection) {  };
+        public event Action<NetworkConnection> OnServerDisconnectEvent = delegate(NetworkConnection connection) {  };
         /// <summary>
         /// Вызывается при готовности клиента продолжать связь.
         /// </summary>
-        public event Action<NetworkConnection> OnClientReady = delegate(NetworkConnection connection) {  };
+        public event Action<NetworkConnection> OnServerReadyEvent = delegate(NetworkConnection connection) {  };
         /// <summary>
         /// Вызывается при старте сервера на текущем пк.
         /// </summary>
@@ -43,6 +46,10 @@ namespace Game.Net
         /// Вызывается при остановке сервера.
         /// </summary>
         public event Action OnServerStopped = delegate {  };
+        /// <summary>
+        /// Вызывается после смены сцены на сервере.
+        /// </summary>
+        public event Action OnServerSceneChangedEvent = delegate {  };
         
         // CLIENT
         
@@ -88,19 +95,78 @@ namespace Game.Net
         public override void OnServerConnect(NetworkConnection conn)
         {
             base.OnServerConnect(conn);
-            OnClientConnected(conn);
+            OnServerConnectEvent(conn);
         }
 
         public override void OnServerDisconnect(NetworkConnection conn)
         {
             base.OnServerDisconnect(conn);
-            OnClientDisconnected(conn);
+            OnServerDisconnectEvent(conn);
         }
 
         public override void OnServerReady(NetworkConnection conn)
         {
             base.OnServerReady(conn);
-            OnClientReady(conn);
+            OnServerReadyEvent(conn);
+        }
+
+        public override void OnServerSceneChanged(string sceneName)
+        {
+            base.OnServerSceneChanged(sceneName);
+            OnServerSceneChangedEvent();
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        /// <summary>
+        /// Меняет сцену сервера и только заданным пользователям.
+        /// </summary>
+        public virtual void ServerChangeSceneUsers(string newSceneName, IEnumerable<NetworkConnection> connections)
+        {
+            if (string.IsNullOrEmpty(newSceneName))
+            {
+                logger.LogError("ServerChangeScene empty scene name");
+                return;
+            }
+
+            if (logger.logEnabled) logger.Log("ServerChangeScene " + newSceneName);
+
+            foreach (var networkConnection in connections)
+            {
+                NetworkServer.SetClientNotReady(networkConnection);
+            }
+            networkSceneName = newSceneName;
+
+            // Let server prepare for scene change
+            OnServerChangeScene(newSceneName);
+
+            // Suspend the server's transport while changing scenes
+            // It will be re-enabled in FinishScene.
+            Transport.activeTransport.enabled = false;
+
+            loadingSceneAsync = SceneManager.LoadSceneAsync(newSceneName);
+
+            // ServerChangeScene can be called when stopping the server
+            // when this happens the server is not active so does not need to tell clients about the change
+            if (NetworkServer.active)
+            {
+                foreach (var networkConnection in connections)
+                {
+                    networkConnection.Send(new SceneMessage {sceneName = newSceneName});
+                }
+            }
+
+            startPositionIndex = 0;
+            startPositions.Clear();
         }
     }
 }

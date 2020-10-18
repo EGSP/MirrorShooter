@@ -7,6 +7,7 @@ using Gasanov.Core.Mvp;
 using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ClientLobbyView : MonoBehaviour, IView
 {
@@ -14,12 +15,17 @@ public class ClientLobbyView : MonoBehaviour, IView
     [SerializeField] private GameObject playerGrid;
     [BoxGroup("Players")]
     [SerializeField] private GameObject playerBoxPrefab;
-
+    
+    [BoxGroup("Session")]
+    [SerializeField] private TMP_Text sessionStarted;
+    [BoxGroup("Session")] 
+    [SerializeField] private Button sessionReadyButton;
     
 
     [SerializeField] private TMP_Text statusTextbox;
 
     public event Action OnDisconnect = delegate {  };
+    public event Action OnReady = delegate {  };
 
     private List<Tuple<GameObject, User>> _playerBoxBinding;
 
@@ -55,6 +61,25 @@ public class ClientLobbyView : MonoBehaviour, IView
         }
         
         _playerBoxBinding.Clear();
+    }
+    
+    public void Ready()
+    {
+        OnReady();
+    }
+
+    public void ShowSession(SessionStateMessage msg)
+    {
+        sessionStarted.text = $"Started = {msg.IsStarted}.";
+
+        if (msg.IsStarted)
+        {
+            sessionReadyButton.interactable = true;
+        }
+        else
+        {
+            sessionReadyButton.interactable = false;
+        }
     }
 
     public void Disconnect()

@@ -60,13 +60,27 @@ namespace Game.Presenters
             View.RemoveUser(user);
         }
 
+        private void OnSessionChanged(SessionStateMessage msg)
+        {
+            Debug.Log("Session presenter");
+            View.ShowSession(msg);
+        }
+
+        private void Ready()
+        {
+            Model.Ready();
+        }
+
         public void Dispose()
         {
             View.OnDisconnect -= DisconnectInput;
-            
-            Model.OnAddUser -= AddUser;
-            Model.OnDisconnectUser -= RemoveUser;
-            Model.OnDisconnect -= Disconnect;
+
+            if (Model != null)
+            {
+                Model.OnAddUser -= AddUser;
+                Model.OnDisconnectUser -= RemoveUser;
+                Model.OnDisconnect -= Disconnect;
+            }
         }
 
         private void OnDestroy()
@@ -100,10 +114,15 @@ namespace Game.Presenters
                 throw new NullReferenceException();
             
             View.OnDisconnect += DisconnectInput;
+            View.OnReady += Ready;
             
             Model.OnAddUser += AddUser;
             Model.OnDisconnectUser += RemoveUser;
             Model.OnDisconnect += Disconnect;
+            Model.OnServerSession += OnSessionChanged;
+            
+            // Запрашиваем информацию о сессии.
+            Model.GetServerSession();
             
             View.Enable();
             View.SetStatus("Connected: Online!");
