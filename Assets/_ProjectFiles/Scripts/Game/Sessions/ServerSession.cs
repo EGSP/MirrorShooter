@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Game.Entities;
+using Game.Net;
 using Game.World;
 using Gasanov.Extensions.Linq;
 using Mirror;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-namespace Game.Net
+namespace Game.Sessions
 {
     public class ServerSession : SerializedMonoBehaviour
     {
@@ -44,7 +46,7 @@ namespace Game.Net
         /// <summary>
         /// Список пользователей находящихся на сцене.
         /// </summary>
-        private List<UserConnection> _userConnectionsInScene;
+        private List<UserHandler> _userConnectionsInScene;
 
         private void Start()
         {
@@ -56,12 +58,13 @@ namespace Game.Net
             if (_playerController == null)
                 throw new NullReferenceException();
             
-            _userConnectionsInScene = new List<UserConnection>();
+            _userConnectionsInScene = new List<UserHandler>();
         }
 
         public void StartSession()
         {
             ServerLobby.OnUserReady += ProcessReadyUser;
+            ServerLobby.OnUserDisconnected += ProcessDisconnectedUser;
             IsStarted = true;
             ServerLobby.ShareServerSessionForConnections(StateMessage);
         }
@@ -69,6 +72,7 @@ namespace Game.Net
         public void StopSession()
         {
             ServerLobby.OnUserReady -= ProcessReadyUser;
+            ServerLobby.OnUserDisconnected -= ProcessDisconnectedUser;
             IsStarted = false;
             ServerLobby.ShareServerSessionForConnections(StateMessage);
         }
@@ -102,7 +106,7 @@ namespace Game.Net
             Debug.Log("PROCESS_USER_READY");
 
             // Если пользователь уже на сцене, то ничего не делаем.
-            if (_userConnectionsInScene.Contains(uc))
+            if (_userConnectionsInScene.Exists(x=>x.UserConnection == uc))
                 return;
             
             ServerLobby.ChangeUserScene(uc);
@@ -119,34 +123,43 @@ namespace Game.Net
             if (uc == null)
                 return;
 
-            if (_userConnectionsInScene.Contains(uc))
+            if (_userConnectionsInScene.Exists(x=>x.UserConnection == uc))
                 return;
 
-            
-            
+            var userHandler = new UserHandler(uc);
             // Заносим в пользователей сцены.
-            _userConnectionsInScene.Add(uc);
+            _userConnectionsInScene.Add(userHandler);
             
+            // Спавним игроков.
             var playerEntity = Instantiate(_playerEntityPrefab);
             playerEntity.gameObject.transform.position = SpawnPoint.SpawnPoints.Random().transform.position;
             playerEntity.owner = uc.User;
             NetworkServer.Spawn(playerEntity.gameObject);
 
-            if (_userConnectionsInScene.Count == 2)
-            {
-                    
-            }
+            var playerController = Instantiate(_playerController);
+            playerController.gameObject.name = $"PC [{playerEntity.owner.id}]";
+            NetworkServer.SpawnFor(playerController.gameObject, uc.Connection);
+            playerController.playerEntityId = playerEntity.netIdentity.netId;
 
-            // Обновляем всех обзерверов.
-            foreach (var networkIdentity in NetworkIdentity.spawned.Values)
-            {
-                networkIdentity.RebuildObservers(true);
-            }
+            NetworkIdentity.RebuildObserversForAll();
             
-            // var playerController = Instantiate(_playerController);
-            // playerController.gameObject.name = $"PC [{playerEntity.owner.id}]";
-            // //NetworkServer.SpawnFor(playerController.gameObject, uc.Connection);
-            // playerController.playerEntityId = playerEntity.netIdentity.netId;
+            userHandler.AddGameObject(playerEntity.gameObject);
+            userHandler.AddGameObject(playerController.gameObject);
+        }
+
+        /// <summary>
+        /// Обработка отключившегося пользователя.
+        /// </summary>
+        private void ProcessDisconnectedUser(UserConnection uc)
+        {
+            Debug.Log("PROCESS_USER_DISCONNECTED");
+            var userHandler = _userConnectionsInScene.FirstOrDefault(x => x.UserConnection == uc);
+            
+            if (userHandler != null)
+            {
+                userHandler.DisposeAsServer();
+                _userConnectionsInScene.Remove(userHandler);
+            }
         }
     }
 }

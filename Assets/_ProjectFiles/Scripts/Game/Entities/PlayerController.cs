@@ -13,9 +13,15 @@ namespace Game.Entities
         private void OnEntityChanged(uint _, uint newEntity)
         {
             if (NetworkIdentity.spawned.TryGetValue(newEntity, out NetworkIdentity identity))
+            {
                 _playerEntity = identity.GetComponent<PlayerEntity>();
+                
+                _playerEntity.SetCamera(Camera.main);
+            }
             else
+            {
                 Debug.Log("PlayerEntity не найден.");
+            }
         }
     }
 }

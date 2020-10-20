@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Game.Sessions;
 using Gasanov.Core;
 using Gasanov.Extensions.Mono;
 using Mirror;
@@ -27,7 +28,7 @@ namespace Game.Net
         /// <summary>
         /// Вызывается когда пользователь отключается от сервера.
         /// </summary>
-        public event Action<User> OnUserDisconnected = delegate(User user) {  };
+        public event Action<UserConnection> OnUserDisconnected = delegate(UserConnection user) {  };
         /// <summary>
         /// Вызывается когда пользователь готов принимать данные.
         /// </summary>
@@ -140,16 +141,16 @@ namespace Game.Net
         private void ClientDisconnected(NetworkConnection clientConnection)
         {
             Debug.Log("Server lobby: someone disconnected");
-            var coincidence = Connections.FirstOrDefault(x
+            var userConnection = Connections.FirstOrDefault(x
                 => x.Connection == clientConnection);
 
-            if (coincidence != null)
+            if (userConnection != null)
             {
-                Connections.Remove(coincidence);
-                if (coincidence.User != null)
+                if (userConnection.User != null)
                 {
-                    DisconnectUser(coincidence.User);
+                    UserDisconnected(userConnection);
                 }
+                Connections.Remove(userConnection);
             }
 
             OnClientDisconnected();
@@ -196,10 +197,11 @@ namespace Game.Net
         /// Удаляет пользователя и его подключение.
         /// Оповещает остальных.
         /// </summary>
-        private void DisconnectUser(User disconnectedUser)
+        private void UserDisconnected(UserConnection userConnection)
         {
-            NotifyClientsDisconnectedOne(disconnectedUser);
-            OnUserDisconnected(disconnectedUser);
+            NotifyClientsDisconnectedOne(userConnection.User);
+            
+            OnUserDisconnected(userConnection);
         }
 
         /// <summary>
