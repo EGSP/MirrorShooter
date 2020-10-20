@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Game.Entities;
 using Game.World;
 using Gasanov.Extensions.Linq;
@@ -18,7 +19,15 @@ namespace Game.Net
         /// </summary>
         public bool IsStarted { get; private set; }
 
+        /// <summary>
+        /// Префаб сущности игрока.
+        /// </summary>
         private PlayerEntity _playerEntityPrefab;
+        
+        /// <summary>
+        /// Префаб контроллера игрока.
+        /// </summary>
+        private PlayerController _playerController;
 
         /// <summary>
         /// Создает сообщение о сессии на основе текущего состояния.
@@ -32,14 +41,22 @@ namespace Game.Net
             }
         }
 
+        /// <summary>
+        /// Список пользователей находящихся на сцене.
+        /// </summary>
+        private List<UserConnection> _userConnectionsInScene;
+
         private void Start()
         {
             _playerEntityPrefab = Resources.Load<PlayerEntity>("Prefabs/Player");
-            
             if(_playerEntityPrefab == null)
                 throw new NullReferenceException();
+
+            _playerController = Resources.Load<PlayerController>("Prefabs/PC");
+            if (_playerController == null)
+                throw new NullReferenceException();
             
-           
+            _userConnectionsInScene = new List<UserConnection>();
         }
 
         public void StartSession()
@@ -83,6 +100,10 @@ namespace Game.Net
         private void ProcessReadyUser(UserConnection uc)
         {
             Debug.Log("PROCESS_USER_READY");
+
+            // Если пользователь уже на сцене, то ничего не делаем.
+            if (_userConnectionsInScene.Contains(uc))
+                return;
             
             ServerLobby.ChangeUserScene(uc);
         }
@@ -97,11 +118,35 @@ namespace Game.Net
             var uc = ServerLobby.Val(conn);
             if (uc == null)
                 return;
+
+            if (_userConnectionsInScene.Contains(uc))
+                return;
+
             
-            var inst = Instantiate(_playerEntityPrefab);
-            inst.gameObject.transform.position = SpawnPoint.SpawnPoints.Random().transform.position;
-            inst.userName = uc.User.name;
-            NetworkServer.SpawnFor(inst.gameObject, uc.Connection);
+            
+            // Заносим в пользователей сцены.
+            _userConnectionsInScene.Add(uc);
+            
+            var playerEntity = Instantiate(_playerEntityPrefab);
+            playerEntity.gameObject.transform.position = SpawnPoint.SpawnPoints.Random().transform.position;
+            playerEntity.owner = uc.User;
+            NetworkServer.Spawn(playerEntity.gameObject);
+
+            if (_userConnectionsInScene.Count == 2)
+            {
+                    
+            }
+
+            // Обновляем всех обзерверов.
+            foreach (var networkIdentity in NetworkIdentity.spawned.Values)
+            {
+                networkIdentity.RebuildObservers(true);
+            }
+            
+            // var playerController = Instantiate(_playerController);
+            // playerController.gameObject.name = $"PC [{playerEntity.owner.id}]";
+            // //NetworkServer.SpawnFor(playerController.gameObject, uc.Connection);
+            // playerController.playerEntityId = playerEntity.netIdentity.netId;
         }
     }
 }

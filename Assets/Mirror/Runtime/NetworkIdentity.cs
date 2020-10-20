@@ -1429,6 +1429,7 @@ namespace Mirror
                 {
                     if (isOneClientConnection)
                     {
+                        Debug.Log("IS_ONE_CLIENT_CONNECTION");
                         // Это условие может конфликтовать с !rebuildOverWritten
                         AddOneConnectionToObservers();
                     }
@@ -1436,6 +1437,7 @@ namespace Mirror
                     {
                         AddAllReadyServerConnectionsToObservers();
                     }
+                    
                 }
                 return;
             }

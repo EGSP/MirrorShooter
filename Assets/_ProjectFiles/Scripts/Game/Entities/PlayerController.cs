@@ -1,9 +1,21 @@
 ﻿using Mirror;
+using UnityEngine;
 
 namespace Game.Entities
 {
     public class PlayerController : NetworkBehaviour
     {
-        // private PlayerEntity 
+        [SyncVar(hook = nameof(OnEntityChanged))]
+        public uint playerEntityId;
+
+        private PlayerEntity _playerEntity;
+
+        private void OnEntityChanged(uint _, uint newEntity)
+        {
+            if (NetworkIdentity.spawned.TryGetValue(newEntity, out NetworkIdentity identity))
+                _playerEntity = identity.GetComponent<PlayerEntity>();
+            else
+                Debug.Log("PlayerEntity не найден.");
+        }
     }
 }

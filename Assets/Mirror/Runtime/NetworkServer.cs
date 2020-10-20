@@ -1083,6 +1083,7 @@ namespace Mirror
             if (logger.LogEnabled()) logger.Log("SpawnObject instance ID " + identity.netId + " asset ID " + identity.assetId);
 
             identity.RebuildObservers(true);
+            // Debug.Log(identity.observers.Count);
         }
 
         /// <summary>
@@ -1112,7 +1113,6 @@ namespace Mirror
             }
             
             identity.OnStartServer();
-            
             if (logger.LogEnabled()) logger.Log("SpawnObject instance ID " + identity.netId + " asset ID " + identity.assetId);
 
             identity.isOneClientConnection = true;
@@ -1124,7 +1124,7 @@ namespace Mirror
         {
             if (identity.serverOnly)
                 return;
-
+            
             // for easier debugging
             if (logger.LogEnabled()) logger.Log("Server SendSpawnMessage: name=" + identity.name + " sceneId=" + identity.sceneId.ToString("X") + " netid=" + identity.netId);
 

@@ -142,6 +142,7 @@ namespace Game.Net
         private void SceneChanged()
         {
             NetworkClient.Send<SceneLoadedMessage>(new SceneLoadedMessage());
+            Ready();
         }
 
         #region User processing
