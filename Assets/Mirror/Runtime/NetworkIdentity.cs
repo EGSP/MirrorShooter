@@ -130,6 +130,34 @@ namespace Mirror
         /// </remarks>
         public bool isClient { get; internal set; }
 
+        public enum ApplicationModeType
+        {
+            None,
+            Client,
+            Server
+        }
+
+        /// <summary>
+        /// Режим работы приложения.
+        /// </summary>
+        public static ApplicationModeType ApplicationMode
+        {
+            get => _applicationMode;
+            set
+            {
+                if (value == _applicationMode)
+                    return;
+                
+                foreach (var identity in spawned.Values)
+                {
+                    identity.ApplyApplicationMode(_applicationMode);
+                }
+
+                _applicationMode = value;
+            }
+        }
+        private static ApplicationModeType _applicationMode;
+
         /// <summary>
         /// Returns true if NetworkServer.active and server is not stopped.
         /// </summary>
@@ -419,6 +447,32 @@ namespace Mirror
             }
 
             hasSpawned = true;
+
+            ApplyApplicationMode(_applicationMode);
+        }
+
+        /// <summary>
+        /// Определяет режим работы идентити. Клиент или сервер.
+        /// </summary>
+        private void ApplyApplicationMode(ApplicationModeType applicationModeType)
+        {
+            switch (applicationModeType)
+            {
+                case ApplicationModeType.Client:
+                    isClient = true;
+                    isServer = false;
+                    break;
+                
+                case ApplicationModeType.Server:
+                    isClient = false;
+                    isServer = true;
+                    break;
+                
+                case ApplicationModeType.None:
+                    isClient = false;
+                    isServer = false;
+                    break;
+            }
         }
 
         void OnValidate()
@@ -816,6 +870,7 @@ namespace Mirror
                 return;
             clientStarted = true;
 
+            Debug.Log("IS_CLIENT");
             isClient = true;
 
             if (logger.LogEnabled()) logger.Log("OnStartClient " + gameObject + " netId:" + netId);
@@ -1394,6 +1449,7 @@ namespace Mirror
         }
 
         static readonly HashSet<NetworkConnection> newObservers = new HashSet<NetworkConnection>();
+        
 
         /// <summary>
         /// This causes the set of players that can see this object to be rebuild.

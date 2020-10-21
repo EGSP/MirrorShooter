@@ -88,6 +88,8 @@ namespace Game.Net
             NetworkManager.OnServerDisconnectEvent += ClientDisconnected;
             NetworkManager.OnServerReadyEvent += ClientReady;
 
+            // NetworkIdentity.ApplicationMode = NetworkIdentity.ApplicationModeType.Server;
+
             Session = gameObject.AddComponent<ServerSession>();
             Session.NetworkManager = NetworkManager;
             Session.ServerLobby = this;

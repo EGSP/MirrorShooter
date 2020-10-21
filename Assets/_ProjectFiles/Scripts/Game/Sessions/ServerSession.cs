@@ -139,8 +139,9 @@ namespace Game.Sessions
             var playerController = Instantiate(_playerController);
             playerController.gameObject.name = $"PC [{playerEntity.owner.id}]";
             NetworkServer.SpawnFor(playerController.gameObject, uc.Connection);
-            playerController.playerEntityId = playerEntity.netIdentity.netId;
-
+            playerController.SetPlayerEntity(playerEntity);
+            playerController.playerEntityId = playerEntity.netId;
+            
             NetworkIdentity.RebuildObserversForAll();
             
             userHandler.AddGameObject(playerEntity.gameObject);

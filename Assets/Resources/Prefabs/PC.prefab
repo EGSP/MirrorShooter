@@ -62,4 +62,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  mouseSensivity: {x: 6.4, y: 6.53}
+  clampCameraVerticalRotation: 80
   playerEntityId: 0

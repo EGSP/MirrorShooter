@@ -885,6 +885,8 @@ namespace Mirror
         internal static void OnObjectSpawnFinished(ObjectSpawnFinishedMessage _)
         {
             logger.Log("SpawnFinished");
+            
+            Debug.Log("SpawnFinished");
 
             // paul: Initialize the objects in the same order as they were initialized
             // in the server.   This is important if spawned objects

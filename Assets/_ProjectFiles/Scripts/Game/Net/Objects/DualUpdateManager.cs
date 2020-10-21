@@ -132,7 +132,13 @@ namespace Game.Net.Objects
         /// </summary>
         public void Add(IDualObject dualObject)
         {
-            _dualObjects.Add(dualObject);
+            if (!_dualObjects.Contains(dualObject))
+                _dualObjects.Add(dualObject);
+        }
+
+        public void Remove(IDualObject dualObject)
+        {
+            _dualObjects.Remove(dualObject);
         }
 
         private void SetMode(UpdateModeType newMode)

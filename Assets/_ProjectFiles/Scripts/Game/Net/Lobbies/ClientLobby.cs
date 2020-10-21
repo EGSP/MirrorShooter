@@ -75,7 +75,8 @@ namespace Game.Net
             NetworkManager.OnClientChangeSceneEvent += CreateSession;
             NetworkManager.OnClientSceneChangedEvent += StartSession;
             NetworkManager.OnClientSceneChangedEvent += SceneChanged;
-            
+
+            NetworkIdentity.ApplicationMode = NetworkIdentity.ApplicationModeType.Client;
 
             IsInitialized = true;
         }

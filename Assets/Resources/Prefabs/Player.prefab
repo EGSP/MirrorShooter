@@ -200,6 +200,8 @@ GameObject:
   - component: {fileID: 993505848647887765}
   - component: {fileID: -2507483051434520070}
   - component: {fileID: 8808900611915477958}
+  - component: {fileID: 4390633278142695683}
+  - component: {fileID: 6435948843783130365}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -256,9 +258,47 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   cameraPlace: {fileID: 1337098320}
+  bodyTransform: {fileID: 993505848647887765}
   owner:
     name: 
     id: 0
+--- !u!114 &4390633278142695683
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 993505848647887761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  clientAuthority: 0
+  localPositionSensitivity: 0.01
+  localRotationSensitivity: 0.01
+  localScaleSensitivity: 0.01
+--- !u!114 &6435948843783130365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 993505848647887761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 734b48bea0b204338958ee3d885e11f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  clientAuthority: 0
+  localPositionSensitivity: 0.01
+  localRotationSensitivity: 0.01
+  localScaleSensitivity: 0.01
+  target: {fileID: 1337098320}
 --- !u!1 &1215838121197605988
 GameObject:
   m_ObjectHideFlags: 0
