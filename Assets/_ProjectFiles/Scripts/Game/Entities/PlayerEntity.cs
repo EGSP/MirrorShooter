@@ -1,29 +1,21 @@
 ﻿using System;
 using Game.Net;
 using Mirror;
+using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 using UnityEngine;
 
 namespace Game.Entities
 {
     public class PlayerEntity : NetworkBehaviour
     {
-        public Transform cameraPlace;
-        public Transform bodyTransform;
-        public Transform cameraTransform;
-        
-        
-        [SyncVar] public User owner;
+        [BoxGroup("Body")]
+        [OdinSerialize] public PlayerBodyEntity BodyEntity { get; private set; }
 
-        
-        /// <summary>
-        /// Устанавливает камеру в объект носитель.
-        /// </summary>
-        public void SetCamera(Camera camera)
-        {
-            camera.transform.SetParent(cameraPlace,true);
-            camera.transform.localRotation = Quaternion.identity;
-            camera.transform.localPosition = Vector3.zero;
-            cameraTransform = camera.transform;
-        }
+        [BoxGroup("Camera")] 
+        [OdinSerialize] public PlayerCameraEntity CameraEntity { get; private set; }
+
+        [FoldoutGroup("User", 100)]
+        [SyncVar] public User owner;
     }
 }

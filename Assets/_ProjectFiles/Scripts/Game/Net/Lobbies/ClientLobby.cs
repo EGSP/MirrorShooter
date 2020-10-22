@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Game.Configuration;
 using Game.Sessions;
 using Gasanov.Core;
 using Gasanov.Extensions.Mono;
@@ -76,6 +77,7 @@ namespace Game.Net
             NetworkManager.OnClientSceneChangedEvent += StartSession;
             NetworkManager.OnClientSceneChangedEvent += SceneChanged;
 
+            LaunchInfo.LaunchMode = LaunchModeType.Client;
             NetworkIdentity.ApplicationMode = NetworkIdentity.ApplicationModeType.Client;
 
             IsInitialized = true;

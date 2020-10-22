@@ -16,12 +16,12 @@ namespace Game.Net.Objects
             DualUpdateManager.Instance.Add(this);       
         }
 
-        protected void OnEnable()
+        protected virtual void OnEnable()
         {
             IsActive = true;
         }
 
-        protected void OnDisable()
+        protected virtual void OnDisable()
         {
             IsActive = false;
         }

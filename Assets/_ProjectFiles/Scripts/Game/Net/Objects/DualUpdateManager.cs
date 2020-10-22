@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Game.Configuration;
 using Gasanov.Core;
 using Mirror;
 
@@ -111,7 +112,7 @@ namespace Game.Net.Objects
 
             _dualObjects = new List<IDualObject>();
             
-            if (NetworkServer.active)
+            if (LaunchInfo.LaunchMode == LaunchModeType.Server)
             {
                 SetMode(UpdateModeType.Server);
             }

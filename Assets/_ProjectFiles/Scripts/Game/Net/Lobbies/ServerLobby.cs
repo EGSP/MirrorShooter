@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Game.Configuration;
 using Game.Sessions;
 using Gasanov.Core;
 using Gasanov.Extensions.Mono;
@@ -88,6 +89,7 @@ namespace Game.Net
             NetworkManager.OnServerDisconnectEvent += ClientDisconnected;
             NetworkManager.OnServerReadyEvent += ClientReady;
 
+            LaunchInfo.LaunchMode = LaunchModeType.Server;
             // NetworkIdentity.ApplicationMode = NetworkIdentity.ApplicationModeType.Server;
 
             Session = gameObject.AddComponent<ServerSession>();

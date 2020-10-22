@@ -130,12 +130,13 @@ namespace Game.Sessions
             // Заносим в пользователей сцены.
             _userConnectionsInScene.Add(userHandler);
             
-            // Спавним игроков.
+            // Спавним игрока
             var playerEntity = Instantiate(_playerEntityPrefab);
             playerEntity.gameObject.transform.position = SpawnPoint.SpawnPoints.Random().transform.position;
             playerEntity.owner = uc.User;
             NetworkServer.Spawn(playerEntity.gameObject);
 
+            // Спавн контроллера
             var playerController = Instantiate(_playerController);
             playerController.gameObject.name = $"PC [{playerEntity.owner.id}]";
             NetworkServer.SpawnFor(playerController.gameObject, uc.Connection);

@@ -1,4 +1,5 @@
 ﻿using System;
+using Game.Configuration;
 using Game.Net.Objects;
 using Mirror;
 using UnityEngine;
@@ -8,18 +9,12 @@ namespace Game.Entities
     // Этот класс будет переписан!!!!!!
     public class PlayerController : DualNetworkBehaviour
     {
-        
         [SerializeField] private Vector2 mouseSensivity;
-        [SerializeField] private float clampCameraVerticalRotation; // Ограничение поворота камеры по оси X
-        
+
         [SyncVar(hook = nameof(OnEntityChanged))]
         public uint playerEntityId;
 
         private PlayerEntity _playerEntity;
-
-        private float _cameraVerticalRotation; // Значение угла поворота камеры
-        private Quaternion _newCameraRotation;
-        private Quaternion _newBodyRotation;
 
         protected override void Awake()
         {
@@ -33,10 +28,10 @@ namespace Game.Entities
             float rotationX = -Input.GetAxis("Mouse Y") * mouseSensivity.y; // Вращение по вертикали
             
             if(rotationX != 0)
-                CmdRotateCamera(rotationX);
+                RotateCamera(rotationX);
             
             if(rotationY != 0)
-                CmdRotateBody(rotationY);
+                RotateBody(rotationY);
         }
 
         protected override void OnServer()
@@ -44,51 +39,26 @@ namespace Game.Entities
             // throw new NotImplementedException();
         }
 
-        [Command(ignoreAuthority = true)]
-        private void CmdRotateCamera(float rotationX)
+        [Client]
+        private void RotateCamera(float rotationX)
         {
-            if (_playerEntity == null && _playerEntity.cameraTransform == null)
-                return;
-            
-            Debug.Log("CMD_CAMERA");
-            // Поворот камеры относительно тела
-            _cameraVerticalRotation += rotationX;
-            _cameraVerticalRotation = Mathf.Clamp(_cameraVerticalRotation,
-                -clampCameraVerticalRotation, clampCameraVerticalRotation); // Ограничение поворота
-            
-            _newCameraRotation = Quaternion.Euler(_cameraVerticalRotation, 0, 0); // Новое вращение камеры
-            _playerEntity.cameraTransform.localRotation = 
-                _newCameraRotation; // Применяем вращение
+            _playerEntity.CameraEntity.CmdRotateX(rotationX);
         }
 
-        [Command(ignoreAuthority = true)]
-        private void CmdRotateBody(float rotationY)
+        [Client]
+        private void RotateBody(float rotationY)
         {
-            if (_playerEntity == null && _playerEntity.bodyTransform == null)
-                return;
-            
-            Debug.Log("CMD_BODY");
-            // Новое вращение тела
-            _newBodyRotation *= Quaternion.Euler(0, rotationY, 0);
-            
-            // Поворот тела
-            _playerEntity.bodyTransform.rotation = 
-                _newBodyRotation;
+            _playerEntity.BodyEntity.CmdRotateY(rotationY);
         }
-        
-        // УЖАСНЫЙ КОД, НУЖНО ПЕРЕДЕЛАТЬ
         
         public void OnEntityChanged(uint _, uint newEntity)
         {
             if (NetworkIdentity.spawned.TryGetValue(newEntity, out NetworkIdentity identity))
             {
                 _playerEntity = identity.GetComponent<PlayerEntity>();
-                   
-                _playerEntity.SetCamera(Camera.main);
-                _playerEntity.GetComponent<NetworkTransformChild>().target = _playerEntity.cameraTransform;
-                
-                _newCameraRotation = _playerEntity.cameraTransform.localRotation;
-                _newBodyRotation = _playerEntity.bodyTransform.rotation;
+
+                if (LaunchInfo.LaunchMode == LaunchModeType.Client)
+                    _playerEntity.CameraEntity.SetCamera(Camera.main);
             }
             else
             {
@@ -100,12 +70,6 @@ namespace Game.Entities
         public void SetPlayerEntity(PlayerEntity playerEntity)
         {
             _playerEntity = playerEntity;
-            
-            _playerEntity.SetCamera(Camera.main);
-            _playerEntity.GetComponent<NetworkTransformChild>().target = _playerEntity.cameraTransform;
-            
-            _newCameraRotation = _playerEntity.cameraTransform.localRotation;
-            _newBodyRotation = _playerEntity.bodyTransform.rotation;
         }
         
     }

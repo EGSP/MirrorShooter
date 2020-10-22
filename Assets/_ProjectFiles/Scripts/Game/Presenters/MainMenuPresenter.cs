@@ -1,4 +1,5 @@
 ﻿using System;
+using Game.Configuration;
 using Game.Net;
 using Game.Views;
 using Gasanov.Core;

@@ -276,12 +276,20 @@ namespace Mirror
 
         void CreateNetworkBehavioursCache()
         {
-            networkBehavioursCache = GetComponents<NetworkBehaviour>();
+            // Теперь он смотрит и на все компоненты в дочерних объектах.
+            networkBehavioursCache = GetComponentsInChildren<NetworkBehaviour>();
+            
             if (NetworkBehaviours.Length > 64)
             {
                 logger.LogError($"Only 64 NetworkBehaviour components are allowed for NetworkIdentity: {name} because of the dirtyComponentMask", this);
                 // Log error once then resize array so that NetworkIdentity does not throw exceptions later
                 Array.Resize(ref networkBehavioursCache, 64);
+            }
+            
+            // Ручная установка, чтобы NetBeh не начал искать на своем объекте NetIden
+            foreach (var networkBehaviour in networkBehavioursCache)
+            {
+                networkBehaviour.NetIdentityCache = this;
             }
         }
 
