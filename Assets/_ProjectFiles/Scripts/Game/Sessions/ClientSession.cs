@@ -1,10 +1,11 @@
 ﻿using System;
 using Game.Entities;
+using Game.Net;
 using Mirror;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-namespace Game.Net
+namespace Game.Sessions
 {
     public class ClientSession : SerializedMonoBehaviour
     {

@@ -56,9 +56,9 @@ namespace Game.Presenters
             View.AddUser(user);
         }
 
-        private void RemoveUser(User user)
+        private void RemoveUser(UserConnection userConnection)
         {
-            View.RemoveUser(user);
+            View.RemoveUser(userConnection.User);
         }
         
         public void Dispose()

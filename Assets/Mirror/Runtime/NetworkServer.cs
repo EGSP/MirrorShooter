@@ -983,9 +983,10 @@ namespace Mirror
         /// </summary>
         /// <param name="conn"></param>
         /// <param name="msg"></param>
-        static void OnClientReadyMessage(NetworkConnection conn, ReadyMessage msg)
+        public static void OnClientReadyMessage(NetworkConnection conn, ReadyMessage msg)
         {
             if (logger.LogEnabled()) logger.Log("Default handler for ready message from " + conn);
+            Debug.Log("CLIENT_READY");
             SetClientReady(conn);
         }
 

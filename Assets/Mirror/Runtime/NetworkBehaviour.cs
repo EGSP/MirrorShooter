@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Mirror.RemoteCalls;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Mirror
@@ -20,9 +21,9 @@ namespace Mirror
     /// <para>Some of the built-in components of the networking system are derived from NetworkBehaviour, including NetworkTransport, NetworkAnimator and NetworkProximityChecker.</para>
     /// </remarks>
     [AddComponentMenu("")]
-    [RequireComponent(typeof(NetworkIdentity))]
+    // [RequireComponent(typeof(NetworkIdentity))]
     [HelpURL("https://mirror-networking.com/docs/Guides/NetworkBehaviour.html")]
-    public abstract class NetworkBehaviour : MonoBehaviour
+    public abstract class NetworkBehaviour : SerializedMonoBehaviour
     {
         static readonly ILogger logger = LogFactory.GetLogger(typeof(NetworkBehaviour));
 
@@ -136,6 +137,15 @@ namespace Mirror
                 }
                 return netIdentityCache;
             }
+        }
+
+        /// <summary>
+        /// Устанавливается новый кеш вручную. Это понадобилось для поддержки дочерних объектов.
+        /// </summary>
+        public NetworkIdentity NetIdentityCache
+        {
+            get => netIdentityCache;
+            set => netIdentityCache = value;
         }
 
         /// <summary>

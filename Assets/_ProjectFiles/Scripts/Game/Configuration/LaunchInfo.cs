@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Game.Net;
 using UnityEngine;
 
-namespace Game.Net
+namespace Game.Configuration
 {
     /// <summary>
     /// Хранит всю информацию о запуске игры.
@@ -14,5 +15,7 @@ namespace Game.Net
         /// При запуске сервера ссылки нет.
         /// </summary>
         public static User User;
+
+        public static LaunchModeType LaunchMode;
     }
 }

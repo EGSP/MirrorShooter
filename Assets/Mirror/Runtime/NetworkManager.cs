@@ -1174,7 +1174,9 @@ namespace Mirror
 
         void OnServerReadyMessageInternal(NetworkConnection conn, ReadyMessage msg)
         {
+            conn.isReady = true;
             logger.Log("NetworkManager.OnServerReadyMessageInternal");
+            
             OnServerReady(conn);
         }
 

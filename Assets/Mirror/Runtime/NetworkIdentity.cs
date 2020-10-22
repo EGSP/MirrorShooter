@@ -130,6 +130,34 @@ namespace Mirror
         /// </remarks>
         public bool isClient { get; internal set; }
 
+        public enum ApplicationModeType
+        {
+            None,
+            Client,
+            Server
+        }
+
+        /// <summary>
+        /// Режим работы приложения.
+        /// </summary>
+        public static ApplicationModeType ApplicationMode
+        {
+            get => _applicationMode;
+            set
+            {
+                if (value == _applicationMode)
+                    return;
+                
+                foreach (var identity in spawned.Values)
+                {
+                    identity.ApplyApplicationMode(_applicationMode);
+                }
+
+                _applicationMode = value;
+            }
+        }
+        private static ApplicationModeType _applicationMode;
+
         /// <summary>
         /// Returns true if NetworkServer.active and server is not stopped.
         /// </summary>
@@ -248,12 +276,20 @@ namespace Mirror
 
         void CreateNetworkBehavioursCache()
         {
-            networkBehavioursCache = GetComponents<NetworkBehaviour>();
+            // Теперь он смотрит и на все компоненты в дочерних объектах.
+            networkBehavioursCache = GetComponentsInChildren<NetworkBehaviour>();
+            
             if (NetworkBehaviours.Length > 64)
             {
                 logger.LogError($"Only 64 NetworkBehaviour components are allowed for NetworkIdentity: {name} because of the dirtyComponentMask", this);
                 // Log error once then resize array so that NetworkIdentity does not throw exceptions later
                 Array.Resize(ref networkBehavioursCache, 64);
+            }
+            
+            // Ручная установка, чтобы NetBeh не начал искать на своем объекте NetIden
+            foreach (var networkBehaviour in networkBehavioursCache)
+            {
+                networkBehaviour.NetIdentityCache = this;
             }
         }
 
@@ -419,6 +455,32 @@ namespace Mirror
             }
 
             hasSpawned = true;
+
+            ApplyApplicationMode(_applicationMode);
+        }
+
+        /// <summary>
+        /// Определяет режим работы идентити. Клиент или сервер.
+        /// </summary>
+        private void ApplyApplicationMode(ApplicationModeType applicationModeType)
+        {
+            switch (applicationModeType)
+            {
+                case ApplicationModeType.Client:
+                    isClient = true;
+                    isServer = false;
+                    break;
+                
+                case ApplicationModeType.Server:
+                    isClient = false;
+                    isServer = true;
+                    break;
+                
+                case ApplicationModeType.None:
+                    isClient = false;
+                    isServer = false;
+                    break;
+            }
         }
 
         void OnValidate()
@@ -816,6 +878,7 @@ namespace Mirror
                 return;
             clientStarted = true;
 
+            Debug.Log("IS_CLIENT");
             isClient = true;
 
             if (logger.LogEnabled()) logger.Log("OnStartClient " + gameObject + " netId:" + netId);
@@ -1394,6 +1457,7 @@ namespace Mirror
         }
 
         static readonly HashSet<NetworkConnection> newObservers = new HashSet<NetworkConnection>();
+        
 
         /// <summary>
         /// This causes the set of players that can see this object to be rebuild.
@@ -1508,6 +1572,18 @@ namespace Mirror
                 {
                     OnSetHostVisibility(false);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Обновление всех наблюдателей, которые заспавнены.
+        /// </summary>
+        public static void RebuildObserversForAll()
+        {
+            // Обновляем всех наблюдателей
+            foreach (var networkIdentity in NetworkIdentity.spawned.Values)
+            {
+                networkIdentity.RebuildObservers(true);
             }
         }
 
