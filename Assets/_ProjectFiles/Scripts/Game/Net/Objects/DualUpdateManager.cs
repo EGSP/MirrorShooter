@@ -19,81 +19,75 @@ namespace Game.Net.Objects
 
         private abstract class AbstractUpdateMode
         {
-            protected AbstractUpdateMode(List<IDualObject> dualObjects)
-            {
-                DualObjects = dualObjects;
-            }
+            public abstract void Awake(IDualObject dualObject);
 
-            protected readonly List<IDualObject> DualObjects;
-            
-            /// <summary>
-            /// Вызывается после обновления.
-            /// </summary>
-            public event Action AfterUpdate = delegate {  };
+            public abstract void Start(IDualObject dualObject);
 
-            public abstract void Update();
+            public abstract void Update(IDualObject dualObject);
 
-            protected void OnAfterUpdate()
-            {
-                AfterUpdate();
-            }
+            public abstract void Enable(IDualObject dualObject);
+
+            public abstract void Disable(IDualObject dualObject);
         }
 
         private class ServerUpdateMode : AbstractUpdateMode
         {
-            public ServerUpdateMode(List<IDualObject> dualObjects) : base(dualObjects)
+
+            public override void Awake(IDualObject dualObject)
             {
+                dualObject.AwakeOnServer();
             }
 
-            public override void Update()
+            public override void Start(IDualObject dualObject)
             {
-                // Вызываем обновление у всех объектов.
-                for (var i = DualObjects.Count - 1; i > -1; i--)
-                {
-                    if (DualObjects != null)
-                    {
-                        DualObjects[i].UpdateOnServer();
-                    }
-                    else
-                    {
-                        DualObjects.RemoveAt(i);
-                    }          
-                }
-                
-                OnAfterUpdate();
+                dualObject.StartOnServer();
+            }
+
+            public override void Update(IDualObject dualObject)
+            {
+                dualObject.UpdateOnServer();
+            }
+
+            public override void Enable(IDualObject dualObject)
+            {
+                dualObject.EnableOnServer();
+            }
+
+            public override void Disable(IDualObject dualObject)
+            {
+                dualObject.DisableOnServer();
             }
         }
 
         private class ClientUpdateMode : AbstractUpdateMode
         {
-            public ClientUpdateMode(List<IDualObject> dualObjects) : base(dualObjects)
+
+            public override void Awake(IDualObject dualObject)
             {
+                dualObject.AwakeOnClient();
             }
 
-            public override void Update()
+            public override void Start(IDualObject dualObject)
             {
-                // Вызываем обновление у всех объектов.
-                for (var i = DualObjects.Count - 1; i > -1; i--)
-                {
-                    if (DualObjects != null)
-                    {
-                        DualObjects[i].UpdateOnClient();
-                    }
-                    else
-                    {
-                        DualObjects.RemoveAt(i);
-                    }          
-                }
-                
-                OnAfterUpdate();
+                dualObject.StartOnClient();
+            }
+
+            public override void Update(IDualObject dualObject)
+            {
+                dualObject.UpdateOnClient();
+            }
+
+            public override void Enable(IDualObject dualObject)
+            {
+                dualObject.EnableOnClient();
+            }
+
+            public override void Disable(IDualObject dualObject)
+            {
+                dualObject.DisableOnClient();
             }
         }    
         #endregion
-        
-        /// <summary>
-        /// Объекты, которые должны обновляться.
-        /// </summary>
-        private List<IDualObject> _dualObjects;
 
         /// <summary>
         /// Текущий режим обновления.
@@ -109,8 +103,6 @@ namespace Game.Net.Objects
         {
             base.Awake();
             AlwaysExist = true;
-
-            _dualObjects = new List<IDualObject>();
             
             if (LaunchInfo.LaunchMode == LaunchModeType.Server)
             {
@@ -122,36 +114,29 @@ namespace Game.Net.Objects
             }
         }
 
-        private void Update()
+        public void AwakeMe(IDualObject dualObject)
         {
-            _abstractUpdateMode.Update();
+            _abstractUpdateMode.Awake(dualObject);
         }
 
-        /// <summary>
-        /// Добавляет новый объект в очередь обновления.
-        /// Обновление произойдет только на следующей итерации.
-        /// </summary>
-        public void Add(IDualObject dualObject)
+        public void StartMe(IDualObject dualObject)
         {
-            if (!_dualObjects.Contains(dualObject))
-                _dualObjects.Add(dualObject);
+            _abstractUpdateMode.Start(dualObject);
         }
 
-        public void Remove(IDualObject dualObject)
+        public void UpdateMe(IDualObject dualObject)
         {
-            _dualObjects.Remove(dualObject);
+            _abstractUpdateMode.Update(dualObject);
         }
 
-        private void SetMode(UpdateModeType newMode)
+        public void EnableMe(IDualObject dualObject)
         {
-            if (newMode == UpdateModeType.Server)
-            {
-                _abstractUpdateMode = new ServerUpdateMode(_dualObjects);
-            }
-            else
-            {
-                _abstractUpdateMode = new ClientUpdateMode(_dualObjects);
-            }
+            _abstractUpdateMode.Enable(dualObject);
+        }
+
+        public void DisableMe(IDualObject dualObject)
+        {
+            _abstractUpdateMode.Disable(dualObject);
         }
 
         /// <summary>
@@ -161,8 +146,18 @@ namespace Game.Net.Objects
         {
             if (newMode == UpdateMode)
                 return;
-
-            _abstractUpdateMode.AfterUpdate += () => SetMode(newMode);
+        }
+        
+        private void SetMode(UpdateModeType newMode)
+        {
+            if (newMode == UpdateModeType.Server)
+            {
+                _abstractUpdateMode = new ServerUpdateMode();
+            }
+            else
+            {
+                _abstractUpdateMode = new ClientUpdateMode();
+            }
         }
     }
 }

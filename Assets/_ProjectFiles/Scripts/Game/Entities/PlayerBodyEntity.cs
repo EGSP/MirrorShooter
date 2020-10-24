@@ -17,24 +17,13 @@ namespace Game.Entities
 
         private Quaternion _cachedBodyRotation;
         
-        protected override void Awake()
+
+        public override void AwakeOnServer()
         {
-            base.Awake();
-            
             if(BodyTransform == null)
                 throw new NullReferenceException();
 
             _cachedBodyRotation = BodyTransform.rotation;
-        }
-
-        protected override void OnClient()
-        {
-            // throw new System.NotImplementedException();
-        }
-
-        protected override void OnServer()
-        {
-            // throw new System.NotImplementedException();
         }
 
         [Command(ignoreAuthority = true)]

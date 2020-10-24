@@ -325,6 +325,8 @@ GameObject:
   - component: {fileID: 8808900611915477958}
   - component: {fileID: 4390633278142695683}
   - component: {fileID: 6435948843783130365}
+  - component: {fileID: 1183391729}
+  - component: {fileID: 1183391728}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -393,6 +395,24 @@ MonoBehaviour:
     - Name: BodyEntity
       Entry: 10
       Data: 0
+    - Name: MoveModule
+      Entry: 7
+      Data: 0|Game.Entities.PlayerMoveModule, Assembly-CSharp
+    - Name: MoveSpeed
+      Entry: 4
+      Data: 5
+    - Name: _moveData
+      Entry: 7
+      Data: 1|Game.Processors.MoveData, Assembly-CSharp
+    - Name: Speed
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: CameraEntity
       Entry: 10
       Data: 1
@@ -456,6 +476,36 @@ MonoBehaviour:
   localRotationSensitivity: 0.01
   localScaleSensitivity: 0.01
   target: {fileID: 589830158}
+--- !u!54 &1183391729
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 993505848647887761}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 80
+  m_CollisionDetection: 0
+--- !u!136 &1183391728
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 993505848647887761}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.5
+  m_Height: 1.5
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.75, z: 0}
 --- !u!1 &1215838121197605988
 GameObject:
   m_ObjectHideFlags: 0

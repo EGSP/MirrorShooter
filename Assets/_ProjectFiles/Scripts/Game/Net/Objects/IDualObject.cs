@@ -14,5 +14,21 @@
         /// Обновление на стороне сервера.
         /// </summary>
         void UpdateOnServer();
+
+        void AwakeOnClient();
+
+        void AwakeOnServer();
+        
+        void StartOnClient();
+
+        void StartOnServer();
+
+        void EnableOnClient();
+
+        void EnableOnServer();
+
+        void DisableOnClient();
+
+        void DisableOnServer();
     }
 }

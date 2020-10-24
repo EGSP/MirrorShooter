@@ -6,50 +6,122 @@ namespace Game.Net.Objects
     
     public abstract class DualNetworkBehaviour : NetworkBehaviour, IDualObject
     {
-        /// <summary>
-        /// Активен ли объект для обновления состояния.
-        /// </summary>
-        protected bool IsActive { get; private set; }
+        private DualUpdateManager _cachedUpdateManager;
         
-        protected virtual void Awake()
+        private void Awake()
         {
-            DualUpdateManager.Instance.Add(this);       
+            // Кешируем значение менеджера.
+            _cachedUpdateManager = DualUpdateManager.Instance;
+            _cachedUpdateManager.AwakeMe(this);
         }
 
-        protected virtual void OnEnable()
+        private void Start()
         {
-            IsActive = true;
+            _cachedUpdateManager.StartMe(this);
         }
 
-        protected virtual void OnDisable()
+        private void Update()
         {
-            IsActive = false;
+            _cachedUpdateManager.UpdateMe(this);
         }
+
+        private void OnEnable()
+        {
+            _cachedUpdateManager.EnableMe(this);
+        }
+
+        private void OnDisable()
+        {    
+            _cachedUpdateManager.DisableMe(this);
+        }
+
+        #region Dual event methods
 
         public virtual void UpdateOnClient()
         {
-            if (!IsActive)
-                return;
-            
-            OnClient();
         }
 
         public virtual void UpdateOnServer()
         {
-            if (!IsActive)
-                return;
-            
-            OnServer();
         }
 
-        /// <summary>
-        /// Обновления состояния на стороне клиента.
-        /// </summary>
-        protected abstract void OnClient();
+        public virtual  void AwakeOnClient()
+        {
+        }
 
-        /// <summary>
-        /// Обновление состояние на стороне сервера.
-        /// </summary>
-        protected abstract void OnServer();
+        public virtual  void AwakeOnServer()
+        {
+        }
+
+        public virtual  void StartOnClient()
+        {
+        }
+
+        public  virtual void StartOnServer()
+        {
+        }
+
+        public virtual  void EnableOnClient()
+        {
+        }
+
+        public  virtual void EnableOnServer()
+        {
+        }
+
+        public virtual void DisableOnClient()
+        {
+        }
+
+        public virtual void DisableOnServer()
+        {
+        }
+
+        #endregion
+
+        // /// <summary>
+        // /// Обновления состояния на стороне клиента.
+        // /// </summary>
+        // protected virtual void OnClientUpdate()
+        // {
+        // }
+        //
+        // /// <summary>
+        // /// Обновление состояние на стороне сервера.
+        // /// </summary>
+        // protected virtual void OnServerUpdate()
+        // {
+        // }
+        // protected virtual void OnClientAwake()
+        // {
+        // }
+        //
+        // protected virtual void OnServerAwake()
+        // {
+        // }
+        //
+        // protected virtual void OnClientStart()
+        // {
+        // }
+        //
+        // protected virtual void OnServerStart()
+        // {
+        // }
+        //
+        // protected virtual void OnClientEnable()
+        // {
+        // }
+        //
+        // protected virtual void OnServerEnable()
+        // {
+        // }
+        //
+        // protected virtual void OnClientDisable()
+        // {
+        // }
+        //
+        // protected virtual void OnServerDisable()
+        // {
+        // }
     }
 }

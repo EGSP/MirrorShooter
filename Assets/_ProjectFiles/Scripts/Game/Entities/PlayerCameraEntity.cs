@@ -37,26 +37,13 @@ namespace Game.Entities
         /// </summary>
         private Quaternion _cachedCameraRotation;
         
-
-        protected override void Awake()
+        
+        public override void AwakeOnServer()
         {
-            base.Awake();
-            
             if(CameraRoot == null)
                 throw new NullReferenceException();
             
-
             _cachedCameraRotation = CameraRoot.localRotation;
-        }
-
-        protected override void OnClient()
-        {
-            // throw new System.NotImplementedException();
-        }
-
-        protected override void OnServer()
-        {
-            // throw new System.NotImplementedException();
         }
 
         /// <summary>
@@ -65,6 +52,9 @@ namespace Game.Entities
         /// </summary>
         public void SetCamera(Camera cameraObject)
         {
+            if (CameraRoot == null)
+                return;
+            
             if (cameraObject == null)
                 return;
             

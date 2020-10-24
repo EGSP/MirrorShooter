@@ -16,27 +16,23 @@ namespace Game.Entities
 
         private PlayerEntity _playerEntity;
 
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
-        protected override void OnClient()
+        public override void UpdateOnClient()
         {
             // Mouse rotation Input
             float rotationY = Input.GetAxis("Mouse X") * mouseSensivity.x; // Вращение по горизонтали
             float rotationX = -Input.GetAxis("Mouse Y") * mouseSensivity.y; // Вращение по вертикали
+
+            float horizontalDelta = Input.GetAxisRaw("Horizontal");
+            float verticalDelta = Input.GetAxisRaw("Vertical");
             
             if(rotationX != 0)
                 RotateCamera(rotationX);
             
             if(rotationY != 0)
                 RotateBody(rotationY);
-        }
-
-        protected override void OnServer()
-        {
-            // throw new NotImplementedException();
+            
+            if(horizontalDelta != 0 || verticalDelta != 0)
+                CmdMoveBody(horizontalDelta, verticalDelta);
         }
 
         [Client]
@@ -49,6 +45,14 @@ namespace Game.Entities
         private void RotateBody(float rotationY)
         {
             _playerEntity.BodyEntity.CmdRotateY(rotationY);
+        }
+
+        // Заменить на модуль 
+        [Command(ignoreAuthority = true)]
+        private void CmdMoveBody(float horDelta, float verDelta)
+        {
+            Debug.Log("CMD_MOVE");
+            _playerEntity.MoveModule.Move(horDelta, verDelta);
         }
         
         public void OnEntityChanged(uint _, uint newEntity)
