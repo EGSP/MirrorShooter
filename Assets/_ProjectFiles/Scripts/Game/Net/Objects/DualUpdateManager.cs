@@ -25,6 +25,8 @@ namespace Game.Net.Objects
 
             public abstract void Update(IDualObject dualObject);
 
+            public abstract void FixedUpdate(IDualObject dualObject);
+
             public abstract void Enable(IDualObject dualObject);
 
             public abstract void Disable(IDualObject dualObject);
@@ -46,6 +48,11 @@ namespace Game.Net.Objects
             public override void Update(IDualObject dualObject)
             {
                 dualObject.UpdateOnServer();
+            }
+
+            public override void FixedUpdate(IDualObject dualObject)
+            {
+                dualObject.FixedUpdateOnServer();
             }
 
             public override void Enable(IDualObject dualObject)
@@ -75,6 +82,11 @@ namespace Game.Net.Objects
             public override void Update(IDualObject dualObject)
             {
                 dualObject.UpdateOnClient();
+            }
+
+            public override void FixedUpdate(IDualObject dualObject)
+            {
+                dualObject.FixedUpdateOnClient();
             }
 
             public override void Enable(IDualObject dualObject)
@@ -127,6 +139,11 @@ namespace Game.Net.Objects
         public void UpdateMe(IDualObject dualObject)
         {
             _abstractUpdateMode.Update(dualObject);
+        }
+
+        public void FixedUpdateMe(IDualObject dualObject)
+        {
+            _abstractUpdateMode.FixedUpdate(dualObject);
         }
 
         public void EnableMe(IDualObject dualObject)

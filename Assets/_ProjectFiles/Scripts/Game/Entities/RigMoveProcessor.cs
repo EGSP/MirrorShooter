@@ -81,9 +81,12 @@ namespace Game.Processors
         public Vector3 Direction { get; set; }
     }
     
+    [Serializable]
     public class MoveProcess : ProcessBase
     {   
+        [SerializeField]
         private MoveData _moveData;
+        [SerializeField]
         private RigidBodyData _rigidBodyData;
 
         public override void Process()
@@ -91,7 +94,8 @@ namespace Game.Processors
             if (DataNullOrDisposed(_moveData, _rigidBodyData))
                 return;
             
-            _rigidBodyData.Rigidbody.MovePosition(_moveData.Direction * _moveData.Speed * _moveData.FixedDeltaTime);
+            _rigidBodyData.Rigidbody.MovePosition(_rigidBodyData.Rigidbody.position +
+                                                  _moveData.Direction * _moveData.Speed * _moveData.FixedDeltaTime);
         }
 
         public override void LookForData(Dictionary<Type, DataBlock> data)

@@ -1,10 +1,11 @@
 ﻿using System;
+using Game.Entities.Modules;
 using Mirror;
 
 namespace Game.Net.Objects
 {
     
-    public abstract class DualNetworkBehaviour : NetworkBehaviour, IDualObject
+    public abstract class DualNetworkBehaviour : NetworkBehaviour, IDualObject, IUnityMethodsHook
     {
         private DualUpdateManager _cachedUpdateManager;
         
@@ -13,26 +14,43 @@ namespace Game.Net.Objects
             // Кешируем значение менеджера.
             _cachedUpdateManager = DualUpdateManager.Instance;
             _cachedUpdateManager.AwakeMe(this);
+
+            OnAwakeEvent();
         }
 
         private void Start()
         {
             _cachedUpdateManager.StartMe(this);
+
+            OnStartEvent();
         }
 
         private void Update()
         {
             _cachedUpdateManager.UpdateMe(this);
+
+            OnUpdateEvent();
+        }
+
+        private void FixedUpdate()
+        {
+            _cachedUpdateManager.FixedUpdateMe(this);
+
+            OnFixedUpdateEvent();
         }
 
         private void OnEnable()
         {
             _cachedUpdateManager.EnableMe(this);
+
+            OnEnableEvent();
         }
 
         private void OnDisable()
         {    
             _cachedUpdateManager.DisableMe(this);
+
+            OnDisableEvent();
         }
 
         #region Dual event methods
@@ -42,6 +60,14 @@ namespace Game.Net.Objects
         }
 
         public virtual void UpdateOnServer()
+        {
+        }
+
+        public virtual void FixedUpdateOnClient()
+        {
+        }
+
+        public virtual void FixedUpdateOnServer()
         {
         }
 
@@ -79,49 +105,15 @@ namespace Game.Net.Objects
 
         #endregion
 
-        // /// <summary>
-        // /// Обновления состояния на стороне клиента.
-        // /// </summary>
-        // protected virtual void OnClientUpdate()
-        // {
-        // }
-        //
-        // /// <summary>
-        // /// Обновление состояние на стороне сервера.
-        // /// </summary>
-        // protected virtual void OnServerUpdate()
-        // {
-        // }
-        // protected virtual void OnClientAwake()
-        // {
-        // }
-        //
-        // protected virtual void OnServerAwake()
-        // {
-        // }
-        //
-        // protected virtual void OnClientStart()
-        // {
-        // }
-        //
-        // protected virtual void OnServerStart()
-        // {
-        // }
-        //
-        // protected virtual void OnClientEnable()
-        // {
-        // }
-        //
-        // protected virtual void OnServerEnable()
-        // {
-        // }
-        //
-        // protected virtual void OnClientDisable()
-        // {
-        // }
-        //
-        // protected virtual void OnServerDisable()
-        // {
-        // }
+        #region IUnityMethodsHook
+
+        public event Action OnAwakeEvent = delegate {  };
+        public event Action OnStartEvent = delegate {  };
+        public event Action OnEnableEvent = delegate {  };
+        public event Action OnDisableEvent = delegate {  };
+        public event Action OnUpdateEvent = delegate {  };
+        public event Action OnFixedUpdateEvent = delegate {  };
+
+        #endregion
     }
 }

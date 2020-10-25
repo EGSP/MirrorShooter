@@ -14,6 +14,10 @@
         /// Обновление на стороне сервера.
         /// </summary>
         void UpdateOnServer();
+        
+        void FixedUpdateOnClient();
+        
+        void FixedUpdateOnServer();
 
         void AwakeOnClient();
 

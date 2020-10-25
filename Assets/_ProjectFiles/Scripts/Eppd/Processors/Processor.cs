@@ -49,7 +49,7 @@ namespace Gasanov.Eppd.Processors
         public virtual void Tick()
         {
             // Выполнение всех процессов
-            for (var i = Processes.Count; i < Processes.Count; i++)
+            for (var i = Processes.Count-1; i >-1; i--)
             {
                 Processes[i].Process();
             }

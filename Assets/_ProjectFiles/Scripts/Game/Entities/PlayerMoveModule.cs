@@ -1,13 +1,14 @@
 ﻿using System;
+using Game.Entities.Modules;
 using Game.Processors;
 using Gasanov.Eppd.Proceeders;
 using Sirenix.Serialization;
 using UnityEngine;
 
-namespace Game.Entities
+namespace Game.Entities.Modules
 {
     [Serializable]
-    public class PlayerMoveModule
+    public class PlayerMoveModule : LogicModule
     {
         [OdinSerialize] public float MoveSpeed { get; private set; } = 5f;
         
@@ -22,11 +23,10 @@ namespace Game.Entities
         /// <summary>
         /// Процессор передвижения.
         /// </summary>
-        public RigMoveProcessor MoveProcessor { get; private set; }
+        [OdinSerialize] public RigMoveProcessor MoveProcessor { get; private set; }
 
         
-        
-        public void Initialize(Rigidbody rig)
+        public void SetRigidBody(Rigidbody rig)
         {
             _rigidbody = rig;
             
@@ -34,14 +34,9 @@ namespace Game.Entities
             MoveProcessor = new RigMoveProcessor(new RigidBodyData(_rigidbody), _moveData);
         }
 
-        public void Update()
+        public override void FixedUpdateOnServer()
         {
-            
-        }
-
-        public void FixedUpdate(float fixedDeltaTime)
-        {
-            _moveData.FixedDeltaTime = fixedDeltaTime;
+            _moveData.FixedDeltaTime = Time.fixedDeltaTime;
             MoveProcessor.Tick();
         }
 
