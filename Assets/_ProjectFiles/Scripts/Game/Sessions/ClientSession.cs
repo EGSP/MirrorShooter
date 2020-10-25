@@ -38,12 +38,13 @@ namespace Game.Sessions
 
         public void StartSession()
         {
-            
+            ClientLobby.OnDisconnect += StopSession;
         }
 
         public void StopSession()
         {
-            
+            ClientLobby.OnDisconnect -= StopSession;
+            ClientLobby.ChangeScene(0);
         }
     }
 }

@@ -35,6 +35,12 @@ namespace Gasanov.Core
 
         protected virtual void Awake()
         {
+            if (_instance != null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            
             var instance = Instance;
         }
 
