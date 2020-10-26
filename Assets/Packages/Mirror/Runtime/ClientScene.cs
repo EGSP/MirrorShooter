@@ -739,7 +739,9 @@ namespace Mirror
             identity.transform.localPosition = msg.position;
             identity.transform.localRotation = msg.rotation;
             identity.transform.localScale = msg.scale;
-            identity.hasAuthority = msg.isOwner;
+            
+            if (identity.hasAuthority == false)
+                identity.hasAuthority = msg.isOwner;
             identity.netId = msg.netId;
 
             if (msg.isLocalPlayer)

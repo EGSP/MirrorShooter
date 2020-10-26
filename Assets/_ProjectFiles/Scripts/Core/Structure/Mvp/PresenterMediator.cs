@@ -27,6 +27,11 @@ namespace Gasanov.Core.Mvp
             _presenters.Add(presenter);
         }
 
+        public static void Unregister(IPresenter presenter)
+        {
+            _presenters.Remove(presenter);
+        }
+
         /// <summary>
         /// Отправляет сообщение всем остальным презентерам до первого положительного ответа.
         /// </summary>

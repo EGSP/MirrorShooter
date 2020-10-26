@@ -6,7 +6,6 @@ using UnityEngine;
 
 namespace Game.Entities
 {
-    // Этот класс будет переписан!!!!!!
     public class PlayerController : DualNetworkBehaviour
     {
         [SerializeField] private Vector2 mouseSensivity;
@@ -38,13 +37,15 @@ namespace Game.Entities
         [Client]
         private void RotateCamera(float rotationX)
         {
-            _playerEntity.CameraEntity.CmdRotateX(rotationX);
+            _playerEntity.CameraEntity.RotateX(rotationX);
+            // _playerEntity.CameraEntity.CmdRotateX(rotationX);
         }
 
         [Client]
         private void RotateBody(float rotationY)
         {
-            _playerEntity.BodyEntity.CmdRotateY(rotationY);
+            _playerEntity.BodyEntity.RotateY(rotationY);
+            // _playerEntity.BodyEntity.CmdRotateY(rotationY);
         }
 
         // Заменить на модуль 
@@ -60,6 +61,7 @@ namespace Game.Entities
             if (NetworkIdentity.spawned.TryGetValue(newEntity, out NetworkIdentity identity))
             {
                 _playerEntity = identity.GetComponent<PlayerEntity>();
+                _playerEntity.netIdentity.hasAuthority = true;
 
                 if (LaunchInfo.LaunchMode == LaunchModeType.Client)
                     _playerEntity.CameraEntity.SetCamera(Camera.main);
@@ -74,6 +76,7 @@ namespace Game.Entities
         public void SetPlayerEntity(PlayerEntity playerEntity)
         {
             _playerEntity = playerEntity;
+            // _playerEntity.netIdentity.hasAuthority = true;
         }
         
     }

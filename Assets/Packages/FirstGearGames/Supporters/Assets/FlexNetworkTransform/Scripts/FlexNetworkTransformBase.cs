@@ -3,6 +3,7 @@ using FirstGearGames.Utilities.Maths;
 using FirstGearGames.Utilities.Objects;
 using Mirror;
 using System;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
@@ -21,6 +22,7 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
             public Vector3 Position;
             public float TransformOffset;
         }
+        
         /// <summary>
         /// Move rates for the most recent received data.
         /// </summary>
@@ -30,11 +32,13 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
             public float Rotation;
             public float Scale;
         }
+        
         /// <summary>
         /// Data used to manage moving towards a target.
         /// </summary>
         protected class TargetSyncData
         {
+            
             public TargetSyncData(TransformSyncData goalData, MoveRateData moveRates, ExtrapolationData extrapolationData)
             {
                 GoalData = goalData;
@@ -45,15 +49,15 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
             /// <summary>
             /// Transform goal data for this update.
             /// </summary>
-            public readonly TransformSyncData GoalData;
+            public  TransformSyncData GoalData;
             /// <summary>
             /// How quickly to move towards each transform property.
             /// </summary>
-            public readonly MoveRateData MoveRates;
+            public  MoveRateData MoveRates;
             /// <summary>
             /// How much extrapolation time remains.
             /// </summary>
-            public readonly ExtrapolationData Extrapolation;
+            public  ExtrapolationData Extrapolation;
         }
         /// <summary>
         /// Ways to synchronize datas.
@@ -208,6 +212,10 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
         /// </summary>
         /// <param name="value"></param>
         public void SetSnapScale(Axes value) { _snapScale = value; }
+        
+        [SerializeField] private bool _positionAuthoritative;
+        [SerializeField] private bool _rotationAuthoritative;
+        [SerializeField] private bool _scaleAuthoritative;
         #endregion
 
         #region Private.
@@ -263,10 +271,17 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
         /// TeleportThreshold value squared.
         /// </summary>
         private float _teleportThresholdSquared;
+
+        /// <summary>
+        /// Какие виды изменений могут быть изменены клиентом.
+        /// </summary>
+        private SyncProperties _syncAuthority;
         #endregion
 
         protected virtual void Awake()
         {
+            SetupAuthority();
+            
             SetTeleportThresholdSquared();
 #if MIRRORNG
             base.NetIdentity.OnStartClient.AddListener(StartClient);
@@ -323,6 +338,32 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
         }
 
         /// <summary>
+        /// Устанавливает возможности изменения данных клиентом.
+        /// </summary>
+        public void SetupAuthority()
+        {
+            _syncAuthority = SyncProperties.None;
+
+            if (_positionAuthoritative)
+            {
+                _syncAuthority &= ~ SyncProperties.None;
+                _syncAuthority |= SyncProperties.Position;
+            }
+
+            if (_rotationAuthoritative)
+            {
+                _syncAuthority &= ~ SyncProperties.None;
+                _syncAuthority |= SyncProperties.Rotation;
+            }
+
+            if (_scaleAuthoritative)
+            {
+                _syncAuthority &= ~ SyncProperties.None;
+                _syncAuthority |= SyncProperties.Scale;
+            }
+        }
+
+        /// <summary>
         /// Sets TeleportThresholdSquared value.
         /// </summary>
         private void SetTeleportThresholdSquared()
@@ -364,6 +405,10 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
         /// </summary>
         private void CheckSendToServer()
         {
+            //Only send to server if client.
+            if (!PlatformIsClient())
+                return;
+            
             //Timed interval.
             if (_intervalType == IntervalTypes.Timed)
             {
@@ -380,23 +425,23 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
                     return;
             }
 
+            
             //Not using client auth movement.
-            if (!_clientAuthoritative)
-                return;
-            //Only send to server if client.
-            if (!PlatformIsClient())
+            if (_syncAuthority == SyncProperties.None)
                 return;
             //Not authoritative client.
             if (!PlatformHasAuthority())
                 return;
 
-            SyncProperties sp = ReturnDifferentProperties(_clientSyncData);
+            SyncProperties sp = ReturnDifferentPropertiesClient(_clientSyncData, null);
+            
+            // Debug.Log(sp);
 
             bool useReliable = _reliable;
             if (!CanSendProperties(ref sp, ref _clientSettleSent, ref useReliable))
                 return;
             //Add additional sync properties.
-            ApplyRequiredSyncProperties(ref sp);
+            ApplyRequiredSyncPropertiesClient(ref sp);
 
             /* This only applies if using interval but
              * add anyway since the math operation is fast. */
@@ -405,12 +450,32 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
                 TargetTransform.GetPosition(UseLocalSpace), TargetTransform.GetRotation(UseLocalSpace), TargetTransform.GetScale());
 
             _lastClientSentSequenceId += 1;
+            
+            // Debug.Log(sp);
 
-            //send to clients.
+            //send to server.
             if (useReliable)
                 CmdSendSyncDataReliable(_clientSyncData);
             else
                 CmdSendSyncDataUnreliable(_clientSyncData);
+        }
+
+        private void ExcludeServerAuthority(ref SyncProperties sp)
+        {
+            if ((_syncAuthority & SyncProperties.Position) == SyncProperties.Position)
+                sp |= SyncProperties.Position;
+            else
+                sp &= ~ SyncProperties.Position;
+            
+            if ((_syncAuthority & SyncProperties.Rotation) == SyncProperties.Rotation)
+                sp |= SyncProperties.Rotation;
+            else
+                sp &= ~ SyncProperties.Rotation;
+            
+            if ((_syncAuthority & SyncProperties.Scale) == SyncProperties.Scale)
+                sp |= SyncProperties.Scale;
+            else
+                sp &= ~ SyncProperties.Scale;
         }
 
         /// <summary>
@@ -418,6 +483,10 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
         /// </summary>
         private void CheckSendToClients()
         {
+            //Only send to clients if server.
+            if (!PlatformIsServer())
+                return;
+            
             //Timed interval.
             if (_intervalType == IntervalTypes.Timed)
             {
@@ -433,10 +502,7 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
                 if (!Time.inFixedTimeStep)
                     return;
             }
-
-            //Only send to clients if server.
-            if (!PlatformIsServer())
-                return;
+            
 
             /* If server only or has authority then use transforms current position.
              * When server only client values are set immediately, but as client host
@@ -444,13 +510,16 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
              * sending the transforms current data we will send the goal data. This prevents
              * clients from receiving slower updates when running as a client host. */
             bool useServerSyncData = (_targetData == null);
+            
             SyncProperties sp;
             //Breaking if statements down for easier reading.
             if (useServerSyncData)
-                sp = ReturnDifferentProperties(_serverSyncData);
+                sp = ReturnDifferentPropertiesServer(_serverSyncData, null);
             //No authority and not server only.
             else
-                sp = ReturnDifferentProperties(_serverSyncData, _targetData);
+                sp = ReturnDifferentPropertiesServer(_serverSyncData, _targetData);
+            
+            
 
             bool useReliable = _reliable;
             if (!CanSendProperties(ref sp, ref _serverSettleSent, ref useReliable))
@@ -458,7 +527,7 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
 
             //Add additional sync properties.
             ApplyRequiredSyncProperties(ref sp);
-
+            
             /* This only applies if using interval but
             * add anyway since the math operation is fast. */
             _nextServerSendTime = Time.time + _synchronizeInterval;
@@ -505,6 +574,20 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
             }
         }
 
+        private void ApplyRequiredSyncPropertiesClient(ref SyncProperties sp)
+        {
+            //If not reliable must send everything that is generally synchronized.
+            if (!_reliable)
+            {
+                sp |= (ReturnConfiguredSynchronizedPropertiesClient() | SyncProperties.Sequenced);
+            }
+            //If has settled then must include all transform values to ensure a perfect match.
+            else if (EnumContains.SyncPropertiesContains(sp, SyncProperties.Settled))
+            {
+                sp |= ReturnConfiguredSynchronizedPropertiesClient();
+            }
+        }
+
         /// <summary>
         /// Returns properties which are configured to be synchronized.
         /// </summary>
@@ -522,6 +605,38 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
 
             return sp;
         }
+        
+        private SyncProperties ReturnConfiguredSynchronizedPropertiesClient()
+        {
+            SyncProperties sp = SyncProperties.None;
+
+            if (_synchronizePosition == SynchronizeTypes.Normal)
+                sp |= SyncProperties.Position & _syncAuthority;
+            if (_synchronizeRotation == SynchronizeTypes.Normal)
+                sp |= SyncProperties.Rotation& _syncAuthority;
+            if (_synchronizeScale == SynchronizeTypes.Normal)
+                sp |= SyncProperties.Scale& _syncAuthority;
+
+            return sp;
+        }
+        
+        // private SyncProperties ReturnConfiguredSynchronizedPropertiesServer()
+        // {
+        //     SyncProperties sp = SyncProperties.None;
+        //
+        //     if (_synchronizePosition == SynchronizeTypes.Normal)
+        //         sp |= SyncProperties.Position;
+        //     if (_synchronizeRotation == SynchronizeTypes.Normal)
+        //         sp |= SyncProperties.Rotation;
+        //     if (_synchronizeScale == SynchronizeTypes.Normal)
+        //         sp |= SyncProperties.Scale;
+        //     
+        //     sp &= ~ (_syncAuthority & SyncProperties.Position);
+        //     sp &= ~ (_syncAuthority & SyncProperties.Rotation);
+        //     sp &= ~ (_syncAuthority & SyncProperties.Scale);
+        //
+        //     return sp;
+        // }
 
         /// <summary>
         /// Returns if data updates should send based on SyncProperties, Reliable, and send history.
@@ -597,6 +712,47 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
             return sp;
         }
 
+        private SyncProperties ReturnDifferentPropertiesClient(TransformSyncData data, TargetSyncData targetData)
+        {
+            if (data == null)
+                return (SyncProperties.Position & _syncAuthority |
+                        SyncProperties.Rotation & _syncAuthority |
+                        SyncProperties.Scale & _syncAuthority);
+            
+            SyncProperties sp = SyncProperties.None;
+            
+            if (_synchronizePosition == SynchronizeTypes.Normal && !PositionMatches(data, targetData, _preciseSynchronization))
+                sp |= SyncProperties.Position & _syncAuthority;
+            if (_synchronizeRotation == SynchronizeTypes.Normal && !RotationMatches(data, targetData, _preciseSynchronization))
+                sp |= SyncProperties.Rotation & _syncAuthority;
+            if (_synchronizeScale == SynchronizeTypes.Normal && !ScaleMatches(data, targetData, _preciseSynchronization))
+                sp |= SyncProperties.Scale & _syncAuthority;
+
+            return sp;
+        }
+        
+        private SyncProperties ReturnDifferentPropertiesServer(TransformSyncData data, TargetSyncData targetData)
+        {
+            //Data is null, so it's definitely not a match.
+            if (data == null)
+                return (SyncProperties.Position | SyncProperties.Rotation | SyncProperties.Scale);
+
+            SyncProperties sp = SyncProperties.None;
+
+            if (_synchronizePosition == SynchronizeTypes.Normal && !PositionMatches(data, targetData, _preciseSynchronization))
+                sp |= SyncProperties.Position;
+            if (_synchronizeRotation == SynchronizeTypes.Normal && !RotationMatches(data, targetData, _preciseSynchronization))
+                sp |= SyncProperties.Rotation;
+            if (_synchronizeScale == SynchronizeTypes.Normal && !ScaleMatches(data, targetData, _preciseSynchronization))
+                sp |= SyncProperties.Scale;
+
+            sp &= ~ (_syncAuthority & SyncProperties.Position);
+            sp &= ~ (_syncAuthority & SyncProperties.Rotation);
+            sp &= ~ (_syncAuthority & SyncProperties.Scale);
+            
+            return sp;
+        }
+
         /// <summary>
         /// Moves towards TargetSyncData.
         /// </summary>
@@ -615,12 +771,12 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
                 _targetData = null;
                 return;
             }
-            //Client authority, don't need to synchronize with self.
-            if (PlatformHasAuthority() && _clientAuthoritative)
-                return;
-            //Not client authority but also not synchronize to owner.
-            if (PlatformHasAuthority() && !_clientAuthoritative && !_synchronizeToOwner)
-                return;
+            // //Client authority, don't need to synchronize with self.
+            // if (PlatformHasAuthority() && _clientAuthoritative)
+            //     return;
+            // //Not client authority but also not synchronize to owner.
+            // if (PlatformHasAuthority() && !_clientAuthoritative && !_synchronizeToOwner)
+            //     return;
 
             bool extrapolate = (_targetData.Extrapolation != null && _targetData.Extrapolation.Remaining > 0f);
             //Already at the correct position and no more remaining extrapolation to use.
@@ -767,12 +923,13 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
         /// </summary>
         /// <param name="data"></param>
 #if MIRROR
-        [Command(channel = 0)]
+        [Command(channel = 0, ignoreAuthority = true)]
 #elif MIRRORNG
         [ServerRpc(channel = 0)]
 #endif
         private void CmdSendSyncDataReliable(TransformSyncData data)
         {
+            Debug.Log("Client data received");
             ClientDataReceived(data);
         }
         /// <summary>
@@ -780,7 +937,7 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
         /// </summary>
         /// <param name="data"></param>
 #if MIRROR
-        [Command(channel = 1)]
+        [Command(channel = 1, ignoreAuthority = true)]
 #elif MIRRORNG
         [ServerRpc(channel = 1)]
 #endif
@@ -790,7 +947,7 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
         }
 
         /// <summary>
-        /// Called on clients when server data is received.
+        /// Called on server when client data is received.
         /// </summary>
         /// <param name="data"></param>
         [Server]
@@ -802,8 +959,17 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
             if (OutOfSequence(data, ref _lastClientReceivedSequenceId))
                 return;
 
-            //Fill in missing data for properties that werent included in send.
-            FillMissingData(data, _targetData);
+            if (_syncAuthority != SyncProperties.None)
+            {
+                // Данные могут прийти с частичными изменениями, под влиянием клиента.
+                FillMissingDataServer(data, _targetData);
+            }
+            else
+            {
+                //Fill in missing data for properties that werent included in send.
+                FillMissingData(data, _targetData);
+            }
+            
 
             if (OnClientDataReceived != null)
             {
@@ -1074,29 +1240,29 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
             if (PlatformIsServer())
                 return;
 
+            if (OutOfSequence(data, ref _lastServerReceivedSequenceId))
+            {
+                Debug.Log("Out of sequence");
+                return;
+            }
+
             //If owner of object.
             if (PlatformHasAuthority())
             {
-                //Client authoritative, already in sync.
-                if (_clientAuthoritative)
-                    return;
-                //Not client authoritative, but also not sync to owner.
-                if (!_clientAuthoritative && !_synchronizeToOwner)
-                    return;
+                //Fill in missing data for properties that werent included in send.
+                FillMissingDataClient(data, _targetData);
             }
-
-            if (OutOfSequence(data, ref _lastServerReceivedSequenceId))
-                return;
-
-            //Fill in missing data for properties that werent included in send.
-            FillMissingData(data, _targetData);
+            else
+            {
+                //Fill in missing data for properties that werent included in send.
+                FillMissingData(data, _targetData);
+            }
 
             ExtrapolationData extrapolation = null;
             MoveRateData moveRates;
             //If teleporting set move rates to be instantaneous.
             if (ShouldTeleport(data))
             {
-
                 moveRates = SetInstantMoveRates();
             }
             //If not teleporting calculate extrapolation and move rates.
@@ -1106,7 +1272,7 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
                 moveRates = SetMoveRates(data);
             }
 
-            ApplyTransformSnapping(data, false);
+            // ApplyTransformSnapping(data, false);
             _targetData = new TargetSyncData(data, moveRates, extrapolation);
         }
 
@@ -1139,6 +1305,76 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
             if (!EnumContains.SyncPropertiesContains(sp, SyncProperties.Scale))
             {
                 if (targetSyncData == null)
+                    data.Scale = TargetTransform.GetScale();
+                else
+                    data.Scale = targetSyncData.GoalData.Scale;
+            }
+            
+            Debug.Log($"DATA AFTER FILL POS {data.Position}");
+        }
+
+        private void FillMissingDataClient(TransformSyncData data, TargetSyncData targetSyncData)
+        {
+            SyncProperties sp = (SyncProperties)data.SyncProperties;
+            
+            Debug.Log($"SERVER SP {sp}");
+            //Position wasn't included.
+            if (!EnumContains.SyncPropertiesContains(sp, SyncProperties.Position))
+            {
+                if (targetSyncData == null || 
+                    EnumContains.SyncPropertiesContains(_syncAuthority, SyncProperties.Position))
+                    data.Position = TargetTransform.GetPosition(UseLocalSpace);
+                else
+                    data.Position = targetSyncData.GoalData.Position;
+            }
+            //Rotation wasn't included.
+            if (!EnumContains.SyncPropertiesContains(sp, SyncProperties.Rotation))
+            {
+                if (targetSyncData == null || 
+                    EnumContains.SyncPropertiesContains(_syncAuthority, SyncProperties.Rotation))
+                    data.Rotation = TargetTransform.GetRotation(UseLocalSpace);
+                else
+                    data.Rotation = targetSyncData.GoalData.Rotation;
+            }
+            //Scale wasn't included.
+            if (!EnumContains.SyncPropertiesContains(sp, SyncProperties.Scale))
+            {
+                if (targetSyncData == null || 
+                    EnumContains.SyncPropertiesContains(_syncAuthority, SyncProperties.Scale))
+                    data.Scale = TargetTransform.GetScale();
+                else
+                    data.Scale = targetSyncData.GoalData.Scale;
+            }
+        }
+
+        private void FillMissingDataServer(TransformSyncData data, TargetSyncData targetSyncData)
+        {
+            SyncProperties sp = (SyncProperties)data.SyncProperties;
+            
+            Debug.Log(sp);
+            //Position wasn't included.
+            if (!EnumContains.SyncPropertiesContains(sp, SyncProperties.Position))
+            {
+                if (targetSyncData == null || 
+                    EnumContains.SyncPropertiesContains(_syncAuthority, SyncProperties.Position))
+                    data.Position = TargetTransform.GetPosition(UseLocalSpace);
+                else
+                    data.Position = targetSyncData.GoalData.Position;
+            }
+            //Rotation wasn't included.
+            if (!EnumContains.SyncPropertiesContains(sp, SyncProperties.Rotation))
+            {
+                if (targetSyncData == null || 
+                    EnumContains.SyncPropertiesContains(_syncAuthority, SyncProperties.Rotation))
+                    data.Rotation = TargetTransform.GetRotation(UseLocalSpace);
+                else
+                    data.Rotation = targetSyncData.GoalData.Rotation;
+            }
+            //Scale wasn't included.
+            if (!EnumContains.SyncPropertiesContains(sp, SyncProperties.Scale))
+            {
+                if (targetSyncData == null || 
+                    EnumContains.SyncPropertiesContains(_syncAuthority, SyncProperties.Scale))
                     data.Scale = TargetTransform.GetScale();
                 else
                     data.Scale = targetSyncData.GoalData.Scale;

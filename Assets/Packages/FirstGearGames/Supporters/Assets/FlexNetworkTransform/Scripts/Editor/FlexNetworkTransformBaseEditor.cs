@@ -24,6 +24,10 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms.Editors
         private SerializedProperty _clientAuthoritative;
         private SerializedProperty _synchronizeToOwner;
 
+        private SerializedProperty _positionAuthoritative;
+        private SerializedProperty _rotationAuthoritative;
+        private SerializedProperty _scaleAuthoritative;
+
 
         private SerializedProperty _synchronizePosition;
         private SerializedProperty _snapPosition;
@@ -51,6 +55,10 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms.Editors
 
             _clientAuthoritative = serializedObject.FindProperty("_clientAuthoritative");
             _synchronizeToOwner = serializedObject.FindProperty("_synchronizeToOwner");
+
+            _positionAuthoritative = serializedObject.FindProperty("_positionAuthoritative");
+            _rotationAuthoritative = serializedObject.FindProperty("_rotationAuthoritative");
+            _scaleAuthoritative = serializedObject.FindProperty("_scaleAuthoritative");
 
             _synchronizePosition = serializedObject.FindProperty("_synchronizePosition");
             _snapPosition = serializedObject.FindProperty("_snapPosition");
@@ -128,6 +136,11 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms.Editors
                 EditorGUILayout.PropertyField(_synchronizeToOwner, new GUIContent("Synchronize To Owner", "True to synchronize server results back to owner. Typically used when you are sending inputs to the server and are relying on the server response to move the transform."));
                 EditorGUI.indentLevel--;
             }
+
+            EditorGUILayout.PropertyField(_positionAuthoritative, new GUIContent("Client position Authority"));
+            EditorGUILayout.PropertyField(_rotationAuthoritative, new GUIContent("Client rotation Authority"));
+            EditorGUILayout.PropertyField(_scaleAuthoritative, new GUIContent("Client scale Authority"));
+            
             EditorGUI.indentLevel--;
             EditorGUILayout.Space();
 
@@ -165,8 +178,10 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms.Editors
                 data.SetSnapPosition((Axes)_snapPosition.intValue);
                 data.SetSnapRotation((Axes)_snapRotation.intValue);
                 data.SetSnapScale((Axes)_snapScale.intValue);
+                
+                data.SetupAuthority();
             }
-
+            
             serializedObject.ApplyModifiedProperties();
         }
     }

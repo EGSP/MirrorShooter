@@ -36,8 +36,15 @@ namespace Game.Entities
         /// Кешированное значение поворота камеры.
         /// </summary>
         private Quaternion _cachedCameraRotation;
-        
-        
+
+        public override void AwakeOnClient()
+        {
+            if(CameraRoot == null)
+                throw new NullReferenceException();
+            
+            _cachedCameraRotation = CameraRoot.localRotation;
+        }
+
         public override void AwakeOnServer()
         {
             if(CameraRoot == null)
@@ -70,12 +77,29 @@ namespace Game.Entities
         }
 
         /// <summary>
+        /// Вращение на стороне клиента.
+        /// </summary>
+        [Client]
+        public void RotateX(float deltaRotationX)
+        {
+            // Поворот камеры относительно тела.
+            _cameraVerticalRotation += deltaRotationX;
+            // Ограничение поворота по вертикали.
+            _cameraVerticalRotation = Mathf.Clamp(_cameraVerticalRotation,
+                -CameraVerticalRotationClamp, CameraVerticalRotationClamp); 
+            
+            // Новое вращение камеры.
+            _cachedCameraRotation = Quaternion.Euler(_cameraVerticalRotation, 0, 0);
+            // Вращаем корневой объект.
+            CameraRoot.localRotation = _cachedCameraRotation;
+        }
+
+        /// <summary>
         /// Поворот камеры по оси Х.
         /// </summary>
         [Command(ignoreAuthority = true)]
         public void CmdRotateX(float deltaRotationX)
         {
-            Debug.Log("CMD_CAMERA");
             // Поворот камеры относительно тела.
             _cameraVerticalRotation += deltaRotationX;
             // Ограничение поворота по вертикали.

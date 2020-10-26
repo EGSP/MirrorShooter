@@ -16,7 +16,14 @@ namespace Game.Entities
         public Transform BodyTransform { get; private set; }
 
         private Quaternion _cachedBodyRotation;
-        
+
+        public override void AwakeOnClient()
+        {
+            if(BodyTransform == null)
+                throw new NullReferenceException();
+
+            _cachedBodyRotation = BodyTransform.rotation;
+        }
 
         public override void AwakeOnServer()
         {
@@ -26,10 +33,25 @@ namespace Game.Entities
             _cachedBodyRotation = BodyTransform.rotation;
         }
 
+        /// <summary>
+        /// Вращение тела у клиента.
+        /// </summary>
+        [Client]
+        public void RotateY(float deltaRotationY)
+        {
+            // Новое вращение тела
+            _cachedBodyRotation *= Quaternion.Euler(0, deltaRotationY, 0);
+            
+            // Поворот тела
+            BodyTransform.rotation = _cachedBodyRotation;
+        }
+
+        /// <summary>
+        /// Вращение тела на сервере.
+        /// </summary>
         [Command(ignoreAuthority = true)]
         public void CmdRotateY(float deltaRotationY)
         {
-            Debug.Log("CMD_BODY");
             // Новое вращение тела
             _cachedBodyRotation *= Quaternion.Euler(0, deltaRotationY, 0);
             
