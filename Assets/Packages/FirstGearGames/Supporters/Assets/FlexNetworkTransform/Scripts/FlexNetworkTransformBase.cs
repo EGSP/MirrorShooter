@@ -319,7 +319,15 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
         {
             CheckSendToServer();
             CheckSendToClients();
-            MoveTowardsTargetSyncData();
+
+            if (PlatformIsServer())
+            {
+                MoveTowardsTargetSyncDataServer();
+            }
+            else
+            {
+                MoveTowardsTargetSyncDataClient();
+            }
         }
 
         private void FixedUpdate()
@@ -822,6 +830,137 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
             if (extrapolate)
                 _targetData.Extrapolation.Remaining -= Time.deltaTime;
         }
+
+        private void MoveTowardsTargetSyncDataClient()
+        {
+            if (_targetData == null)
+                return;
+            
+            bool extrapolate = (_targetData.Extrapolation != null && _targetData.Extrapolation.Remaining > 0f);
+            //Already at the correct position and no more remaining extrapolation to use.
+            if (SyncDataMatchesTransform(_targetData.GoalData, true) && !extrapolate)
+                return;
+
+            if(!EnumContains.SyncPropertiesContains(_syncAuthority, SyncProperties.Position))
+            {
+                //Position
+                if (_targetData.MoveRates.Position == -1f)
+                {
+                    TargetTransform.SetPosition(UseLocalSpace, _targetData.GoalData.Position);
+                }
+                else
+                {
+                    Vector3 positionGoal =
+                        (extrapolate) ? _targetData.Extrapolation.Position : _targetData.GoalData.Position;
+                    TargetTransform.SetPosition(UseLocalSpace,
+                        Vector3.MoveTowards(TargetTransform.GetPosition(UseLocalSpace), positionGoal,
+                            _targetData.MoveRates.Position * Time.deltaTime)
+                    );
+                }
+            }
+
+            if (!EnumContains.SyncPropertiesContains(_syncAuthority, SyncProperties.Rotation))
+            {
+                //Rotation.
+                if (_targetData.MoveRates.Rotation == -1f)
+                {
+                    TargetTransform.SetRotation(UseLocalSpace, _targetData.GoalData.Rotation);
+                }
+                else
+                {
+                    TargetTransform.SetRotation(UseLocalSpace,
+                        Quaternion.RotateTowards(TargetTransform.GetRotation(UseLocalSpace),
+                            _targetData.GoalData.Rotation, _targetData.MoveRates.Rotation * Time.deltaTime)
+                    );
+                }
+            }
+
+            if (!EnumContains.SyncPropertiesContains(_syncAuthority, SyncProperties.Scale))
+            {
+                //Scale.
+                if (_targetData.MoveRates.Scale == -1f)
+                {
+                    TargetTransform.SetScale(_targetData.GoalData.Scale);
+                }
+                else
+                {
+                    TargetTransform.SetScale(
+                        Vector3.MoveTowards(TargetTransform.GetScale(), _targetData.GoalData.Scale,
+                            _targetData.MoveRates.Scale * Time.deltaTime)
+                    );
+                }
+            }
+
+            //Remove from remaining extrapolation time.
+            if (extrapolate)
+                _targetData.Extrapolation.Remaining -= Time.deltaTime;
+        }
+
+        private void MoveTowardsTargetSyncDataServer()
+        {
+            if (_targetData == null)
+                return;
+            
+            bool extrapolate = (_targetData.Extrapolation != null && _targetData.Extrapolation.Remaining > 0f);
+            //Already at the correct position and no more remaining extrapolation to use.
+            if (SyncDataMatchesTransform(_targetData.GoalData, true) && !extrapolate)
+                return;
+
+            if(EnumContains.SyncPropertiesContains(_syncAuthority, SyncProperties.Position))
+            {
+                //Position
+                if (_targetData.MoveRates.Position == -1f)
+                {
+                    TargetTransform.SetPosition(UseLocalSpace, _targetData.GoalData.Position);
+                }
+                else
+                {
+                    Vector3 positionGoal =
+                        (extrapolate) ? _targetData.Extrapolation.Position : _targetData.GoalData.Position;
+                    TargetTransform.SetPosition(UseLocalSpace,
+                        Vector3.MoveTowards(TargetTransform.GetPosition(UseLocalSpace), positionGoal,
+                            _targetData.MoveRates.Position * Time.deltaTime)
+                    );
+                }
+            }
+
+            if (EnumContains.SyncPropertiesContains(_syncAuthority, SyncProperties.Rotation))
+            {
+                //Rotation.
+                if (_targetData.MoveRates.Rotation == -1f)
+                {
+                    TargetTransform.SetRotation(UseLocalSpace, _targetData.GoalData.Rotation);
+                }
+                else
+                {
+                    TargetTransform.SetRotation(UseLocalSpace,
+                        Quaternion.RotateTowards(TargetTransform.GetRotation(UseLocalSpace),
+                            _targetData.GoalData.Rotation, _targetData.MoveRates.Rotation * Time.deltaTime)
+                    );
+                }
+            }
+
+            if (EnumContains.SyncPropertiesContains(_syncAuthority, SyncProperties.Scale))
+            {
+                //Scale.
+                if (_targetData.MoveRates.Scale == -1f)
+                {
+                    TargetTransform.SetScale(_targetData.GoalData.Scale);
+                }
+                else
+                {
+                    TargetTransform.SetScale(
+                        Vector3.MoveTowards(TargetTransform.GetScale(), _targetData.GoalData.Scale,
+                            _targetData.MoveRates.Scale * Time.deltaTime)
+                    );
+                }
+            }
+
+            //Remove from remaining extrapolation time.
+            if (extrapolate)
+                _targetData.Extrapolation.Remaining -= Time.deltaTime;
+        }
+        
 
 
         /// <summary>
