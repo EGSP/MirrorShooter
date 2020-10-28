@@ -129,6 +129,12 @@ namespace Mirror
         /// <remarks>
         /// </remarks>
         public bool isClient { get; internal set; }
+        
+        /// <summary>
+        /// Указывает на то, является ли объект локальным представлением игрока.
+        /// Устанавливается вручную.
+        /// </summary>
+        public bool isLocalRepresenter { get; set; }
 
         public enum ApplicationModeType
         {

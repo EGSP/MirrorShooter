@@ -14,6 +14,11 @@ namespace Game.Entities
         /// </summary>
         [OdinSerialize] 
         public Transform BodyTransform { get; private set; }
+        
+        /// <summary>
+        /// Физический компонент тела.
+        /// </summary>
+        public Rigidbody Rigidbody { get; private set; }
 
         private Quaternion _cachedBodyRotation;
 
@@ -31,6 +36,14 @@ namespace Game.Entities
                 throw new NullReferenceException();
 
             _cachedBodyRotation = BodyTransform.rotation;
+        }
+
+        /// <summary>
+        /// Устанавливает физическое тело.
+        /// </summary>
+        public void SetRigidBody(Rigidbody rigidbody)
+        {
+            Rigidbody = rigidbody;
         }
 
         /// <summary>

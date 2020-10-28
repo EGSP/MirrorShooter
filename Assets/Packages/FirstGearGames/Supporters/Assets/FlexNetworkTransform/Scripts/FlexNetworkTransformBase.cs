@@ -320,13 +320,25 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
             CheckSendToServer();
             CheckSendToClients();
 
+            
             if (PlatformIsServer())
             {
                 MoveTowardsTargetSyncDataServer();
             }
             else
             {
-                MoveTowardsTargetSyncDataClient();
+                // Локальный игрок.
+                if (netIdentity.isLocalRepresenter)
+                {
+                    // Учитывает ограничители.
+                    MoveTowardsTargetSyncDataClient();
+                }
+                else
+                {
+                    // Не учитывает ограничители.
+                    MoveTowardsTargetSyncData();
+                }
+                
             }
         }
 
@@ -522,10 +534,10 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
             SyncProperties sp;
             //Breaking if statements down for easier reading.
             if (useServerSyncData)
-                sp = ReturnDifferentPropertiesServer(_serverSyncData, null);
+                sp = ReturnDifferentProperties(_serverSyncData, null);
             //No authority and not server only.
             else
-                sp = ReturnDifferentPropertiesServer(_serverSyncData, _targetData);
+                sp = ReturnDifferentProperties(_serverSyncData, _targetData);
             
             
 

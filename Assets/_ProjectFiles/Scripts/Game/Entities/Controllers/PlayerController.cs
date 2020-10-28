@@ -61,7 +61,9 @@ namespace Game.Entities
             if (NetworkIdentity.spawned.TryGetValue(newEntity, out NetworkIdentity identity))
             {
                 _playerEntity = identity.GetComponent<PlayerEntity>();
+                // _playerEntity.BodyEntity.Rigidbody.isKinematic = true;
                 _playerEntity.netIdentity.hasAuthority = true;
+                _playerEntity.netIdentity.isLocalRepresenter = true;
 
                 if (LaunchInfo.LaunchMode == LaunchModeType.Client)
                     _playerEntity.CameraEntity.SetCamera(Camera.main);

@@ -22,12 +22,22 @@ namespace Game.Entities
         [FoldoutGroup("User", 100)]
         [SyncVar] public User owner;
 
+        public override void AwakeOnClient()
+        {
+            var rigidBody = GetComponent<Rigidbody>();
+            if(rigidBody == null)
+                throw new NullReferenceException();
+            
+            BodyEntity.SetRigidBody(rigidBody);
+        }
 
         public override void AwakeOnServer()
         {
             var rigidBody = GetComponent<Rigidbody>();
             if(rigidBody == null)
                 throw new NullReferenceException();
+            
+            BodyEntity.SetRigidBody(rigidBody);
             
             MoveModule.Initialize(this);
             MoveModule.SetRigidBody(rigidBody);
