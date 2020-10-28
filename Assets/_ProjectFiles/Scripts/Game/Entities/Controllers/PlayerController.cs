@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using Game.Configuration;
 using Game.Net.Objects;
 using Mirror;
 using UnityEngine;
 
-namespace Game.Entities
+namespace Game.Entities.Controllers
 {
     public class PlayerController : DualNetworkBehaviour
     {
@@ -14,6 +15,15 @@ namespace Game.Entities
         public uint playerEntityId;
 
         private PlayerEntity _playerEntity;
+
+        // SERVER_SIDE
+        private PlayerInputManager _playerInputManager;
+
+        public override void AwakeOnServer()
+        {
+            if (_playerInputManager == null)
+                _playerInputManager = new PlayerInputManager();
+        }
 
         public override void UpdateOnClient()
         {
@@ -32,29 +42,70 @@ namespace Game.Entities
             
             if(horizontalDelta != 0 || verticalDelta != 0)
                 CmdMoveBody(horizontalDelta, verticalDelta);
+            
+            // Здесь нужно формировать лист из нажаты= отжатых кнопок и отправлять его.
+
+            var newDown = new List<int>();
+            var newUp = new List<int>();
+            
+            if (Input.GetKeyUp(KeyCode.LeftShift))
+            {
+                newUp.Add((int)KeyCode.LeftShift);
+            }
+            
+            if (Input.GetKeyDown(KeyCode.LeftShift))
+            {
+                newDown.Add((int)KeyCode.LeftShift);
+            }
+            
+            CmdHandleUpKeys(newUp);
+            CmdHandleDownKeys(newDown);
+        }
+
+        [Server]
+        public override void LateUpdateOnServer()
+        { 
+            _playerInputManager.LateUpdate(Time.deltaTime);
         }
 
         [Client]
         private void RotateCamera(float rotationX)
         {
             _playerEntity.CameraEntity.RotateX(rotationX);
-            // _playerEntity.CameraEntity.CmdRotateX(rotationX);
         }
 
         [Client]
         private void RotateBody(float rotationY)
         {
             _playerEntity.BodyEntity.RotateY(rotationY);
-            // _playerEntity.BodyEntity.CmdRotateY(rotationY);
         }
 
-        // Заменить на модуль 
         [Command(ignoreAuthority = true)]
         private void CmdMoveBody(float horDelta, float verDelta)
         {
             Debug.Log("CMD_MOVE");
             _playerEntity.MoveModule.Move(horDelta, verDelta);
         }
+
+        [Command(ignoreAuthority = true)]
+        private void CmdHandleUpKeys(List<int> keyCodes)
+        {
+            for (int i = 0; i < keyCodes.Count; i++)
+            {
+                _playerInputManager.NewUp((KeyCode)keyCodes[i]);
+            }
+        }
+
+        [Command(ignoreAuthority = true)]
+        private void CmdHandleDownKeys(List<int> keyCodes)
+        {
+            for (int i = 0; i < keyCodes.Count; i++)
+            {
+                _playerInputManager.NewDown((KeyCode)keyCodes[i]);
+            }
+        }
+        
+        
         
         public void OnEntityChanged(uint _, uint newEntity)
         {
@@ -76,8 +127,10 @@ namespace Game.Entities
 
         [Server]
         public void SetPlayerEntity(PlayerEntity playerEntity)
-        {
+        {   
             _playerEntity = playerEntity;
+
+            playerEntity.SetInput(_playerInputManager);
             // _playerEntity.netIdentity.hasAuthority = true;
         }
         

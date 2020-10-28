@@ -19,6 +19,10 @@
         
         void FixedUpdateOnServer();
 
+        void LateUpdateOnClient();
+
+        void LateUpdateOnServer();
+
         void AwakeOnClient();
 
         void AwakeOnServer();

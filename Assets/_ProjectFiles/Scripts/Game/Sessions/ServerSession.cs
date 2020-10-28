@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Game.Entities;
+using Game.Entities.Controllers;
 using Game.Net;
 using Game.World;
 using Gasanov.Extensions.Linq;

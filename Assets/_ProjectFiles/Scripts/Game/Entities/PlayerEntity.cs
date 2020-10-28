@@ -1,4 +1,5 @@
 ﻿using System;
+using Game.Entities.Controllers;
 using Game.Entities.Modules;
 using Game.Net;
 using Game.Net.Objects;
@@ -21,7 +22,10 @@ namespace Game.Entities
 
         [FoldoutGroup("User", 100)]
         [SyncVar] public User owner;
-
+        
+        // SERVER
+        private PlayerInputManager _playerInputManager;
+        
         public override void AwakeOnClient()
         {
             var rigidBody = GetComponent<Rigidbody>();
@@ -31,6 +35,13 @@ namespace Game.Entities
             BodyEntity.SetRigidBody(rigidBody);
         }
 
+        public void SetInput(PlayerInputManager playerInputManager)
+        {
+            _playerInputManager = playerInputManager;
+
+            MoveModule.PlayerInputManager = _playerInputManager;
+        }
+        
         public override void AwakeOnServer()
         {
             var rigidBody = GetComponent<Rigidbody>();
@@ -40,7 +51,7 @@ namespace Game.Entities
             BodyEntity.SetRigidBody(rigidBody);
             
             MoveModule.Initialize(this);
-            MoveModule.SetRigidBody(rigidBody);
+            MoveModule.Setup(rigidBody);
         }
     }
 }

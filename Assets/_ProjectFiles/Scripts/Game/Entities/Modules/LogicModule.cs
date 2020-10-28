@@ -63,6 +63,11 @@ namespace Game.Entities.Modules
             _cachedUpdateManager.FixedUpdateMe(this);
         }
 
+        private void LateUpdate()
+        {
+            _cachedUpdateManager.LateUpdateMe(this);
+        }
+
         private void Enable()
         {
             AcceptHook(_hook);
@@ -88,6 +93,14 @@ namespace Game.Entities.Modules
         }
 
         public virtual void FixedUpdateOnServer()
+        {
+        }
+
+        public virtual void LateUpdateOnClient()
+        {
+        }
+
+        public virtual void LateUpdateOnServer()
         {
         }
 

@@ -14,25 +14,35 @@ namespace Game.Processors
     {
 
         private readonly RigidBodyData _rigidBodyData;
-        private readonly MoveData _moveData;
 
         /// <summary>
         /// Просчитывает направление движние.
         /// </summary>
         public readonly QueueProceeder<Vector3> DirectionProceeder;
+
+        /// <summary>
+        /// Просчитывает модификаторы данных ходьбы.
+        /// </summary>
+        public readonly Proceeder<MoveData> MoveProceeder;
+
+        /// <summary>
+        /// Процесс, отвечающий за движение.
+        /// </summary>
+        private readonly MoveProcess _moveProcess;
+        private readonly MoveData _moveData;
         
         public RigMoveProcessor(RigidBodyData rigidBodyData, MoveData moveData) : base()
         {
-            InsertData(rigidBodyData);
-            InsertData(moveData);
-
             _rigidBodyData = rigidBodyData;
             _moveData = moveData;
-
-            DirectionProceeder = new QueueProceeder<Vector3>(
-                (_old, _new) => _old + _new);
             
-            AppendProcess(new MoveProcess());
+            InsertData(rigidBodyData);
+            
+            DirectionProceeder = new QueueProceeder<Vector3>((_old, _new) => _old + _new);
+            MoveProceeder = new Proceeder<MoveData>();
+            
+            _moveProcess = new MoveProcess();
+            _moveProcess.LookForData(DataBlocks);
         }
 
         public override void Tick()
@@ -41,10 +51,26 @@ namespace Game.Processors
             
             // Получение направления движения
             _moveData.Direction = DirectionProceeder.Proceed();
+
+            // Подключение модификаторов.
+            var modifiedMoveData = MoveProceeder.Proceed(_moveData);
+            
+            _moveProcess.Process(modifiedMoveData);
             
             // Запуск процессов
             base.Tick();
             DataReadAvailable();
+        }
+
+        public void AddMoveDataModifier(IProcess<MoveData> modifier)
+        {
+            MoveProceeder.AppendProcess(modifier);
+        }
+
+        public void RemoveMoveDataModifier<TProcess>()
+            where TProcess : IProcess<MoveData>
+        {
+            MoveProceeder.RemoveProcesses<TProcess>();
         }
     }
     
@@ -62,7 +88,7 @@ namespace Game.Processors
     }
 
     [Serializable]
-    public class MoveData : DataBlock
+    public class MoveData : DataBlock, ICloneable<MoveData>
     {
         /// <summary>
         /// Скорость передвижения.
@@ -79,29 +105,50 @@ namespace Game.Processors
         /// Вектор движения.
         /// </summary>
         public Vector3 Direction { get; set; }
+
+        public MoveData Clone()
+        {
+            var clone = new MoveData();
+            clone.Speed = Speed;
+            clone.Direction = Direction;
+            clone.FixedDeltaTime = FixedDeltaTime;
+            return clone;
+        }
     }
-    
-    [Serializable]
-    public class MoveProcess : ProcessBase
-    {   
-        [SerializeField]
-        private MoveData _moveData;
-        [SerializeField]
+
+    public class MoveProcess : ProcessBase<MoveData>
+    {
         private RigidBodyData _rigidBodyData;
 
-        public override void Process()
+        public override void Process(MoveData dataBlock)
         {
-            if (DataNullOrDisposed(_moveData, _rigidBodyData))
+            // Debug.Log("MOVE_PROCESS");
+            if (DataNullOrDisposed(dataBlock, _rigidBodyData))
                 return;
             
+            // Debug.Log($"MOVE_PROCESS_({dataBlock.Direction}, {dataBlock.Speed})");
             _rigidBodyData.Rigidbody.MovePosition(_rigidBodyData.Rigidbody.position +
-                                                  _moveData.Direction * _moveData.Speed * _moveData.FixedDeltaTime);
+                                                  dataBlock.Direction * dataBlock.Speed * dataBlock.FixedDeltaTime);
         }
+
 
         public override void LookForData(Dictionary<Type, DataBlock> data)
         {
-            TryGetData(data, ref _moveData);
             TryGetData(data, ref _rigidBodyData);
+        }
+    }
+
+    public class RunDataModifier : ProcessBase<MoveData>
+    {
+        private readonly float _speedModifier;
+        public RunDataModifier(float speedModifier)
+        {
+            _speedModifier = speedModifier;
+        }
+        
+        public override void Process(MoveData dataBlock)
+        {
+            dataBlock.Speed *= _speedModifier;
         }
     }
 }

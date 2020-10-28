@@ -401,18 +401,9 @@ MonoBehaviour:
     - Name: MoveSpeed
       Entry: 4
       Data: 5
-    - Name: MoveProcessor
-      Entry: 6
-      Data: 
-    - Name: _moveData
-      Entry: 7
-      Data: 1|Game.Processors.MoveData, Assembly-CSharp
-    - Name: Speed
+    - Name: RunSpeedModifier
       Entry: 4
-      Data: 0
-    - Name: 
-      Entry: 8
-      Data: 
+      Data: 1.87
     - Name: 
       Entry: 8
       Data: 

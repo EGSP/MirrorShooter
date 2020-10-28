@@ -1,5 +1,6 @@
 ﻿using System;
 using Game.Entities;
+using Game.Entities.Controllers;
 using Game.Net;
 using Mirror;
 using Sirenix.OdinInspector;

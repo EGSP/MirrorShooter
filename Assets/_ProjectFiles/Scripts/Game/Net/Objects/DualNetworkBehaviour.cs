@@ -38,6 +38,11 @@ namespace Game.Net.Objects
 
             OnFixedUpdateEvent();
         }
+        
+        private void LateUpdate()
+        {
+            _cachedUpdateManager.LateUpdateMe(this);
+        }
 
         private void OnEnable()
         {
@@ -68,6 +73,14 @@ namespace Game.Net.Objects
         }
 
         public virtual void FixedUpdateOnServer()
+        {
+        }
+
+        public virtual void LateUpdateOnClient()
+        {
+        }
+
+        public virtual void LateUpdateOnServer()
         {
         }
 

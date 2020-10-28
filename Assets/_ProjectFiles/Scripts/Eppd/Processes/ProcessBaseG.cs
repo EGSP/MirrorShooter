@@ -22,7 +22,9 @@ namespace Gasanov.Eppd.Processes
         
         public abstract void Process(TDataBlock dataBlock);
 
-        public abstract void LookForData(Dictionary<Type, DataBlock> data);
+        public virtual void LookForData(Dictionary<Type, DataBlock> data)
+        {
+        }
         
         /// <summary>
         /// Ищет блок данных в словаре, если текущее значение равно null.
