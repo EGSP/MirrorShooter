@@ -14,11 +14,12 @@ namespace Game.Entities
     {
         [BoxGroup("Body")]
         [OdinSerialize] public PlayerBodyEntity BodyEntity { get; private set; }
-        [BoxGroup("Body/Movement")]
-        [OdinSerialize] public PlayerMoveModule MoveModule { get; private set; }
 
         [BoxGroup("Camera")] 
         [OdinSerialize] public PlayerCameraEntity CameraEntity { get; private set; }
+        
+        [BoxGroup("Modules")]
+        [OdinSerialize] public PlayerMoveModule MoveModule { get; private set; }
 
         [FoldoutGroup("User", 100)]
         [SyncVar] public User owner;

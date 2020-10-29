@@ -395,21 +395,36 @@ MonoBehaviour:
     - Name: BodyEntity
       Entry: 10
       Data: 0
+    - Name: CameraEntity
+      Entry: 10
+      Data: 1
     - Name: MoveModule
       Entry: 7
       Data: 0|Game.Entities.Modules.PlayerMoveModule, Assembly-CSharp
     - Name: MoveSpeed
       Entry: 4
-      Data: 5
+      Data: 3
     - Name: RunSpeedModifier
       Entry: 4
-      Data: 1.87
+      Data: 2
+    - Name: JumpForce
+      Entry: 4
+      Data: 3.24
+    - Name: GroundLayer
+      Entry: 7
+      Data: UnityEngine.LayerMask, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 311
     - Name: 
       Entry: 8
       Data: 
-    - Name: CameraEntity
-      Entry: 10
-      Data: 1
+    - Name: IsGrounded
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
   syncMode: 0
   syncInterval: 0.1
   owner:

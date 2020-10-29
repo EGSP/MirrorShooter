@@ -16,5 +16,11 @@ namespace Gasanov.Eppd.Data
     public interface ICloneable<T>
     {
         T Clone();
+
+        /// <summary>
+        /// Копирует значения из другого объекта.
+        /// </summary>
+        /// <param name="clone"></param>
+        void Accept(T clone);
     }
 }

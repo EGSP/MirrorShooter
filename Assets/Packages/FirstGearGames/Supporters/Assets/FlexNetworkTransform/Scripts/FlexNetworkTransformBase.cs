@@ -455,7 +455,6 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
 
             SyncProperties sp = ReturnDifferentPropertiesClient(_clientSyncData, null);
             
-            // Debug.Log(sp);
 
             bool useReliable = _reliable;
             if (!CanSendProperties(ref sp, ref _clientSettleSent, ref useReliable))
@@ -471,8 +470,6 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
 
             _lastClientSentSequenceId += 1;
             
-            // Debug.Log(sp);
-
             //send to server.
             if (useReliable)
                 CmdSendSyncDataReliable(_clientSyncData);
@@ -1080,7 +1077,6 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
 #endif
         private void CmdSendSyncDataReliable(TransformSyncData data)
         {
-            Debug.Log("Client data received");
             ClientDataReceived(data);
         }
         /// <summary>
@@ -1393,7 +1389,7 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
 
             if (OutOfSequence(data, ref _lastServerReceivedSequenceId))
             {
-                Debug.Log("Out of sequence");
+                
                 return;
             }
 
@@ -1461,14 +1457,12 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
                     data.Scale = targetSyncData.GoalData.Scale;
             }
             
-            Debug.Log($"DATA AFTER FILL POS {data.Position}");
         }
 
         private void FillMissingDataClient(TransformSyncData data, TargetSyncData targetSyncData)
         {
             SyncProperties sp = (SyncProperties)data.SyncProperties;
             
-            Debug.Log($"SERVER SP {sp}");
             //Position wasn't included.
             if (!EnumContains.SyncPropertiesContains(sp, SyncProperties.Position))
             {
@@ -1502,7 +1496,6 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms
         {
             SyncProperties sp = (SyncProperties)data.SyncProperties;
             
-            Debug.Log(sp);
             //Position wasn't included.
             if (!EnumContains.SyncPropertiesContains(sp, SyncProperties.Position))
             {

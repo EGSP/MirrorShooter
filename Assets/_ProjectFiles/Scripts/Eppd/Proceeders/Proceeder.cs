@@ -17,22 +17,30 @@ namespace Gasanov.Eppd.Proceeders
         /// </summary>
         protected List<IProcess<TDataBlock>> Processes = new List<IProcess<TDataBlock>>();
 
+        /// <summary>
+        /// Временный клон.
+        /// </summary>
+        private TDataBlock _temporaryClone;
 
+        /// <summary>
+        /// Временная ссылка на изначальные данные.
+        /// </summary>
+        private TDataBlock _temporaryReference;
+        
         /// <summary>
         /// Обработка данных через процессы.
         /// Блок данных клонируется, обрабатывается и возвращается в виде результата.
         /// </summary>
         /// <returns></returns>
-        public virtual TDataBlock Proceed(TDataBlock inData)
+        public virtual void Proceed(TDataBlock inData)
         {
-            var clone = inData.Clone();
+            _temporaryReference = inData;
+            _temporaryClone = inData.Clone();
             
             for (var i = 0; i < Processes.Count; i++)
             {
-                Processes[i].Process(inData);
+                Processes[i].Process(_temporaryReference);
             }
-
-            return clone;
         }
         
         /// <summary>
@@ -51,5 +59,12 @@ namespace Gasanov.Eppd.Proceeders
             Processes.RemoveByType<T>();
         }
         
+        /// <summary>
+        /// Устанавливает изначальные настройки для блока данных.
+        /// </summary>
+        public void Reset()
+        {
+            _temporaryReference.Accept(_temporaryClone);
+        }
     }
 }

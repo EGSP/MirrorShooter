@@ -27,6 +27,9 @@ namespace Game.Entities.Controllers
 
         public override void UpdateOnClient()
         {
+            if (_playerEntity == null)
+                return;
+            
             // Mouse rotation Input
             float rotationY = Input.GetAxis("Mouse X") * mouseSensivity.x; // Вращение по горизонтали
             float rotationX = -Input.GetAxis("Mouse Y") * mouseSensivity.y; // Вращение по вертикали
@@ -57,7 +60,17 @@ namespace Game.Entities.Controllers
             {
                 newDown.Add((int)KeyCode.LeftShift);
             }
-            
+
+            if (Input.GetKeyUp(KeyCode.Space))
+            {
+                newUp.Add((int) KeyCode.Space);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                newDown.Add((int) KeyCode.Space);
+            }
+
             CmdHandleUpKeys(newUp);
             CmdHandleDownKeys(newDown);
         }
@@ -99,8 +112,10 @@ namespace Game.Entities.Controllers
         [Command(ignoreAuthority = true)]
         private void CmdHandleDownKeys(List<int> keyCodes)
         {
+            Debug.Log($"Key count {keyCodes.Count}");
             for (int i = 0; i < keyCodes.Count; i++)
             {
+                Debug.Log($"{(KeyCode)keyCodes[i]}");
                 _playerInputManager.NewDown((KeyCode)keyCodes[i]);
             }
         }
