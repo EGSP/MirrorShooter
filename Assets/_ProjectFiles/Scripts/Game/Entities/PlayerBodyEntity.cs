@@ -15,16 +15,17 @@ namespace Game.Entities
         [OdinSerialize] 
         public Transform BodyTransform { get; private set; }
         
-        /// <summary>
-        /// Физический компонент тела.
-        /// </summary>
-        public Rigidbody Rigidbody { get; private set; }
+        [OdinSerialize]
+        public CapsuleCollider Collider { get; private set; }
 
         private Quaternion _cachedBodyRotation;
 
         public override void AwakeOnClient()
         {
             if(BodyTransform == null)
+                throw new NullReferenceException();
+            
+            if(Collider == null)
                 throw new NullReferenceException();
 
             _cachedBodyRotation = BodyTransform.rotation;
@@ -34,16 +35,11 @@ namespace Game.Entities
         {
             if(BodyTransform == null)
                 throw new NullReferenceException();
+            
+            if(Collider == null)
+                throw new NullReferenceException();
 
             _cachedBodyRotation = BodyTransform.rotation;
-        }
-
-        /// <summary>
-        /// Устанавливает физическое тело.
-        /// </summary>
-        public void SetRigidBody(Rigidbody rigidbody)
-        {
-            Rigidbody = rigidbody;
         }
 
         /// <summary>

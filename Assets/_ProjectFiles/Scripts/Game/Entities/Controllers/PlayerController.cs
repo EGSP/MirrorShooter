@@ -19,6 +19,15 @@ namespace Game.Entities.Controllers
         // SERVER_SIDE
         protected PlayerInputManager PlayerInputManager;
 
+        /// <summary>
+        /// Список нажатых клавиш (полон только во время обновления)
+        /// </summary>
+        protected List<int> down = new List<int>();
+        /// <summary>
+        /// Список отжатых клавиш (полон только во время обновления)
+        /// </summary>
+        protected List<int> up = new List<int>();
+
         public override void AwakeOnServer()
         {
             if (PlayerInputManager == null)
@@ -43,36 +52,37 @@ namespace Game.Entities.Controllers
             if(rotationY != 0)
                 RotateBody(rotationY);
             
-            if(horizontalDelta != 0 || verticalDelta != 0)
-                CmdMoveBody(horizontalDelta, verticalDelta);
+            // Здесь нужно формировать лист из нажаты - отжатых кнопок и отправлять его.
+
+            DefineKeyCodeState(KeyCode.W);
+            DefineKeyCodeState(KeyCode.S);
+            DefineKeyCodeState(KeyCode.A);
+            DefineKeyCodeState(KeyCode.D);
             
-            // Здесь нужно формировать лист из нажаты= отжатых кнопок и отправлять его.
-
-            var newDown = new List<int>();
-            var newUp = new List<int>();
+            DefineKeyCodeState(KeyCode.LeftShift);
+            DefineKeyCodeState(KeyCode.Space);
             
-            if (Input.GetKeyUp(KeyCode.LeftShift))
-            {
-                newUp.Add((int)KeyCode.LeftShift);
-            }
+            CmdHandleDownKeys(down);
+            CmdHandleUpKeys(up);
             
-            if (Input.GetKeyDown(KeyCode.LeftShift))
+            down.Clear();
+            up.Clear();
+        }
+
+        /// <summary>
+        /// Заносит клавишу в список состояний.
+        /// </summary>
+        protected void DefineKeyCodeState(KeyCode code)
+        {
+            if (Input.GetKeyUp(code))
             {
-                newDown.Add((int)KeyCode.LeftShift);
+                up.Add((int) code);
             }
 
-            if (Input.GetKeyUp(KeyCode.Space))
+            if (Input.GetKeyDown(code))
             {
-                newUp.Add((int) KeyCode.Space);
+                down.Add((int) code);
             }
-
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                newDown.Add((int) KeyCode.Space);
-            }
-
-            CmdHandleUpKeys(newUp);
-            CmdHandleDownKeys(newDown);
         }
 
         [Server]
@@ -89,18 +99,6 @@ namespace Game.Entities.Controllers
         protected void RotateBody(float rotationY)
         {
             PlayerEntity.BodyEntity.RotateY(rotationY);
-        }
-
-        [Command(ignoreAuthority = true)]
-        private void CmdMoveBody(float horDelta, float verDelta)
-        {
-            MoveBody(horDelta, verDelta);
-        }
-
-        [Server]
-        protected void MoveBody(float horDelta, float verDelta)
-        {
-            PlayerEntity.MoveModule.Move(horDelta, verDelta);
         }
 
         [Command(ignoreAuthority = true)]

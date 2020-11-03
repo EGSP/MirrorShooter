@@ -33,7 +33,6 @@ namespace Game.Entities
             if(rigidBody == null)
                 throw new NullReferenceException();
             
-            BodyEntity.SetRigidBody(rigidBody);
         }
 
         public void SetInput(PlayerInputManager playerInputManager)
@@ -49,10 +48,18 @@ namespace Game.Entities
             if(rigidBody == null)
                 throw new NullReferenceException();
             
-            BodyEntity.SetRigidBody(rigidBody);
-            
             MoveModule.Initialize(this);
-            MoveModule.Setup(rigidBody);
+            MoveModule.Setup(this, rigidBody);
+        }
+
+        [Button("Show movement info")]
+        private void ShowMoveInfo()
+        {
+            if (MoveModule != null && GetComponent<Rigidbody>() != null)
+            {
+                Debug.Log($" Expected jump height: " +
+                          $"{MoveModule.ExcpectedJumpHeight(GetComponent<Rigidbody>())}");
+            }
         }
     }
 }

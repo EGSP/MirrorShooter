@@ -61,7 +61,7 @@ namespace Game.Entities.Controllers
                 // Если идет удержание.
                 if (handler.State == KeyCodeState.Hold)
                 {
-                    Debug.Log($"Holding {handler.Code}");
+                    // Debug.Log($"Holding {handler.Code}");
                     handler.TimeHold += deltaTime;
                     return;
                 }
@@ -74,7 +74,7 @@ namespace Game.Entities.Controllers
                     // Кнопка удерживается.
                     if (handler.TimeHold > HoldSpan)
                     {
-                        Debug.Log($"New hold {handler.Code}");
+                        // Debug.Log($"New hold {handler.Code}");
                         handler.State = KeyCodeState.Hold;
                     }
                 }
@@ -82,7 +82,7 @@ namespace Game.Entities.Controllers
                 // Если человек отжал кнопку, то ее нужно удалить из списка.
                 if (handler.State == KeyCodeState.Up)
                 {
-                    Debug.Log($"New up {handler.Code}");
+                    // Debug.Log($"New up {handler.Code}");
                     KeyCodeHandlers.RemoveAt(i);
                 }
                     

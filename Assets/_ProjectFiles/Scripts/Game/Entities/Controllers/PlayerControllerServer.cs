@@ -28,36 +28,21 @@ namespace Game.Entities.Controllers
             if(rotationY != 0)
                 RotateBody(rotationY);
             
-            if(horizontalDelta != 0 || verticalDelta != 0)
-                MoveBody(horizontalDelta, verticalDelta);
+            // Здесь нужно формировать лист из нажаты - отжатых кнопок и отправлять его.
+
+            DefineKeyCodeState(KeyCode.W);
+            DefineKeyCodeState(KeyCode.S);
+            DefineKeyCodeState(KeyCode.A);
+            DefineKeyCodeState(KeyCode.D);
             
-            // Здесь нужно формировать лист из нажаты = отжатых кнопок и отправлять его.
-
-            var newDown = new List<int>();
-            var newUp = new List<int>();
+            DefineKeyCodeState(KeyCode.LeftShift);
+            DefineKeyCodeState(KeyCode.Space);
             
-            if (Input.GetKeyUp(KeyCode.LeftShift))
-            {
-                newUp.Add((int)KeyCode.LeftShift);
-            }
+            AddNewDown(down);
+            AddNewUp(up);
             
-            if (Input.GetKeyDown(KeyCode.LeftShift))
-            {
-                newDown.Add((int)KeyCode.LeftShift);
-            }
-
-            if (Input.GetKeyUp(KeyCode.Space))
-            {
-                newUp.Add((int) KeyCode.Space);
-            }
-
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                newDown.Add((int) KeyCode.Space);
-            }
-
-            AddNewUp(newUp);
-            AddNewDown(newDown);
+            down.Clear();
+            up.Clear();
         }
     }
 }

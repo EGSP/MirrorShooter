@@ -1,7 +1,7 @@
 ﻿using System;
 using Game.Entities.Controllers;
 using Game.Entities.Modules;
-using Game.Processors;
+using Game.Entities.States.Player;
 using Gasanov.Eppd.Proceeders;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
@@ -12,203 +12,93 @@ namespace Game.Entities.Modules
     [Serializable]
     public class PlayerMoveModule : LogicModule
     {
+        public PlayerEntity PlayerEntity { get; set; }
         public PlayerInputManager PlayerInputManager { get; set; }
-
-        #region States
-
-        public abstract class MoveModuleState
-        {
-            protected readonly PlayerMoveModule MoveModule;
-            /// <summary>
-            /// Следующее состояние. Может быть пустым, тогда состояние само определяет следующее.
-            /// </summary>
-            protected MoveModuleState NextState { get; private set; }
-            
-            protected MoveModuleState(PlayerMoveModule moveModule)
-            {
-                MoveModule = moveModule;
-            }
-            
-            public abstract MoveModuleState FixedUpdateOnServer(float deltaTime);
-
-            public virtual void Move(float horizontal, float vertical)
-            {
-                var forwardBack = vertical * MoveModule.Rigidbody.transform.forward;
-                var rightLeft = horizontal * MoveModule.Rigidbody.transform.right;
-                
-                MoveModule.RigMoveProcessor.DirectionProceeder.Add(forwardBack+rightLeft);
-            }
-
-            public void SetNext(MoveModuleState nextState)
-            {
-                NextState = nextState;
-            }
-        }
-
-        public class MoveModuleWalk : MoveModuleState
-        {
-            public MoveModuleWalk(PlayerMoveModule moveModule) : base(moveModule)
-            {
-                Debug.Log("NEW WALK MODULE");
-            }
-
-            public override MoveModuleState FixedUpdateOnServer(float deltaTime)
-            {
-                MoveModule.MoveData.FixedDeltaTime = deltaTime;
-                MoveModule.RigMoveProcessor.Tick();
-
-                var input = MoveModule.PlayerInputManager;
-                
-                if (input.GetDown(KeyCode.Space))
-                {
-                    return new MoveModuleJump(MoveModule, MoveModule.MoveSpeed);
-                }
-
-                if (input.GetHold(KeyCode.LeftShift))
-                {
-                    return new MoveModuleRun(MoveModule);
-                }
-                
-                return this;
-            }
-        }
-        
-        public class MoveModuleRun : MoveModuleState
-        {
-            public MoveModuleRun(PlayerMoveModule moveModule) : base(moveModule)
-            {
-                Debug.Log("NEW RUN MODULE");
-                MoveModule.RigMoveProcessor.AddMoveDataModifier(new RunDataModifier(MoveModule.RunSpeedModifier));
-            }
-
-            public override MoveModuleState FixedUpdateOnServer(float deltaTime)
-            {
-                MoveModule.MoveData.FixedDeltaTime = deltaTime;
-                MoveModule.RigMoveProcessor.Tick();
-
-                var input = MoveModule.PlayerInputManager;
-
-                if (input.GetDown(KeyCode.Space))
-                {
-                    MoveModule.RigMoveProcessor.RemoveMoveDataModifier<RunDataModifier>();
-                    return new MoveModuleJump(MoveModule,
-                        MoveModule.RunSpeedModifier * MoveModule.MoveSpeed);
-                    //
-                    // js.SetNext(new );
-                }
-                
-                // Если нет удержания.
-                if (!input.GetHold(KeyCode.LeftShift))
-                {
-                    // Debug.Log("NOT RUN");
-                    MoveModule.RigMoveProcessor.RemoveMoveDataModifier<RunDataModifier>();
-                    return new MoveModuleWalk(MoveModule);
-                }
-
-                return this;
-            }
-        }
-        
-        public class MoveModuleJump : MoveModuleState
-        {
-            private readonly JumpDataModifier _jumpDataModifier;
-            public MoveModuleJump(PlayerMoveModule moveModule, float flySpeed) : base(moveModule)
-            {
-                Debug.Log("NEW JUMP MODULE");
-                _jumpDataModifier = new JumpDataModifier(flySpeed);
-                MoveModule.RigMoveProcessor.AddMoveDataModifier(_jumpDataModifier);
-                
-                MoveModule.Rigidbody.AddForce(MoveModule.Rigidbody.transform.up * MoveModule.JumpForce,
-                    ForceMode.Impulse);
-            }
-
-            public override MoveModuleState FixedUpdateOnServer(float deltaTime)
-            {
-                MoveModule.MoveData.FixedDeltaTime = deltaTime;
-                MoveModule.RigMoveProcessor.Tick();
-
-                // Если на земле.
-                if (MoveModule.IsGrounded)
-                {
-                    MoveModule.RigMoveProcessor.RemoveMoveDataModifier<JumpDataModifier>();
-
-                    if (NextState != null)
-                    {
-                        return NextState;
-                    }
-                    else
-                    {
-                        return new MoveModuleWalk(MoveModule);
-                    }
-                }
-                
-                // Если в прыжке.
-                return this;
-            }
-        }
-        
-
-        #endregion
-        
 
         [BoxGroup("Characteristics")]
         [OdinSerialize] public float MoveSpeed { get; private set; } = 5f;
         [BoxGroup("Characteristics")]
         [OdinSerialize] public float RunSpeedModifier { get; private set; } = 2f;
 
-        [BoxGroup("Characteristics")]
+        [BoxGroup("Characteristics/Jump")]
         [OdinSerialize] public float JumpForce { get; private set; } = 2f;
+
+        [BoxGroup("Characteristics/Jump")]
+        [OdinSerialize][PropertyRange(0,1)]
+        public float ForwardModifier { get; private set; } = 0.1f;
+
+        [BoxGroup("Characteristics/Jump")]
+        [OdinSerialize][PropertyRange(0,1)]
+        public float BackwardModifier { get; private set; } = 0.06f;
+
+        [BoxGroup("Characteristics/Jump")]
+        [OdinSerialize][PropertyRange(0,1)]
+        public float SidewardsModifier { get; private set; } = 0.03f;
+        
+        [BoxGroup("Characteristics/Jump")]
+        [OdinSerialize] public float BaseJumpInterval { get; private set; }
 
         [BoxGroup("Global settings")]
         [OdinSerialize] public LayerMask GroundLayer { get; private set; }
+        [BoxGroup("Global settings")] [InfoBox("Промежуток времени после прыжка, прежде чем проверять землю")]
+        [OdinSerialize] public float GroundCheckInterval { get; private set; }
+        [BoxGroup("Global settings")]
+        [OdinSerialize] public float WallCheckDistance { get; private set; }
         
+        
+        [OdinSerialize][ReadOnly] public bool IsGrounded { get; private set; }
+
+        [SerializeField][ReadOnly] private string currentStateName;
+
         /// <summary>
-        /// Данные передвижения.
+        /// Можно прыгать, когда пройден интервал времени с момента прошлого прыжка.
         /// </summary>
-        public MoveData MoveData { get; private set; }
+        public bool JumpIntervaled => _baseJumpInterval >= BaseJumpInterval;
         
         /// <summary>
         /// Физическое тело для перемещения.
         /// </summary>
         public Rigidbody Rigidbody { get; private set; }
-        
-        /// <summary>
-        /// Процессор для передвижения.
-        /// </summary>
-        public RigMoveProcessor RigMoveProcessor { get; private set; }
-        
-        /// <summary>
-        /// Находится ли персонаж сейчас на земле.
-        /// </summary>
-        [OdinSerialize] public bool IsGrounded { get; private set; }
 
         /// <summary>
         /// Текущее состояние модуля передвижения.
         /// </summary>
         private MoveModuleState _moveModuleState;
-        
-        
-        public void Setup(Rigidbody rig)
-        {
-            Rigidbody = rig;
-            
-            MoveData = new MoveData(){Speed = MoveSpeed};
-            RigMoveProcessor = new RigMoveProcessor(new RigidBodyData(Rigidbody), MoveData);
 
+        private float _baseJumpInterval;
+        private float _groundCheckInterval;
+        
+
+        
+        public void Setup(PlayerEntity playerEntity, Rigidbody rig)
+        {
+            PlayerEntity = playerEntity;
+            Rigidbody = rig;
+
+            _baseJumpInterval = _baseJumpInterval;
+            _groundCheckInterval = GroundCheckInterval;
             _moveModuleState = new MoveModuleWalk(this);
+        }
+
+        public override void UpdateOnServer()
+        {
+            CheckJumpInterval();
         }
 
         public override void FixedUpdateOnServer()
         {
             if (PlayerInputManager == null)
             {    
-                Debug.LogWarning("PLAYER_INPUT_NULL");
                 return;
             }
 
             if (_moveModuleState != null)
+            {
+                currentStateName = _moveModuleState.GetType().Name;
+                
                 _moveModuleState = _moveModuleState.FixedUpdateOnServer(Time.fixedDeltaTime);
-            
+            }
+
             CheckIsGrounded();
         }
 
@@ -217,9 +107,14 @@ namespace Game.Entities.Modules
         /// </summary>
         private void CheckIsGrounded()
         {
-            // Если под нами есть земля
-            if (Physics.Raycast(Rigidbody.position, Rigidbody.transform.up * -1,
-                0.3f, GroundLayer))
+            if (_groundCheckInterval < GroundCheckInterval)
+            {
+                _groundCheckInterval += Time.fixedDeltaTime;
+                return;
+            }
+            
+            // Если под ногами есть земля. Пивот должен быть в ногах.
+            if (Physics.OverlapSphere(Rigidbody.position,0.01f,GroundLayer).Length != 0)
             {
                 IsGrounded = true;
             }
@@ -229,14 +124,28 @@ namespace Game.Entities.Modules
             }
         }
 
-        /// <summary>
-        /// Передвижение объекта с помощью двух направлений.
-        /// </summary>
-        /// <param name="horizontal"></param>
-        /// <param name="vertical"></param>
-        public void Move(float horizontal, float vertical)
+        public void JumpInitiated()
         {
-            _moveModuleState.Move(horizontal, vertical);
+            _baseJumpInterval = 0;
+            _groundCheckInterval = 0;
+            IsGrounded = false;
+        }
+        
+        public void CheckJumpInterval()
+        {
+            if (_baseJumpInterval < BaseJumpInterval)
+            {
+                _baseJumpInterval += Time.deltaTime;
+            }          
+        }
+
+        public float ExcpectedJumpHeight(Rigidbody rigidBody)
+        {
+            float g = Physics.gravity.magnitude;
+            float v0 = JumpForce / rigidBody.mass; // converts the jumpForce to an initial velocity
+            float jumpHeight = (v0 * v0)/(2*g);
+
+            return jumpHeight;
         }
     }
 }
