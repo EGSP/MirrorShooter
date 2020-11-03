@@ -79,7 +79,6 @@ namespace Game.Entities
         /// <summary>
         /// Вращение на стороне клиента.
         /// </summary>
-        [Client]
         public void RotateX(float deltaRotationX)
         {
             // Поворот камеры относительно тела.

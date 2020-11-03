@@ -49,7 +49,6 @@ namespace Game.Entities
         /// <summary>
         /// Вращение тела у клиента.
         /// </summary>
-        [Client]
         public void RotateY(float deltaRotationY)
         {
             // Новое вращение тела

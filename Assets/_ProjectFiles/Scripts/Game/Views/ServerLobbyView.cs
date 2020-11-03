@@ -7,6 +7,7 @@ using Sirenix.OdinInspector;
 using Sirenix.Utilities;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ServerLobbyView : MonoBehaviour, IView
 {
@@ -21,6 +22,9 @@ public class ServerLobbyView : MonoBehaviour, IView
     [BoxGroup("Scene")]
     [SerializeField] private TMP_InputField sceneField;
 
+    [BoxGroup("Settings")]
+    public Toggle spawnControllerToggle;
+    
     [SerializeField] private TMP_Text statusTextbox;
 
     public event Action OnShutdown = delegate {  };

@@ -21,6 +21,11 @@ namespace Game.Sessions
         /// Началась ли сессия.
         /// </summary>
         public bool IsStarted { get; private set; }
+        
+        /// <summary>
+        /// Нужно ли спавнить контроллер для сервера.
+        /// </summary>
+        public bool SpawnServerController { get; set; }
 
         /// <summary>
         /// Префаб сущности игрока.
@@ -31,6 +36,8 @@ namespace Game.Sessions
         /// Префаб контроллера игрока.
         /// </summary>
         private PlayerController _playerController;
+        
+        
 
         /// <summary>
         /// Создает сообщение о сессии на основе текущего состояния.
@@ -66,8 +73,32 @@ namespace Game.Sessions
         {
             ServerLobby.OnUserReady += ProcessReadyUser;
             ServerLobby.OnUserDisconnected += ProcessDisconnectedUser;
+            
             IsStarted = true;
             ServerLobby.ShareServerSessionForConnections(StateMessage);
+
+            // Спавн серверного контроллера
+            if (SpawnServerController)
+            {
+                var playerEntityServerPrefab = Resources.Load<PlayerEntity>("Prefabs/Player_Server");
+                if(_playerEntityPrefab == null)
+                    throw new NullReferenceException();
+
+                 var playerControllerServer = Resources.Load<PlayerController>("Prefabs/PC_Server");
+                if (_playerController == null)
+                    throw new NullReferenceException();
+                
+                // Спавн персонажа
+                var playerEntity = Instantiate(playerEntityServerPrefab);
+                playerEntity.gameObject.transform.position = SpawnPoint.SpawnPoints.Random().transform.position;
+                
+                // Спавн контроллера
+                var playerController = Instantiate(playerControllerServer);
+                playerController.gameObject.name = $"PC [SERVER]";
+                
+                playerController.SetPlayerEntity(playerEntity);
+                playerController.SetPlayerEntityCamera();
+            }
         }
 
         public void StopSession()

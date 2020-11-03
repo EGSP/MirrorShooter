@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Game.Net;
 using Gasanov.Core;
 using Gasanov.Core.Mvp;
@@ -34,6 +35,11 @@ namespace Game.Presenters
             Model.Session.ChangeScene(sceneName);
         }
 
+        private void ToggleSpawnServerController(bool toggleState)
+        {
+            Model.Session.SpawnServerController = toggleState;
+        }
+
         private void Shutdown()
         {
             Model.Shutdown();
@@ -65,6 +71,7 @@ namespace Game.Presenters
         {
             View.OnShutdown -= Shutdown;
             View.OnLoadScene -= LoadScene;
+            View.spawnControllerToggle.onValueChanged.RemoveListener(ToggleSpawnServerController);
 
             if (Model != null)
             {
@@ -107,6 +114,13 @@ namespace Game.Presenters
             
             View.OnShutdown += Shutdown;
             View.OnLoadScene += LoadScene;
+            View.spawnControllerToggle.onValueChanged.AddListener(ToggleSpawnServerController);
+
+            var isOnToggle = View.spawnControllerToggle.isOn;
+            if (isOnToggle)
+            {
+                ToggleSpawnServerController(true);
+            }
 
             Model.OnClientConnected += ClientConnected;
             Model.OnUserConnected += AddUser;

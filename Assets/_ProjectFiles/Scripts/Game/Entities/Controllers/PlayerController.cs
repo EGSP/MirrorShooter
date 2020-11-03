@@ -9,25 +9,25 @@ namespace Game.Entities.Controllers
 {
     public class PlayerController : DualNetworkBehaviour
     {
-        [SerializeField] private Vector2 mouseSensivity;
+        [SerializeField] protected Vector2 mouseSensivity;
 
         [SyncVar(hook = nameof(OnEntityChanged))]
         public uint playerEntityId;
 
-        private PlayerEntity _playerEntity;
+        protected PlayerEntity PlayerEntity;
 
         // SERVER_SIDE
-        private PlayerInputManager _playerInputManager;
+        protected PlayerInputManager PlayerInputManager;
 
         public override void AwakeOnServer()
         {
-            if (_playerInputManager == null)
-                _playerInputManager = new PlayerInputManager();
+            if (PlayerInputManager == null)
+                PlayerInputManager = new PlayerInputManager();
         }
 
         public override void UpdateOnClient()
         {
-            if (_playerEntity == null)
+            if (PlayerEntity == null)
                 return;
             
             // Mouse rotation Input
@@ -78,45 +78,59 @@ namespace Game.Entities.Controllers
         [Server]
         public override void LateUpdateOnServer()
         { 
-            _playerInputManager.LateUpdate(Time.deltaTime);
+            PlayerInputManager.LateUpdate(Time.deltaTime);
         }
 
-        [Client]
-        private void RotateCamera(float rotationX)
+        protected void RotateCamera(float rotationX)
         {
-            _playerEntity.CameraEntity.RotateX(rotationX);
+            PlayerEntity.CameraEntity.RotateX(rotationX);
         }
 
-        [Client]
-        private void RotateBody(float rotationY)
+        protected void RotateBody(float rotationY)
         {
-            _playerEntity.BodyEntity.RotateY(rotationY);
+            PlayerEntity.BodyEntity.RotateY(rotationY);
         }
 
         [Command(ignoreAuthority = true)]
         private void CmdMoveBody(float horDelta, float verDelta)
         {
-            Debug.Log("CMD_MOVE");
-            _playerEntity.MoveModule.Move(horDelta, verDelta);
+            MoveBody(horDelta, verDelta);
+        }
+
+        [Server]
+        protected void MoveBody(float horDelta, float verDelta)
+        {
+            PlayerEntity.MoveModule.Move(horDelta, verDelta);
         }
 
         [Command(ignoreAuthority = true)]
         private void CmdHandleUpKeys(List<int> keyCodes)
         {
-            for (int i = 0; i < keyCodes.Count; i++)
-            {
-                _playerInputManager.NewUp((KeyCode)keyCodes[i]);
-            }
+            AddNewUp(keyCodes);
         }
-
+        
         [Command(ignoreAuthority = true)]
         private void CmdHandleDownKeys(List<int> keyCodes)
         {
-            Debug.Log($"Key count {keyCodes.Count}");
+            AddNewDown(keyCodes);
+        }
+
+        
+        [Server]
+        protected void AddNewUp(List<int> keyCodes)
+        {
             for (int i = 0; i < keyCodes.Count; i++)
             {
-                Debug.Log($"{(KeyCode)keyCodes[i]}");
-                _playerInputManager.NewDown((KeyCode)keyCodes[i]);
+                PlayerInputManager.NewUp((KeyCode)keyCodes[i]);
+            }
+        }
+        
+        [Server]
+        protected void AddNewDown(List<int> keyCodes)
+        {
+            for (int i = 0; i < keyCodes.Count; i++)
+            {
+                PlayerInputManager.NewDown((KeyCode)keyCodes[i]);
             }
         }
         
@@ -126,13 +140,13 @@ namespace Game.Entities.Controllers
         {
             if (NetworkIdentity.spawned.TryGetValue(newEntity, out NetworkIdentity identity))
             {
-                _playerEntity = identity.GetComponent<PlayerEntity>();
+                PlayerEntity = identity.GetComponent<PlayerEntity>();
                 // _playerEntity.BodyEntity.Rigidbody.isKinematic = true;
-                _playerEntity.netIdentity.hasAuthority = true;
-                _playerEntity.netIdentity.isLocalRepresenter = true;
+                PlayerEntity.netIdentity.hasAuthority = true;
+                PlayerEntity.netIdentity.isLocalRepresenter = true;
 
                 if (LaunchInfo.LaunchMode == LaunchModeType.Client)
-                    _playerEntity.CameraEntity.SetCamera(Camera.main);
+                    PlayerEntity.CameraEntity.SetCamera(Camera.main);
             }
             else
             {
@@ -143,10 +157,16 @@ namespace Game.Entities.Controllers
         [Server]
         public void SetPlayerEntity(PlayerEntity playerEntity)
         {   
-            _playerEntity = playerEntity;
+            PlayerEntity = playerEntity;
 
-            playerEntity.SetInput(_playerInputManager);
+            playerEntity.SetInput(PlayerInputManager);
             // _playerEntity.netIdentity.hasAuthority = true;
+        }
+
+        [Server]
+        public void SetPlayerEntityCamera()
+        {
+            PlayerEntity.CameraEntity.SetCamera(Camera.main);
         }
         
     }
