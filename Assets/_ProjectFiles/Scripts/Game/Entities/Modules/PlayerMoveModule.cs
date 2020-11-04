@@ -37,11 +37,13 @@ namespace Game.Entities.Modules
         
         [BoxGroup("Characteristics/Jump")]
         [OdinSerialize] public float BaseJumpInterval { get; private set; }
+        [BoxGroup("Characteristics/Jump")]
+        [OdinSerialize] public float LongJumpInterval { get; private set; }
 
         [BoxGroup("Global settings")]
         [OdinSerialize] public LayerMask GroundLayer { get; private set; }
         [BoxGroup("Global settings")] [InfoBox("Промежуток времени после прыжка, прежде чем проверять землю")]
-        [OdinSerialize] public float GroundCheckInterval { get; private set; }
+        [OdinSerialize] public float GroundCheckDelay { get; private set; }
         [BoxGroup("Global settings")]
         [OdinSerialize] public float WallCheckDistance { get; private set; }
         
@@ -66,7 +68,7 @@ namespace Game.Entities.Modules
         private MoveModuleState _moveModuleState;
 
         private float _baseJumpInterval;
-        private float _groundCheckInterval;
+        private float _groundCheckDelay;
         
 
         
@@ -76,7 +78,7 @@ namespace Game.Entities.Modules
             Rigidbody = rig;
 
             _baseJumpInterval = _baseJumpInterval;
-            _groundCheckInterval = GroundCheckInterval;
+            _groundCheckDelay = GroundCheckDelay;
             _moveModuleState = new MoveModuleWalk(this);
         }
 
@@ -107,9 +109,9 @@ namespace Game.Entities.Modules
         /// </summary>
         private void CheckIsGrounded()
         {
-            if (_groundCheckInterval < GroundCheckInterval)
+            if (_groundCheckDelay < GroundCheckDelay)
             {
-                _groundCheckInterval += Time.fixedDeltaTime;
+                _groundCheckDelay += Time.fixedDeltaTime;
                 return;
             }
             
@@ -127,7 +129,7 @@ namespace Game.Entities.Modules
         public void JumpInitiated()
         {
             _baseJumpInterval = 0;
-            _groundCheckInterval = 0;
+            _groundCheckDelay = 0;
             IsGrounded = false;
         }
         

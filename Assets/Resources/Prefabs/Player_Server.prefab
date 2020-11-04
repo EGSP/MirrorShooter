@@ -578,10 +578,13 @@ MonoBehaviour:
       Data: 0.01
     - Name: SidewardsModifier
       Entry: 4
-      Data: 0.01
+      Data: 0.449
     - Name: BaseJumpInterval
       Entry: 4
       Data: 2
+    - Name: LongJumpInterval
+      Entry: 4
+      Data: 1
     - Name: GroundLayer
       Entry: 7
       Data: UnityEngine.LayerMask, UnityEngine.CoreModule
@@ -591,9 +594,9 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: GroundCheckInterval
+    - Name: GroundCheckDelay
       Entry: 4
-      Data: 0.15
+      Data: 0.4
     - Name: WallCheckDistance
       Entry: 4
       Data: 0.18

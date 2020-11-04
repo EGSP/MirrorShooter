@@ -21,7 +21,7 @@ namespace Game.Entities.States.Player
             if (input.GetDown(KeyCode.Space))
             {
                 if (MoveModule.JumpIntervaled)
-                    return new MoveModuleJump(MoveModule, MoveModule.MoveSpeed, isWalking);
+                    return new MoveModuleJump(MoveModule, MoveModule.MoveSpeed);
             }
             
             if (input.GetHold(KeyCode.LeftShift))
