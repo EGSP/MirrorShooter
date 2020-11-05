@@ -71,7 +71,8 @@ namespace Game.Entities
             CameraObject = cameraObject;
             
             // Присоедининие к корневому объекту.
-            CameraObject.transform.SetParent(CameraRoot,false);
+            CameraObject.transform.
+                SetParent(CameraRoot,false);
             CameraObject.transform.localRotation = Quaternion.identity;
             CameraObject.transform.localPosition = Vector3.zero;
         }

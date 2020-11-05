@@ -71,6 +71,5 @@ MonoBehaviour:
     SerializationNodes: []
   syncMode: 0
   syncInterval: 0.1
-  mouseSensivity: {x: 6.4, y: 6.53}
-  MoveSpeed: 6
+  mouseSensivity: {x: 6.4, y: 6.4}
   playerEntityId: 0

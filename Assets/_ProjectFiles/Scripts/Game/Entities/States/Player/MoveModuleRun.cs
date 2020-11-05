@@ -33,17 +33,31 @@ namespace Game.Entities.States.Player
                 if (MoveModule.JumpIntervaled)
                 {
                     var horizontal = ExtractHorizontalInput();
+                    var vertical = ExtractVerticalInput();
 
-                    // Длинный прыжок.
+                    
+                    // Прыжок вперед-назад
                     if (horizontal == 0)
                     {
+                        bool isLongJump = _longJumpInterval >= MoveModule.LongJumpInterval && vertical != -1;
 
-                        var isLongJump = _longJumpInterval >= MoveModule.LongJumpInterval;
-                        var jumpState = new MoveModuleJump(MoveModule,
-                            MoveModule.MoveSpeed * MoveModule.RunSpeedModifier, isLongJump);
+                        // Длинный прыжок.
+                        if (isLongJump)
+                        {
+                            var jumpState = new MoveModuleJump(MoveModule,
+                                MoveModule.MoveSpeed * MoveModule.RunSpeedModifier, isWalking, isLongJump);
 
-                        jumpState.SetNext(new MoveModuleRun(MoveModule));
-                        return jumpState;
+                            jumpState.SetNext(new MoveModuleRun(MoveModule));
+                            return jumpState;
+                        }
+                        // Прыжок назад.
+                        else
+                        {
+                            var jumpState = new MoveModuleJump(MoveModule, MoveModule.MoveSpeed);
+
+                            jumpState.SetNext(new MoveModuleWalk(MoveModule));
+                            return jumpState;
+                        }
                     }
                     // Отскок.
                     else

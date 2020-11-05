@@ -3,6 +3,7 @@ using Game.Entities.Controllers;
 using Game.Entities.Modules;
 using Game.Net;
 using Game.Net.Objects;
+using Game.Sessions;
 using Mirror;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
@@ -20,6 +21,9 @@ namespace Game.Entities
         
         [BoxGroup("Modules")]
         [OdinSerialize] public PlayerMoveModule MoveModule { get; private set; }
+        
+        [BoxGroup("Modules")]
+        [OdinSerialize] public PlayerAnimationModule AnimationModule { get; private set; }
 
         [FoldoutGroup("User", 100)]
         [SyncVar] public User owner;
@@ -33,13 +37,8 @@ namespace Game.Entities
             if(rigidBody == null)
                 throw new NullReferenceException();
             
-        }
-
-        public void SetInput(PlayerInputManager playerInputManager)
-        {
-            _playerInputManager = playerInputManager;
-
-            MoveModule.PlayerInputManager = _playerInputManager;
+            rigidBody.useGravity = false;
+            
         }
         
         public override void AwakeOnServer()
@@ -48,9 +47,23 @@ namespace Game.Entities
             if(rigidBody == null)
                 throw new NullReferenceException();
             
+            ServerSession.singletone.AddPlayerEntity(this);
+            
             MoveModule.Initialize(this);
             MoveModule.Setup(this, rigidBody);
+
+            AnimationModule.Initialize(this);
         }
+        
+
+
+        public void SetInput(PlayerInputManager playerInputManager)
+        {
+            _playerInputManager = playerInputManager;
+
+            MoveModule.PlayerInputManager = _playerInputManager;
+        }
+        
 
         [Button("Show movement info")]
         private void ShowMoveInfo()

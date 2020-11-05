@@ -15,7 +15,7 @@ namespace Game.Entities.States.Player
          
         /// <param name="baseSpeed">Базовая скорость для перемещения во время полета</param>
         /// <param name="startSpeed">Стартовая скорость. 0 - если прыжок с места, 1 - если во время движения</param>
-        public MoveModuleJump(PlayerMoveModule moveModule, float baseSpeed, bool longJump = false) : base(moveModule)
+        public MoveModuleJump(PlayerMoveModule moveModule, float baseSpeed, int isWalking = 1, bool longJump = false) : base(moveModule)
         {
             MoveModule.JumpInitiated();
             
@@ -23,7 +23,6 @@ namespace Game.Entities.States.Player
                 ForceMode.Impulse);
             
             var direction = ExtractOverallInputDirection();
-            int isWalking = direction.sqrMagnitude != 0 ? 1 : 0;
 
             var vertical = ExtractVerticalInput();
             _targetDirection += MoveModule.Rigidbody.transform.forward * vertical * isWalking;

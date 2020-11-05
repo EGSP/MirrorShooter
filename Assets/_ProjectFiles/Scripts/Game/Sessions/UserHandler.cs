@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Game.Entities;
 using Game.Net;
+using Gasanov.Extensions.Linq;
 using Gasanov.Utils.GameObjectUtilities;
 using Mirror;
 using UnityEngine;
@@ -22,6 +25,11 @@ namespace Game.Sessions
             UserConnection = uc;
             relatedGameObjects = new List<GameObject>();
         } 
+        
+        /// <summary>
+        /// Связанная сущность игрока.
+        /// </summary>
+        public PlayerEntity RelatedPlayerEntity { get; set; }
         
         /// <summary>
         /// Связанные игровые объекты.
@@ -51,7 +59,7 @@ namespace Game.Sessions
         
         [Server]
         /// <summary>
-        /// Этим методом удаляютс все объекты на стороне сервера и его клиентов. 
+        /// Этим методом удаляются все объекты на стороне сервера и его клиентов. 
         /// </summary>
         public void DisposeAsServer()
         {

@@ -4,6 +4,7 @@ using System.Linq;
 using Game.Entities;
 using Game.Entities.Controllers;
 using Game.Net;
+using Game.Sessions.Observers;
 using Game.World;
 using Gasanov.Extensions.Linq;
 using Mirror;
@@ -14,6 +15,8 @@ namespace Game.Sessions
 {
     public class ServerSession : SerializedMonoBehaviour
     {
+        public static ServerSession singletone;
+        
         [NonSerialized] public EventNetworkManager NetworkManager;
         [NonSerialized] public ServerLobby ServerLobby;
         
@@ -37,8 +40,6 @@ namespace Game.Sessions
         /// </summary>
         private PlayerController _playerController;
         
-        
-
         /// <summary>
         /// Создает сообщение о сессии на основе текущего состояния.
         /// </summary>
@@ -50,11 +51,33 @@ namespace Game.Sessions
                 return msg;
             }
         }
+        
 
         /// <summary>
         /// Список пользователей находящихся на сцене.
         /// </summary>
         private List<UserHandler> _userConnectionsInScene;
+
+        /// <summary>
+        /// Все текущие сущности игроков.
+        /// </summary>
+        public List<PlayerEntity> PlayerEntities { get; private set; }
+        
+        /// <summary>
+        /// Вызывается при добавлении новой сущности игрока.
+        /// </summary>
+        public event Action<PlayerEntity> OnPlayerEntityAdd = delegate(PlayerEntity entity) {  };
+        /// <summary>
+        /// Вызывается при удалении сущности игрока.
+        /// </summary>
+        public event Action<PlayerEntity> OnPlayerEntityRemove = delegate(PlayerEntity entity) {  };
+
+        public List<SessionObserver> SessionObservers { get; private set; }
+
+        private void Awake()
+        {
+            singletone = this;
+        }
 
         private void Start()
         {
@@ -67,7 +90,17 @@ namespace Game.Sessions
                 throw new NullReferenceException();
             
             _userConnectionsInScene = new List<UserHandler>();
+            PlayerEntities = new List<PlayerEntity>();
+            SessionObservers = new List<SessionObserver>();
+            
+            SessionObservers.Add(new PlayerTransformObserver(this));
         }
+
+        private void Update()
+        {
+            UpdateObservers();
+        }
+        
 
         public void StartSession()
         {
@@ -129,6 +162,14 @@ namespace Game.Sessions
             NetworkManager.OnServerSceneChangedEvent += StartSession;
             NetworkManager.ServerChangeSceneUsers(sceneName, ServerLobby.FullValReadyConnections);
         }
+        
+        private void UpdateObservers()
+        {
+            for (var i = 0; i < SessionObservers.Count; i++)
+            {
+                SessionObservers[i].Update(Time.deltaTime);
+            }   
+        }
 
         /// <summary>
         /// Обработка готового пользователя.
@@ -176,9 +217,12 @@ namespace Game.Sessions
             playerController.playerEntityId = playerEntity.netId;
             
             NetworkIdentity.RebuildObserversForAll();
-            
+
+            userHandler.RelatedPlayerEntity = playerEntity;
             userHandler.AddGameObject(playerEntity.gameObject);
             userHandler.AddGameObject(playerController.gameObject);
+            
+            AddPlayerEntity(playerEntity);
         }
 
         /// <summary>
@@ -187,12 +231,42 @@ namespace Game.Sessions
         private void ProcessDisconnectedUser(UserConnection uc)
         {
             Debug.Log("PROCESS_USER_DISCONNECTED");
+            
             var userHandler = _userConnectionsInScene.FirstOrDefault(x => x.UserConnection == uc);
             
             if (userHandler != null)
             {
+                if (userHandler.RelatedPlayerEntity != null)
+                {
+                    RemovePlayerEntity(userHandler.RelatedPlayerEntity);
+                }
+                
                 userHandler.DisposeAsServer();
                 _userConnectionsInScene.Remove(userHandler);
+            }
+        }
+        
+        public void AddPlayerEntity(PlayerEntity playerEntity)
+        {
+            var coincidence = PlayerEntities.FirstOrDefault(x=> x== playerEntity);
+            
+            // Он не был зарегестрирован.
+            if (coincidence == null)
+            {
+                PlayerEntities.Add(playerEntity);
+                OnPlayerEntityAdd(playerEntity);
+            }
+        }
+
+        public void RemovePlayerEntity(PlayerEntity playerEntity)
+        {
+            var coincidence = PlayerEntities.FirstOrDefault(x=> x== playerEntity);
+
+            // Он был зарегестрирован.
+            if (coincidence != null)
+            {
+                PlayerEntities.Remove(playerEntity);
+                OnPlayerEntityRemove(playerEntity);
             }
         }
     }
