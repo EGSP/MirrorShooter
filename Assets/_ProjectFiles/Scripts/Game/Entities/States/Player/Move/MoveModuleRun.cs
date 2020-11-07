@@ -14,23 +14,39 @@ namespace Game.Entities.States.Player
 
         public override MoveModuleState FixedUpdateOnServer(float deltaTime)
         {
-            var input = MoveModule.PlayerInputManager;
+            // Если игрок на земле и над ним препятствие.
+            if (Module.IsGrounded && Module.IsHeadUnderObstacle)
+            {
+                return new MoveModuleCrouch(Module);       
+            }
+            
+            var input = Module.PlayerInputManager;
 
             _longJumpInterval += deltaTime;
-            
-            // Если нет удержания бега.
-            if (!input.GetHold(KeyCode.LeftShift))
-            {
-                return new MoveModuleWalk(MoveModule);
-            }
             
             var direction = ExtractOverallInputDirection();
             int isWalking = direction.sqrMagnitude != 0 ? 1 : 0;
             
+            if (isWalking == 0)
+            {
+                return new MoveModuleWalk(Module);
+            }
+            
+            // Если нет удержания бега.
+            if (!input.GetHold(KeyCode.LeftShift))
+            {
+                return new MoveModuleWalk(Module);
+            }
+            
+            
             // Если хотим прыгнуть.
             if (input.GetDown(KeyCode.Space))
             {
-                if (MoveModule.JumpIntervaled)
+                // Над головой препятствие.
+                if (Module.IsHeadUnderObstacle)
+                    return this;
+                
+                if (Module.JumpIntervaled)
                 {
                     var horizontal = ExtractHorizontalInput();
                     var vertical = ExtractVerticalInput();
@@ -39,23 +55,23 @@ namespace Game.Entities.States.Player
                     // Прыжок вперед-назад
                     if (horizontal == 0)
                     {
-                        bool isLongJump = _longJumpInterval >= MoveModule.LongJumpInterval && vertical != -1;
+                        bool isLongJump = _longJumpInterval >= Module.LongJumpInterval && vertical != -1;
 
                         // Длинный прыжок.
                         if (isLongJump)
                         {
-                            var jumpState = new MoveModuleJump(MoveModule,
-                                MoveModule.MoveSpeed * MoveModule.RunSpeedModifier, isWalking, isLongJump);
+                            var jumpState = new MoveModuleJump(Module,
+                                Module.MoveSpeed * Module.RunSpeedModifier, isWalking, isLongJump);
 
-                            jumpState.SetNext(new MoveModuleRun(MoveModule));
+                            jumpState.SetNext(new MoveModuleRun(Module));
                             return jumpState;
                         }
                         // Прыжок назад.
                         else
                         {
-                            var jumpState = new MoveModuleJump(MoveModule, MoveModule.MoveSpeed);
+                            var jumpState = new MoveModuleJump(Module, Module.MoveSpeed);
 
-                            jumpState.SetNext(new MoveModuleWalk(MoveModule));
+                            jumpState.SetNext(new MoveModuleWalk(Module));
                             return jumpState;
                         }
                     }
@@ -63,8 +79,8 @@ namespace Game.Entities.States.Player
                     else
                     {
                         // Прыжок со скоростью ходьбы
-                        var dodgeState = new MoveModuleDodge(MoveModule,horizontal,MoveModule.MoveSpeed);
-                        dodgeState.SetNext(new MoveModuleRun(MoveModule));
+                        var dodgeState = new MoveModuleDodge(Module,horizontal,Module.MoveSpeed);
+                        dodgeState.SetNext(new MoveModuleRun(Module));
 
                         return dodgeState;
                     }
@@ -72,7 +88,9 @@ namespace Game.Entities.States.Player
                 }
             }
             
-            Move(direction, MoveModule.MoveSpeed * MoveModule.RunSpeedModifier, deltaTime);
+            Play("Walk");
+
+            Move(direction, Module.MoveSpeed * Module.RunSpeedModifier, deltaTime);
             
             return this;
         }

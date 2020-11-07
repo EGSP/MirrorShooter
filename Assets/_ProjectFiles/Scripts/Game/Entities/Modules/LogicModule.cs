@@ -1,13 +1,21 @@
 ﻿using System;
+using Game.Entities.States;
 using Game.Net.Objects;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Game.Entities.Modules
 {
-    public class LogicModule : IDualObject, IDisposable
+    public class LogicModule<TState, TModule> : IDualObject, IDisposable
+        where TState: LogicState<TState,TModule>
+        where TModule: LogicModule<TState,TModule>
     {
         private DualUpdateManager _cachedUpdateManager;
 
         private IUnityMethodsHook _hook;
+
+        [SerializeField][ReadOnly] private string currentStateName;
+        protected TState CurrentState;
         
         public virtual void Initialize(IUnityMethodsHook hook)
         {
@@ -41,6 +49,34 @@ namespace Game.Entities.Modules
             _hook.OnFixedUpdateEvent -= FixedUpdate;
             _hook.OnEnableEvent -= Enable;
             _hook.OnDisableEvent -= Disable;
+        }
+
+        protected void UpdateState()
+        {
+            if (CurrentState != null)
+            {
+                currentStateName = CurrentState.GetType().Name;
+                
+                CurrentState = CurrentState.UpdateOnServer(Time.deltaTime);
+            }
+        }
+
+        protected void FixedUpdateState()
+        {
+            if (CurrentState != null)
+            {
+                currentStateName = CurrentState.GetType().Name;
+                
+                CurrentState = CurrentState.FixedUpdateOnServer(Time.fixedDeltaTime);
+            }
+        }
+        
+        public virtual void SetState(TState state)
+        {
+            if (state == null)
+                return;
+
+            CurrentState = state;
         }
 
         private void Awake()

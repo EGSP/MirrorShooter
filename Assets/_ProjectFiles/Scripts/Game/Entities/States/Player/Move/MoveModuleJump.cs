@@ -17,18 +17,18 @@ namespace Game.Entities.States.Player
         /// <param name="startSpeed">Стартовая скорость. 0 - если прыжок с места, 1 - если во время движения</param>
         public MoveModuleJump(PlayerMoveModule moveModule, float baseSpeed, int isWalking = 1, bool longJump = false) : base(moveModule)
         {
-            MoveModule.JumpInitiated();
+            Module.JumpInitiated();
             
-            MoveModule.Rigidbody.AddForce(MoveModule.Rigidbody.transform.up * MoveModule.JumpForce,
+            Module.Rigidbody.AddForce(Module.Rigidbody.transform.up * Module.JumpForce,
                 ForceMode.Impulse);
             
             var direction = ExtractOverallInputDirection();
 
             var vertical = ExtractVerticalInput();
-            _targetDirection += MoveModule.Rigidbody.transform.forward * vertical * isWalking;
+            _targetDirection += Module.Rigidbody.transform.forward * vertical * isWalking;
 
             var horizontal = ExtractHorizontalInput();
-            _targetDirection += MoveModule.Rigidbody.transform.right * horizontal * isWalking;
+            _targetDirection += Module.Rigidbody.transform.right * horizontal * isWalking;
             
             _baseSpeed = baseSpeed;
             _longJump = longJump;
@@ -37,7 +37,7 @@ namespace Game.Entities.States.Player
         public override MoveModuleState FixedUpdateOnServer(float deltaTime)
         {
             // Если на земле.
-            if (MoveModule.IsGrounded)
+            if (Module.IsGrounded)
             {
                 if (NextState != null)
                 {
@@ -45,7 +45,7 @@ namespace Game.Entities.States.Player
                 }
                 else
                 {
-                    return new MoveModuleWalk(MoveModule);
+                    return new MoveModuleWalk(Module);
                 }
             }
             
@@ -57,10 +57,10 @@ namespace Game.Entities.States.Player
 
         private void ProcessMovement(float deltaTime)
         {
-            var bodyCollider = MoveModule.PlayerEntity.BodyEntity.Collider;
-            if (Physics.Raycast(bodyCollider.center+MoveModule.Rigidbody.position,
-                MoveModule.Rigidbody.transform.forward,
-                bodyCollider.radius + MoveModule.WallCheckDistance, MoveModule.GroundLayer))
+            var bodyCollider = Module.PlayerEntity.BodyModule.Collider;
+            if (Physics.Raycast(bodyCollider.center+Module.Rigidbody.position,
+                Module.Rigidbody.transform.forward,
+                bodyCollider.radius + Module.WallCheckDistance, Module.GroundLayer))
             {
                 _targetDirection = Vector3.zero;
                 return;
@@ -83,21 +83,21 @@ namespace Game.Entities.States.Player
             switch (vertical)
             {
                 case 1:
-                    verticalModifier = MoveModule.ForwardModifier;
+                    verticalModifier = Module.ForwardModifier;
                     break;
                 case -1:
-                    verticalModifier = MoveModule.BackwardModifier;
+                    verticalModifier = Module.BackwardModifier;
                     break;
             }
 
             // Сила смещения вправо-влево
             var horizontalModifier = 0f;
             if (horizontal != 0)
-                horizontalModifier = MoveModule.SidewardsModifier;
+                horizontalModifier = Module.SidewardsModifier;
 
             // Смещение изначальной траектории
-            var additionalDirection = MoveModule.Rigidbody.transform.forward * vertical * verticalModifier +
-                MoveModule.Rigidbody.transform.right * horizontal * horizontalModifier;
+            var additionalDirection = Module.Rigidbody.transform.forward * vertical * verticalModifier +
+                Module.Rigidbody.transform.right * horizontal * horizontalModifier;
             
             additionalDirection = Vector3.ClampMagnitude(_targetDirection+additionalDirection,1f);
                 

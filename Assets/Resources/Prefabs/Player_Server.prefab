@@ -357,7 +357,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1661494666628229542}
-  - component: {fileID: 1661494666628229540}
   - component: {fileID: 1661494666628229541}
   m_Layer: 0
   m_Name: Entities
@@ -380,37 +379,6 @@ Transform:
   m_Father: {fileID: 1929639431487818606}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1661494666628229540
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1661494666628229543}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6aec1860f0b1412fb90177789e542c1d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
-    ReferencedUnityObjects:
-    - {fileID: 1929639431487818606}
-    - {fileID: 1661494666652827403}
-    SerializedBytesString: 
-    Prefab: {fileID: 0}
-    PrefabModificationsReferencedUnityObjects: []
-    PrefabModifications: []
-    SerializationNodes:
-    - Name: BodyTransform
-      Entry: 10
-      Data: 0
-    - Name: Collider
-      Entry: 10
-      Data: 1
-  syncMode: 0
-  syncInterval: 0.1
 --- !u!114 &1661494666628229541
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -488,6 +456,7 @@ GameObject:
   - component: {fileID: 1661494666652827402}
   - component: {fileID: 1661494666652827403}
   - component: {fileID: 108709797333829950}
+  - component: {fileID: 6152321693929208383}
   m_Layer: 0
   m_Name: Player_Server
   m_TagString: Untagged
@@ -546,28 +515,267 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
-    - {fileID: 1661494666628229540}
     - {fileID: 1661494666628229541}
+    - {fileID: 1929639431487818606}
+    - {fileID: 1661494666652827403}
+    - {fileID: 108709797333829950}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes:
-    - Name: BodyEntity
-      Entry: 10
-      Data: 0
     - Name: CameraEntity
       Entry: 10
+      Data: 0
+    - Name: BodyModule
+      Entry: 7
+      Data: 0|Game.Entities.Modules.PlayerBodyModule, Assembly-CSharp
+    - Name: currentStateName
+      Entry: 6
+      Data: 
+    - Name: BodyTransform
+      Entry: 10
       Data: 1
+    - Name: Collider
+      Entry: 10
+      Data: 2
+    - Name: InOutCrouch
+      Entry: 7
+      Data: 1|Gasanov.Extensions.Curves.CurveHandler, Assembly-CSharp
+    - Name: curve
+      Entry: 7
+      Data: 2|UnityEngine.AnimationCurve, UnityEngine.CoreModule
+    - Name: 
+      Entry: 7
+      Data: 3|UnityEngine.Keyframe[], UnityEngine.CoreModule
+    - Name: 
+      Entry: 12
+      Data: 2
+    - Name: 
+      Entry: 7
+      Data: UnityEngine.Keyframe, UnityEngine.CoreModule
+    - Name: ver
+      Entry: 3
+      Data: 1
+    - Name: m_Time
+      Entry: 4
+      Data: 0
+    - Name: m_Value
+      Entry: 4
+      Data: 1.88
+    - Name: m_InTangent
+      Entry: 4
+      Data: -0.580000043
+    - Name: m_OutTangent
+      Entry: 4
+      Data: -0.580000043
+    - Name: m_TangentMode
+      Entry: 3
+      Data: 34
+    - Name: m_WeightedMode
+      Entry: 3
+      Data: 0
+    - Name: m_InWeight
+      Entry: 4
+      Data: 0
+    - Name: m_OutWeight
+      Entry: 4
+      Data: 0.333333343
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: UnityEngine.Keyframe, UnityEngine.CoreModule
+    - Name: ver
+      Entry: 3
+      Data: 1
+    - Name: m_Time
+      Entry: 4
+      Data: 1
+    - Name: m_Value
+      Entry: 4
+      Data: 1.3
+    - Name: m_InTangent
+      Entry: 4
+      Data: -0.580000043
+    - Name: m_OutTangent
+      Entry: 4
+      Data: -0.580000043
+    - Name: m_TangentMode
+      Entry: 3
+      Data: 34
+    - Name: m_WeightedMode
+      Entry: 3
+      Data: 0
+    - Name: m_InWeight
+      Entry: 4
+      Data: 0.333333343
+    - Name: m_OutWeight
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 3
+      Data: 8
+    - Name: 
+      Entry: 3
+      Data: 8
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: InOutCrouchTime
+      Entry: 4
+      Data: 0.7
+    - Name: CrouchY
+      Entry: 7
+      Data: UnityEngine.Vector2, UnityEngine.CoreModule
+    - Name: 
+      Entry: 4
+      Data: 0.65
+    - Name: 
+      Entry: 4
+      Data: 0.88
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: InSprint
+      Entry: 7
+      Data: 4|Gasanov.Extensions.Curves.CurveHandler, Assembly-CSharp
+    - Name: curve
+      Entry: 7
+      Data: 5|UnityEngine.AnimationCurve, UnityEngine.CoreModule
+    - Name: 
+      Entry: 7
+      Data: 6|UnityEngine.Keyframe[], UnityEngine.CoreModule
+    - Name: 
+      Entry: 12
+      Data: 2
+    - Name: 
+      Entry: 7
+      Data: UnityEngine.Keyframe, UnityEngine.CoreModule
+    - Name: ver
+      Entry: 3
+      Data: 1
+    - Name: m_Time
+      Entry: 4
+      Data: 0
+    - Name: m_Value
+      Entry: 4
+      Data: 1.88
+    - Name: m_InTangent
+      Entry: 4
+      Data: -0.230000019
+    - Name: m_OutTangent
+      Entry: 4
+      Data: -0.230000019
+    - Name: m_TangentMode
+      Entry: 3
+      Data: 34
+    - Name: m_WeightedMode
+      Entry: 3
+      Data: 0
+    - Name: m_InWeight
+      Entry: 4
+      Data: 0
+    - Name: m_OutWeight
+      Entry: 4
+      Data: 0.333333343
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: UnityEngine.Keyframe, UnityEngine.CoreModule
+    - Name: ver
+      Entry: 3
+      Data: 1
+    - Name: m_Time
+      Entry: 4
+      Data: 1
+    - Name: m_Value
+      Entry: 4
+      Data: 1.65
+    - Name: m_InTangent
+      Entry: 4
+      Data: -0.230000019
+    - Name: m_OutTangent
+      Entry: 4
+      Data: -0.230000019
+    - Name: m_TangentMode
+      Entry: 3
+      Data: 34
+    - Name: m_WeightedMode
+      Entry: 3
+      Data: 0
+    - Name: m_InWeight
+      Entry: 4
+      Data: 0.333333343
+    - Name: m_OutWeight
+      Entry: 4
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 3
+      Data: 8
+    - Name: 
+      Entry: 3
+      Data: 8
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: InSprintTime
+      Entry: 4
+      Data: 0.75
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: MoveModule
       Entry: 7
-      Data: 0|Game.Entities.Modules.PlayerMoveModule, Assembly-CSharp
+      Data: 7|Game.Entities.Modules.PlayerMoveModule, Assembly-CSharp
+    - Name: currentStateName
+      Entry: 6
+      Data: 
     - Name: MoveSpeed
       Entry: 4
       Data: 3
     - Name: RunSpeedModifier
       Entry: 4
-      Data: 2
+      Data: 1.3
+    - Name: CrouchSpeedModifier
+      Entry: 4
+      Data: 0.4
+    - Name: SprintSpeedModifier
+      Entry: 4
+      Data: 1.7
+    - Name: SprintTime
+      Entry: 4
+      Data: 1.8
+    - Name: SprintInterval
+      Entry: 4
+      Data: 2.5
     - Name: JumpForce
       Entry: 4
       Data: 25
@@ -604,18 +812,18 @@ MonoBehaviour:
     - Name: IsGrounded
       Entry: 5
       Data: false
-    - Name: currentStateName
-      Entry: 6
-      Data: 
     - Name: 
       Entry: 8
       Data: 
     - Name: AnimationModule
       Entry: 7
-      Data: 1|Game.Entities.Modules.PlayerAnimationModule, Assembly-CSharp
-    - Name: _networkAnimator
+      Data: 8|Game.Entities.Modules.PlayerAnimationModule, Assembly-CSharp
+    - Name: currentStateName
       Entry: 6
       Data: 
+    - Name: _networkAnimator
+      Entry: 10
+      Data: 3
     - Name: 
       Entry: 8
       Data: 
@@ -650,10 +858,10 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.5
-  m_Height: 1.5
+  m_Radius: 0.28363913
+  m_Height: 1.88
   m_Direction: 1
-  m_Center: {x: 0, y: 0.75, z: 0}
+  m_Center: {x: 0, y: 0.88, z: 0}
 --- !u!114 &108709797333829950
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -677,11 +885,30 @@ MonoBehaviour:
     SerializationNodes: []
   syncMode: 0
   syncInterval: 0.1
-  _animator: {fileID: 4388991801009490039}
+  _animator: {fileID: 6152321693929208383}
   _clientAuthoritative: 0
   _synchronizeToOwner: 0
   _smoothFloats: 1
   _interpolationFallbehind: 0.02
+--- !u!95 &6152321693929208383
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1929639431487818602}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: ec2b1e61993d307458b233edc3f3ecd7, type: 3}
+  m_Controller: {fileID: 9100000, guid: f20a301747f4616408885f7dfa17e24c, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &2197550863464557921
 GameObject:
   m_ObjectHideFlags: 0
@@ -721,7 +948,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6614593329585931115}
-  - component: {fileID: 4388991801009490039}
   m_Layer: 0
   m_Name: mixamorig:Hips
   m_TagString: Untagged
@@ -746,25 +972,6 @@ Transform:
   m_Father: {fileID: 1929639431487818606}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &4388991801009490039
-Animator:
-  serializedVersion: 3
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2239461897671580190}
-  m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: ec2b1e61993d307458b233edc3f3ecd7, type: 3}
-  m_Controller: {fileID: 9100000, guid: f20a301747f4616408885f7dfa17e24c, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &2440684429547468300
 GameObject:
   m_ObjectHideFlags: 0

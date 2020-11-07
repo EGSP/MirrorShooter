@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using FirstGearGames.Mirrors.Assets.FlexNetworkAnimators;
+using Game.Entities.States.Player.Animation;
 using Sirenix.Serialization;
 using UnityEngine;
 
 namespace Game.Entities.Modules
 {
-    public class PlayerAnimationModule : LogicModule
+    public class PlayerAnimationModule : LogicModule<AnimationModuleState, PlayerAnimationModule>
     {
         [SerializeField] private FlexNetworkAnimator _networkAnimator;
 
@@ -40,7 +41,12 @@ namespace Game.Entities.Modules
             var hash = Animator.StringToHash(animationString);
 
             if (_networkAnimator != null)
+            {
                 _networkAnimator.SetTrigger(hash);
+                
+                _networkAnimator.Animator.Play(hash);
+            }
+
         }
     }
 }

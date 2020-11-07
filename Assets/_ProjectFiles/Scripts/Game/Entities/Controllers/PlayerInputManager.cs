@@ -164,5 +164,35 @@ namespace Game.Entities.Controllers
             return KeyCodeHandlers.Exists(x =>
                 x.Code == keyCode && x.State == KeyCodeState.Hold);
         }
+
+        public bool GetHoldOrDown(KeyCode keyCode)
+        {
+            var keyHandler = KeyCodeHandlers.FirstOrDefault(x => x.Code == keyCode);
+
+            if (keyHandler == null)
+                return false;
+
+            if (keyHandler.State == KeyCodeState.Down || keyHandler.State == KeyCodeState.Hold)
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Убирает ключ из списка.
+        /// </summary>
+        public void RemoveKey(KeyCode keyCode)
+        {
+            for (var i = 0; i < KeyCodeHandlers.Count; i++)
+            {
+                var handler = KeyCodeHandlers[i];
+
+                if (handler.Code == keyCode)
+                {
+                    KeyCodeHandlers.RemoveAt(i);
+                }
+            }
+        }
+        
     }
 }

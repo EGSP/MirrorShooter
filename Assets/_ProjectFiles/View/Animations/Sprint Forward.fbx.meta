@@ -1,11 +1,11 @@
 fileFormatVersion: 2
-guid: e52963f606283fb43861bc59c8124150
+guid: db045c044eed32a43b63d799857a4a31
 ModelImporter:
   serializedVersion: 19301
   internalIDToNameTable:
   - first:
       74: -203655887218126122
-    second: Idle
+    second: Sprint
   externalObjects: {}
   materials:
     materialImportMode: 1
@@ -18,8 +18,7 @@ ModelImporter:
     resampleCurves: 1
     optimizeGameObjects: 0
     motionNodeName: 
-    rigImportErrors: "Invalid copied Avatar Rig Configuration:\n\tNo human bone found.
-      Ensure both rig type match\n"
+    rigImportErrors: 
     rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
@@ -36,11 +35,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Idle
+      name: Sprint
       takeName: mixamo.com
       internalID: 0
       firstFrame: 0
-      lastFrame: 600
+      lastFrame: 30
       wrapMode: 0
       orientationOffsetY: 0
       level: 0

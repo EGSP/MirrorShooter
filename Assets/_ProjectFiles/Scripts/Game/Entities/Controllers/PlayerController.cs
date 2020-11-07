@@ -54,13 +54,7 @@ namespace Game.Entities.Controllers
             
             // Здесь нужно формировать лист из нажаты - отжатых кнопок и отправлять его.
 
-            DefineKeyCodeState(KeyCode.W);
-            DefineKeyCodeState(KeyCode.S);
-            DefineKeyCodeState(KeyCode.A);
-            DefineKeyCodeState(KeyCode.D);
-            
-            DefineKeyCodeState(KeyCode.LeftShift);
-            DefineKeyCodeState(KeyCode.Space);
+            DefineKeys();
             
             CmdHandleDownKeys(down);
             CmdHandleUpKeys(up);
@@ -69,6 +63,20 @@ namespace Game.Entities.Controllers
             up.Clear();
         }
 
+        protected void DefineKeys()
+        {
+            DefineKeyCodeState(KeyCode.W);
+            DefineKeyCodeState(KeyCode.S);
+            DefineKeyCodeState(KeyCode.A);
+            DefineKeyCodeState(KeyCode.D);
+            
+            DefineKeyCodeState(KeyCode.LeftShift);
+            
+            DefineKeyCodeState(KeyCode.Space);
+            
+            DefineKeyCodeState(KeyCode.LeftControl);
+        }
+        
         /// <summary>
         /// Заносит клавишу в список состояний.
         /// </summary>
@@ -98,7 +106,7 @@ namespace Game.Entities.Controllers
 
         protected void RotateBody(float rotationY)
         {
-            PlayerEntity.BodyEntity.RotateY(rotationY);
+            PlayerEntity.BodyModule.RotateY(rotationY);
         }
 
         [Command(ignoreAuthority = true)]

@@ -462,7 +462,7 @@ namespace Mirror
 
             hasSpawned = true;
 
-            ApplyApplicationMode(_applicationMode);
+            ApplyApplicationMode(ApplicationMode);
         }
 
         /// <summary>

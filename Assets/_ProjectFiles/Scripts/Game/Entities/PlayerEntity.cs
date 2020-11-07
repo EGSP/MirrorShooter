@@ -13,16 +13,17 @@ namespace Game.Entities
 {
     public class PlayerEntity : DualNetworkBehaviour
     {
-        [BoxGroup("Body")]
-        [OdinSerialize] public PlayerBodyEntity BodyEntity { get; private set; }
-
         [BoxGroup("Camera")] 
         [OdinSerialize] public PlayerCameraEntity CameraEntity { get; private set; }
         
         [BoxGroup("Modules")]
+        [BoxGroup("Modules/Body")]
+        [OdinSerialize] public PlayerBodyModule BodyModule { get; private set; }
+        
+        [BoxGroup("Modules/Movement")]
         [OdinSerialize] public PlayerMoveModule MoveModule { get; private set; }
         
-        [BoxGroup("Modules")]
+        [BoxGroup("Modules/Animation")]
         [OdinSerialize] public PlayerAnimationModule AnimationModule { get; private set; }
 
         [FoldoutGroup("User", 100)]
@@ -49,6 +50,8 @@ namespace Game.Entities
             
             ServerSession.singletone.AddPlayerEntity(this);
             
+            BodyModule.Initialize(this);
+            
             MoveModule.Initialize(this);
             MoveModule.Setup(this, rigidBody);
 
@@ -62,6 +65,7 @@ namespace Game.Entities
             _playerInputManager = playerInputManager;
 
             MoveModule.PlayerInputManager = _playerInputManager;
+            BodyModule.PlayerInputManager = _playerInputManager;
         }
         
 

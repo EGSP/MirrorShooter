@@ -10,7 +10,7 @@ using UnityEngine;
 namespace Game.Entities.Modules
 {
     [Serializable]
-    public class PlayerMoveModule : LogicModule
+    public class PlayerMoveModule : LogicModule<MoveModuleState, PlayerMoveModule>
     {
         public PlayerEntity PlayerEntity { get; set; }
         public PlayerInputManager PlayerInputManager { get; set; }
@@ -19,6 +19,17 @@ namespace Game.Entities.Modules
         [OdinSerialize] public float MoveSpeed { get; private set; } = 5f;
         [BoxGroup("Characteristics")]
         [OdinSerialize] public float RunSpeedModifier { get; private set; } = 2f;
+        [BoxGroup("Characteristics")]
+        [OdinSerialize] public float CrouchSpeedModifier { get; private set; }
+        
+        [BoxGroup("Characteristics/Sprint")]
+        [OdinSerialize] public float SprintSpeedModifier { get; private set; }
+        
+        [BoxGroup("Characteristics/Sprint")]
+        [OdinSerialize] public float SprintTime { get; private set; }
+        
+        [BoxGroup("Characteristics/Sprint")] [PropertyTooltip("Время для возможности активации спринта.")]
+        [OdinSerialize] public float SprintInterval { get; private set; }
 
         [BoxGroup("Characteristics/Jump")]
         [OdinSerialize] public float JumpForce { get; private set; } = 2f;
@@ -42,15 +53,14 @@ namespace Game.Entities.Modules
 
         [BoxGroup("Global settings")]
         [OdinSerialize] public LayerMask GroundLayer { get; private set; }
-        [BoxGroup("Global settings")] [InfoBox("Промежуток времени после прыжка, прежде чем проверять землю")]
+        [BoxGroup("Global settings")] [InfoBox("Промежуток времени после прыжка, прежде чем проверять землю.")]
         [OdinSerialize] public float GroundCheckDelay { get; private set; }
         [BoxGroup("Global settings")]
         [OdinSerialize] public float WallCheckDistance { get; private set; }
         
         
         [OdinSerialize][ReadOnly] public bool IsGrounded { get; private set; }
-
-        [SerializeField][ReadOnly] private string currentStateName;
+        [OdinSerialize][ReadOnly] public bool IsHeadUnderObstacle { get; private set; }
 
         /// <summary>
         /// Можно прыгать, когда пройден интервал времени с момента прошлого прыжка.
@@ -61,11 +71,6 @@ namespace Game.Entities.Modules
         /// Физическое тело для перемещения.
         /// </summary>
         public Rigidbody Rigidbody { get; private set; }
-
-        /// <summary>
-        /// Текущее состояние модуля передвижения.
-        /// </summary>
-        private MoveModuleState _moveModuleState;
 
         private float _baseJumpInterval;
         private float _groundCheckDelay;
@@ -79,12 +84,22 @@ namespace Game.Entities.Modules
 
             _baseJumpInterval = _baseJumpInterval;
             _groundCheckDelay = GroundCheckDelay;
-            _moveModuleState = new MoveModuleWalk(this);
+            CurrentState = new MoveModuleWalk(this);
         }
 
         public override void UpdateOnServer()
         {
+            if (PlayerInputManager == null)
+            {    
+                return;
+            }
+
+            UpdateState();
+            
             CheckJumpInterval();
+            
+            CheckIsGrounded();
+            CheckIsHeadUnderObstacle();
         }
 
         public override void FixedUpdateOnServer()
@@ -94,14 +109,7 @@ namespace Game.Entities.Modules
                 return;
             }
 
-            if (_moveModuleState != null)
-            {
-                currentStateName = _moveModuleState.GetType().Name;
-                
-                _moveModuleState = _moveModuleState.FixedUpdateOnServer(Time.fixedDeltaTime);
-            }
-
-            CheckIsGrounded();
+            FixedUpdateState();
         }
 
         /// <summary>
@@ -109,20 +117,37 @@ namespace Game.Entities.Modules
         /// </summary>
         private void CheckIsGrounded()
         {
+            
+            // Debug.Log("CheckGroundStart");
             if (_groundCheckDelay < GroundCheckDelay)
             {
+                // Debug.Log("CheckDelay");
                 _groundCheckDelay += Time.fixedDeltaTime;
                 return;
             }
             
             // Если под ногами есть земля. Пивот должен быть в ногах.
-            if (Physics.OverlapSphere(Rigidbody.position,0.01f,GroundLayer).Length != 0)
+            if (Physics.OverlapSphere(Rigidbody.position,0.1f,GroundLayer).Length != 0)
             {
                 IsGrounded = true;
             }
             else
             {
                 IsGrounded = false;
+            }
+        }
+
+        private void CheckIsHeadUnderObstacle()
+        {
+            if (Physics.OverlapSphere(
+                Rigidbody.position + Vector3.up * PlayerEntity.BodyModule.InOutCrouch.Get(0), 
+                0.1f, GroundLayer).Length != 0)
+            {
+                IsHeadUnderObstacle = true;
+            }
+            else
+            {
+                IsHeadUnderObstacle = false;
             }
         }
 

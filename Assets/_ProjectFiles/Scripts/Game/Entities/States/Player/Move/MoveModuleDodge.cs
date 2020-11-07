@@ -10,12 +10,12 @@ namespace Game.Entities.States.Player
 
         public MoveModuleDodge(PlayerMoveModule moveModule, int horizontalInput, float baseSpeed) : base(moveModule)
         {
-            _targetDirection = MoveModule.Rigidbody.transform.right * horizontalInput;;
+            _targetDirection = Module.Rigidbody.transform.right * horizontalInput;;
             _baseSpeed = baseSpeed;
             
-            MoveModule.JumpInitiated();
+            Module.JumpInitiated();
             
-            MoveModule.Rigidbody.AddForce(MoveModule.Rigidbody.transform.up * MoveModule.JumpForce,
+            Module.Rigidbody.AddForce(Module.Rigidbody.transform.up * Module.JumpForce,
                 ForceMode.Impulse);
             
         }
@@ -23,7 +23,7 @@ namespace Game.Entities.States.Player
         public override MoveModuleState FixedUpdateOnServer(float deltaTime)
         {
             // Если на земле.
-            if (MoveModule.IsGrounded)
+            if (Module.IsGrounded)
             {
                 if (NextState != null)
                 {
@@ -31,7 +31,7 @@ namespace Game.Entities.States.Player
                 }
                 else
                 {
-                    return new MoveModuleWalk(MoveModule);
+                    return new MoveModuleWalk(Module);
                 }
             }
             
@@ -42,10 +42,10 @@ namespace Game.Entities.States.Player
 
         public void ProcessMovement(float deltaTime)
         {
-            var bodyCollider = MoveModule.PlayerEntity.BodyEntity.Collider;
-            if (Physics.Raycast(bodyCollider.center+MoveModule.Rigidbody.position,
-                MoveModule.Rigidbody.transform.forward,
-                bodyCollider.radius + MoveModule.WallCheckDistance, MoveModule.GroundLayer))
+            var bodyCollider = Module.PlayerEntity.BodyModule.Collider;
+            if (Physics.Raycast(bodyCollider.center+Module.Rigidbody.position,
+                Module.Rigidbody.transform.forward,
+                bodyCollider.radius + Module.WallCheckDistance, Module.GroundLayer))
             {
                 return;
             }
