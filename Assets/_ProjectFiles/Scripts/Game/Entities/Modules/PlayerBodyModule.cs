@@ -22,6 +22,9 @@ namespace Game.Entities.Modules
         [OdinSerialize] 
         public Transform BodyTransform { get; private set; }
         
+        [OdinSerialize]
+        public Transform CameraTarget { get; private set; }
+        
         /// <summary>
         /// Физический коллайдер игрока.
         /// </summary>
@@ -53,20 +56,19 @@ namespace Game.Entities.Modules
         /// Присел ли персонаж.
         /// </summary>
         public bool HasCrouched => CurrentCrouchOpacity == 1;
-        
+
         public override void AwakeOnClient()
         {
-            if(BodyTransform == null)
-                throw new NullReferenceException();
-            
-            if(Collider == null)
-                throw new NullReferenceException();
-
-            _cachedBodyRotation = BodyTransform.rotation;
+            CommonAwake();
         }
 
         public override void AwakeOnServer()
         {
+            CommonAwake();
+        }
+
+        private void CommonAwake()
+        {
             if(BodyTransform == null)
                 throw new NullReferenceException();
             
@@ -74,6 +76,7 @@ namespace Game.Entities.Modules
                 throw new NullReferenceException();
 
             _cachedBodyRotation = BodyTransform.rotation;
+            
         }
 
         public override void UpdateOnServer()
@@ -84,6 +87,13 @@ namespace Game.Entities.Modules
             }
             
             UpdateState();
+            MoveCameraTarget();
+        }
+
+        private void MoveCameraTarget()
+        {
+            CameraTarget.localPosition = Vector3.zero + new Vector3(0, 
+                InOutCrouch.Get(CurrentCrouchOpacity),0);
         }
 
         /// <summary>

@@ -41,9 +41,9 @@ namespace Game.Entities.States.Player.Body
 
             // На какой мы точке.
             var opacity = Mathf.Clamp(_crouchingTime / Module.InOutCrouchTime, 0,1);
-            Module.CurrentCrouchOpacity = opacity;
 
             opacity = Mathf.Abs(_inOut - opacity);
+            Module.CurrentCrouchOpacity = opacity;
             
             var height = Module.InOutCrouch.Get(opacity);
             

@@ -153,7 +153,7 @@ namespace Game.Entities.Controllers
                 // PlayerEntity.GetComponent<Rigidbody>().useGravity = false;
 
                 if (LaunchInfo.LaunchMode == LaunchModeType.Client)
-                    PlayerEntity.CameraEntity.SetCamera(Camera.main);
+                    PlayerEntity.CameraEntity.SetCamera(Camera.main, PlayerEntity.BodyModule.CameraTarget);
             }
             else
             {
@@ -173,7 +173,7 @@ namespace Game.Entities.Controllers
         [Server]
         public void SetPlayerEntityCamera()
         {
-            PlayerEntity.CameraEntity.SetCamera(Camera.main);
+            PlayerEntity.CameraEntity.SetCamera(Camera.main, PlayerEntity.BodyModule.CameraTarget);
         }
         
     }

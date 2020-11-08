@@ -9,16 +9,9 @@ namespace Game.Entities
 {
     public class PlayerCameraEntity : DualNetworkBehaviour
     {
-        /// <summary>
-        /// Корневой объект камеры, к которому она привязана.
-        /// </summary>
-        [BoxGroup("Objects")][OdinSerialize]
-        public Transform CameraRoot { get; private set; }
-        /// <summary>
-        /// Объект камеры, он привязан к корневому объекту.
-        /// </summary>
-        [BoxGroup("Objects")][OdinSerialize]
-        public Camera CameraObject { get; private set; }
+        
+        [OdinSerialize][ReadOnly]
+        public Camera CameraComponent { get; private set; }
         
         /// <summary>
         /// Ограничение поворота камеры по оси X.
@@ -26,55 +19,72 @@ namespace Game.Entities
         /// </summary>
         [BoxGroup("Settings")]
         [OdinSerialize] public float CameraVerticalRotationClamp { get; private set; }
+        [BoxGroup("Settings")]
+        [OdinSerialize][PropertyRange(0,1)] public float FollowRate { get; private set; }
         
         
         /// <summary>
         /// Текущий угол поворота камеры.
         /// </summary>
         private float _cameraVerticalRotation;
+        
         /// <summary>
         /// Кешированное значение поворота камеры.
         /// </summary>
         private Quaternion _cachedCameraRotation;
 
-        public override void AwakeOnClient()
+        private Transform _target;
+        
+
+        public override void LateUpdateOnClient()
         {
-            if(CameraRoot == null)
-                throw new NullReferenceException();
+            if (CameraComponent == null)
+                return;
             
-            _cachedCameraRotation = CameraRoot.localRotation;
+            Follow();
         }
 
-        public override void AwakeOnServer()
+        public override void LateUpdateOnServer()
         {
-            if(CameraRoot == null)
-                throw new NullReferenceException();
+            if (CameraComponent == null)
+                return;
             
-            _cachedCameraRotation = CameraRoot.localRotation;
+            Follow();
+        }
+
+        private void Follow()
+        {
+            if (_target == null)
+                return;
+            
+            var tr = CameraComponent.transform;
+            
+            tr.localPosition = Vector3.Slerp(tr.localPosition, _target.position, FollowRate);
+
+            // Поворот относительно тела.
+            tr.localRotation = _target.rotation * _cachedCameraRotation;
         }
 
         /// <summary>
         /// Установка новой камеры. Старая камера будет удалена.
         /// Если новая камера null, то просто ничего не произойдет.
         /// </summary>
-        public void SetCamera(Camera cameraObject)
+        public void SetCamera(Camera cameraComponent, Transform target)
         {
-            if (CameraRoot == null)
+            if (cameraComponent == null)
                 return;
             
-            if (cameraObject == null)
-                return;
+            if (CameraComponent != null)
+                Destroy(CameraComponent.gameObject);
             
-            if (CameraObject != null)
-                Destroy(CameraObject.gameObject);
+            CameraComponent = cameraComponent;
             
-            CameraObject = cameraObject;
-            
-            // Присоедининие к корневому объекту.
-            CameraObject.transform.
-                SetParent(CameraRoot,false);
-            CameraObject.transform.localRotation = Quaternion.identity;
-            CameraObject.transform.localPosition = Vector3.zero;
+            CameraComponent.transform.localRotation = Quaternion.identity;
+            CameraComponent.transform.localPosition = Vector3.zero;
+
+            _cachedCameraRotation = CameraComponent.transform.localRotation;
+
+            _target = target;
         }
 
         /// <summary>
@@ -91,25 +101,7 @@ namespace Game.Entities
             // Новое вращение камеры.
             _cachedCameraRotation = Quaternion.Euler(_cameraVerticalRotation, 0, 0);
             // Вращаем корневой объект.
-            CameraRoot.localRotation = _cachedCameraRotation;
-        }
-
-        /// <summary>
-        /// Поворот камеры по оси Х.
-        /// </summary>
-        [Command(ignoreAuthority = true)]
-        public void CmdRotateX(float deltaRotationX)
-        {
-            // Поворот камеры относительно тела.
-            _cameraVerticalRotation += deltaRotationX;
-            // Ограничение поворота по вертикали.
-            _cameraVerticalRotation = Mathf.Clamp(_cameraVerticalRotation,
-                -CameraVerticalRotationClamp, CameraVerticalRotationClamp); 
-            
-            // Новое вращение камеры.
-            _cachedCameraRotation = Quaternion.Euler(_cameraVerticalRotation, 0, 0);
-            // Вращаем корневой объект.
-            CameraRoot.localRotation = _cachedCameraRotation;
+            CameraComponent.transform.localRotation = _cachedCameraRotation;
         }
     }
 }

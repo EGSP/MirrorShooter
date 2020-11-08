@@ -327,7 +327,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1661494666538229931}
   m_Layer: 0
-  m_Name: CameraPlace
+  m_Name: CameraTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -343,8 +343,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.674, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 1661494667284134133}
+  m_Children: []
   m_Father: {fileID: 1929639431487818606}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -394,54 +393,23 @@ MonoBehaviour:
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
-    ReferencedUnityObjects:
-    - {fileID: 1661494667284134133}
+    ReferencedUnityObjects: []
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes:
-    - Name: CameraRoot
-      Entry: 10
-      Data: 0
-    - Name: CameraObject
+    - Name: CameraComponent
       Entry: 6
       Data: 
     - Name: CameraVerticalRotationClamp
       Entry: 4
       Data: 80
+    - Name: FollowRate
+      Entry: 4
+      Data: 0.974
   syncMode: 0
   syncInterval: 0.1
---- !u!1 &1661494667284134134
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1661494667284134133}
-  m_Layer: 0
-  m_Name: CameraRoot
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1661494667284134133
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1661494667284134134}
-  m_LocalRotation: {x: -0.16676867, y: 0, z: 0, w: 0.98599607}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1661494666538229931}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1929639431487818602
 GameObject:
   m_ObjectHideFlags: 0
@@ -517,6 +485,7 @@ MonoBehaviour:
     ReferencedUnityObjects:
     - {fileID: 1661494666628229541}
     - {fileID: 1929639431487818606}
+    - {fileID: 1661494666538229931}
     - {fileID: 1661494666652827403}
     - {fileID: 108709797333829950}
     SerializedBytesString: 
@@ -536,9 +505,12 @@ MonoBehaviour:
     - Name: BodyTransform
       Entry: 10
       Data: 1
-    - Name: Collider
+    - Name: CameraTarget
       Entry: 10
       Data: 2
+    - Name: Collider
+      Entry: 10
+      Data: 3
     - Name: InOutCrouch
       Entry: 7
       Data: 1|Gasanov.Extensions.Curves.CurveHandler, Assembly-CSharp
@@ -775,7 +747,7 @@ MonoBehaviour:
       Data: 1.8
     - Name: SprintInterval
       Entry: 4
-      Data: 2.5
+      Data: 1.54
     - Name: JumpForce
       Entry: 4
       Data: 25
@@ -812,6 +784,9 @@ MonoBehaviour:
     - Name: IsGrounded
       Entry: 5
       Data: false
+    - Name: IsHeadUnderObstacle
+      Entry: 5
+      Data: false
     - Name: 
       Entry: 8
       Data: 
@@ -823,7 +798,7 @@ MonoBehaviour:
       Data: 
     - Name: _networkAnimator
       Entry: 10
-      Data: 3
+      Data: 4
     - Name: 
       Entry: 8
       Data: 
