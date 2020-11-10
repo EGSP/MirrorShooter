@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Game.Configuration;
 using Gasanov.Core;
 using Mirror;
+using UnityEngine;
 
 namespace Game.Net.Objects
 {
@@ -184,6 +185,7 @@ namespace Game.Net.Objects
         
         private void SetMode(UpdateModeType newMode)
         {
+            // Debug.Log(newMode);
             if (newMode == UpdateModeType.Server)
             {
                 _abstractUpdateMode = new ServerUpdateMode();

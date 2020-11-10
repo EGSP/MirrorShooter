@@ -42,7 +42,7 @@ namespace Game.Entities.Modules
 
             if (_networkAnimator != null)
             {
-                _networkAnimator.SetTrigger(hash);
+                // _networkAnimator.SetTrigger(hash);
                 
                 _networkAnimator.Animator.Play(hash);
             }

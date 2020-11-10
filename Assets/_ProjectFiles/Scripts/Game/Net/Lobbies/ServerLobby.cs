@@ -90,7 +90,9 @@ namespace Game.Net
             NetworkManager.OnServerReadyEvent += ClientReady;
 
             LaunchInfo.LaunchMode = LaunchModeType.Server;
-            NetworkIdentity.ApplicationMode = NetworkIdentity.ApplicationModeType.Server;
+            
+            // Из-за этой строки не спавнятся объекты у клиентов.
+            // NetworkIdentity.ApplicationMode = NetworkIdentity.ApplicationModeType.Server;
 
             Session = gameObject.AddComponent<ServerSession>();
             Session.NetworkManager = NetworkManager;

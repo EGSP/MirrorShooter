@@ -25,6 +25,8 @@ namespace Game.Entities
         
         [BoxGroup("Modules/Animation")]
         [OdinSerialize] public PlayerAnimationModule AnimationModule { get; private set; }
+        
+        
 
         [FoldoutGroup("User", 100)]
         [SyncVar] public User owner;
@@ -40,6 +42,10 @@ namespace Game.Entities
             
             rigidBody.useGravity = false;
             
+            BodyModule.Initialize(this);
+            MoveModule.Initialize(this);
+            MoveModule.Setup(this, rigidBody);
+            AnimationModule.Initialize(this);
         }
         
         public override void AwakeOnServer()

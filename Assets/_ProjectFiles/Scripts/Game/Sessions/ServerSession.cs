@@ -114,11 +114,11 @@ namespace Game.Sessions
             if (SpawnServerController)
             {
                 var playerEntityServerPrefab = Resources.Load<PlayerEntity>("Prefabs/Player_Server");
-                if(_playerEntityPrefab == null)
+                if(playerEntityServerPrefab == null)
                     throw new NullReferenceException();
 
                  var playerControllerServer = Resources.Load<PlayerController>("Prefabs/PC_Server");
-                if (_playerController == null)
+                if (playerControllerServer == null)
                     throw new NullReferenceException();
                 
                 // Спавн персонажа

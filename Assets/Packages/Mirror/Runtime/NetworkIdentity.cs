@@ -154,12 +154,12 @@ namespace Mirror
                 if (value == _applicationMode)
                     return;
                 
+                _applicationMode = value;
+                
                 foreach (var identity in spawned.Values)
                 {
                     identity.ApplyApplicationMode(_applicationMode);
                 }
-
-                _applicationMode = value;
             }
         }
         private static ApplicationModeType _applicationMode;

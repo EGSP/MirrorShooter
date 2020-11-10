@@ -1,6 +1,7 @@
 ﻿using System;
 using Game.Entities.Modules;
 using Mirror;
+using UnityEngine;
 
 namespace Game.Net.Objects
 {
@@ -15,6 +16,7 @@ namespace Game.Net.Objects
             _cachedUpdateManager = DualUpdateManager.Instance;
             _cachedUpdateManager.AwakeMe(this);
 
+            // Debug.Log("AWAKE DUAL");
             OnAwakeEvent();
         }
 

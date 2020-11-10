@@ -48,10 +48,12 @@ namespace Game.Entities.Controllers
             
             if(rotationX != 0)
                 RotateCamera(rotationX);
-            
-            if(rotationY != 0)
+
+            if (rotationY != 0)
+            {
+                // Debug.Log(rotationY);
                 RotateBody(rotationY);
-            
+            }
             // Здесь нужно формировать лист из нажаты - отжатых кнопок и отправлять его.
 
             DefineKeys();
@@ -167,7 +169,7 @@ namespace Game.Entities.Controllers
             PlayerEntity = playerEntity;
 
             playerEntity.SetInput(PlayerInputManager);
-            // _playerEntity.netIdentity.hasAuthority = true;
+            // playerEntity.netIdentity.hasAuthority = true;
         }
 
         [Server]
