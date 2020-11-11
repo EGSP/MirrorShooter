@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 
 namespace Gasanov.Extensions.Linq
 {
@@ -47,6 +48,18 @@ namespace Gasanov.Extensions.Linq
             }
 
             return coincidences;
+        }
+
+        /// <summary>
+        /// Убирает все элементы списка являющиеся типом T.
+        /// </summary>
+        public static void RemoveByType<T>(this IList source)
+        {
+            for (var i = source.Count - 1; i > -1; i--)
+            {
+                if(source[i] is T)
+                    source.RemoveAt(i);
+            }
         }
         
         /// <summary>

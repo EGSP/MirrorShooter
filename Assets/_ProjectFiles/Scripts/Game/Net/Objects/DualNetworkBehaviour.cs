@@ -1,55 +1,134 @@
 ﻿using System;
+using Game.Entities.Modules;
 using Mirror;
+using UnityEngine;
 
 namespace Game.Net.Objects
 {
     
-    public abstract class DualNetworkBehaviour : NetworkBehaviour, IDualObject
+    public abstract class DualNetworkBehaviour : NetworkBehaviour, IDualObject, IUnityMethodsHook
     {
-        /// <summary>
-        /// Активен ли объект для обновления состояния.
-        /// </summary>
-        protected bool IsActive { get; private set; }
+        private DualUpdateManager _cachedUpdateManager;
         
-        protected virtual void Awake()
+        private void Awake()
         {
-            DualUpdateManager.Instance.Add(this);       
+            // Кешируем значение менеджера.
+            _cachedUpdateManager = DualUpdateManager.Instance;
+            _cachedUpdateManager.AwakeMe(this);
+
+            // Debug.Log("AWAKE DUAL");
+            OnAwakeEvent();
         }
 
-        protected virtual void OnEnable()
+        private void Start()
         {
-            IsActive = true;
+            _cachedUpdateManager.StartMe(this);
+
+            OnStartEvent();
         }
 
-        protected virtual void OnDisable()
+        private void Update()
         {
-            IsActive = false;
+            _cachedUpdateManager.UpdateMe(this);
+
+            OnUpdateEvent();
         }
+
+        private void FixedUpdate()
+        {
+            _cachedUpdateManager.FixedUpdateMe(this);
+
+            OnFixedUpdateEvent();
+        }
+        
+        private void LateUpdate()
+        {
+            _cachedUpdateManager.LateUpdateMe(this);
+        }
+
+        private void OnEnable()
+        {
+            _cachedUpdateManager.EnableMe(this);
+
+            OnEnableEvent();
+        }
+
+        private void OnDisable()
+        {    
+            _cachedUpdateManager.DisableMe(this);
+
+            OnDisableEvent();
+        }
+
+        #region Dual event methods
 
         public virtual void UpdateOnClient()
         {
-            if (!IsActive)
-                return;
-            
-            OnClient();
         }
 
         public virtual void UpdateOnServer()
         {
-            if (!IsActive)
-                return;
-            
-            OnServer();
         }
 
-        /// <summary>
-        /// Обновления состояния на стороне клиента.
-        /// </summary>
-        protected abstract void OnClient();
+        public virtual void FixedUpdateOnClient()
+        {
+        }
 
-        /// <summary>
-        /// Обновление состояние на стороне сервера.
-        /// </summary>
-        protected abstract void OnServer();
+        public virtual void FixedUpdateOnServer()
+        {
+        }
+
+        public virtual void LateUpdateOnClient()
+        {
+        }
+
+        public virtual void LateUpdateOnServer()
+        {
+        }
+
+        public virtual  void AwakeOnClient()
+        {
+        }
+
+        public virtual  void AwakeOnServer()
+        {
+        }
+
+        public virtual  void StartOnClient()
+        {
+        }
+
+        public  virtual void StartOnServer()
+        {
+        }
+
+        public virtual  void EnableOnClient()
+        {
+        }
+
+        public  virtual void EnableOnServer()
+        {
+        }
+
+        public virtual void DisableOnClient()
+        {
+        }
+
+        public virtual void DisableOnServer()
+        {
+        }
+
+        #endregion
+
+        #region IUnityMethodsHook
+
+        public event Action OnAwakeEvent = delegate {  };
+        public event Action OnStartEvent = delegate {  };
+        public event Action OnEnableEvent = delegate {  };
+        public event Action OnDisableEvent = delegate {  };
+        public event Action OnUpdateEvent = delegate {  };
+        public event Action OnFixedUpdateEvent = delegate {  };
+
+        #endregion
     }
 }

@@ -23,8 +23,12 @@ namespace Gasanov.Core.Mvp
             if (_presenters.Contains(presenter))
                 return;
 
-            presenter.OnDispose += () => _presenters.Remove(presenter);
             _presenters.Add(presenter);
+        }
+
+        public static void Unregister(IPresenter presenter)
+        {
+            _presenters.Remove(presenter);
         }
 
         /// <summary>

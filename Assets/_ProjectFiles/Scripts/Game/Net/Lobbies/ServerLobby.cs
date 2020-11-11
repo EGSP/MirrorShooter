@@ -70,11 +70,6 @@ namespace Game.Net
         {
             base.Awake();
             AlwaysExist = true;
-            
-            // NetworkManager = this.ValidateComponent(NetworkManager);
-            // if (NetworkManager == null)
-            //     throw new NullReferenceException();
-
             Connections = new List<UserConnection>();
         }
 
@@ -90,7 +85,6 @@ namespace Game.Net
             NetworkManager.OnServerReadyEvent += ClientReady;
 
             LaunchInfo.LaunchMode = LaunchModeType.Server;
-            // NetworkIdentity.ApplicationMode = NetworkIdentity.ApplicationModeType.Server;
 
             Session = gameObject.AddComponent<ServerSession>();
             Session.NetworkManager = NetworkManager;

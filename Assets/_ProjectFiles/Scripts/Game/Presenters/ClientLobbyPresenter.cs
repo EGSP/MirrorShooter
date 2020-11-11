@@ -16,8 +16,6 @@ namespace Game.Presenters
         [OdinSerialize]
         public ClientLobby Model { get; private set; }
         
-        public event Action OnDispose;
-
         protected override void Awake()
         {
             base.Awake();
@@ -62,7 +60,7 @@ namespace Game.Presenters
 
         private void OnSessionChanged(SessionStateMessage msg)
         {
-            Debug.Log("Session presenter");
+            // Debug.Log("Session presenter");
             View.ShowSession(msg);
         }
 
@@ -81,6 +79,8 @@ namespace Game.Presenters
                 Model.OnDisconnectUser -= RemoveUser;
                 Model.OnDisconnect -= Disconnect;
             }
+            
+            PresenterMediator.Unregister(this);
         }
 
         private void OnDestroy()
@@ -109,6 +109,8 @@ namespace Game.Presenters
             Model = ClientLobby.Instance;
             if(Model == null)
                 throw new NullReferenceException();
+            
+            Debug.Log($"View {View.gameObject.name}");
             
             if(View == null)
                 throw new NullReferenceException();

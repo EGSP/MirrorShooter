@@ -1,5 +1,6 @@
 ﻿using System;
 using Game.Entities;
+using Game.Entities.Controllers;
 using Game.Net;
 using Mirror;
 using Sirenix.OdinInspector;
@@ -12,6 +13,8 @@ namespace Game.Sessions
         [NonSerialized] public EventNetworkManager NetworkManager;
         [NonSerialized] public ClientLobby ClientLobby;
 
+        private string offlineScene;
+        
         /// <summary>
         /// Префаб сущности игрока.
         /// </summary>
@@ -38,12 +41,13 @@ namespace Game.Sessions
 
         public void StartSession()
         {
-            
+            ClientLobby.OnDisconnect += StopSession;
         }
 
         public void StopSession()
         {
-            
+            ClientLobby.OnDisconnect -= StopSession;
+            ClientLobby.ChangeScene(Preloader.Instance.OfflineScene);
         }
     }
 }

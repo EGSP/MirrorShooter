@@ -8,6 +8,7 @@ using Gasanov.Extensions.Mono;
 using Mirror;
 using Sirenix.Serialization;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Game.Net
 {
@@ -55,9 +56,11 @@ namespace Game.Net
 
         [OdinSerialize]
         public List<User> LobbyUsers { get; private set; }
-        
-        
-        
+
+
+
+
+        #region Setup
 
         protected override void Awake()
         {
@@ -78,7 +81,6 @@ namespace Game.Net
             NetworkManager.OnClientSceneChangedEvent += SceneChanged;
 
             LaunchInfo.LaunchMode = LaunchModeType.Client;
-            NetworkIdentity.ApplicationMode = NetworkIdentity.ApplicationModeType.Client;
 
             IsInitialized = true;
         }
@@ -101,6 +103,10 @@ namespace Game.Net
 
             NetworkManager.StartClient();
         }
+
+        #endregion
+
+        #region Client processing
 
         /// <summary>
         /// Обработка присоединения к серверу.
@@ -143,11 +149,7 @@ namespace Game.Net
             OnDisconnect();
         }
 
-        private void SceneChanged()
-        {
-            NetworkClient.Send<SceneLoadedMessage>(new SceneLoadedMessage());
-            Ready();
-        }
+        #endregion
 
         #region User processing
 
@@ -212,6 +214,50 @@ namespace Game.Net
         
         #endregion
 
+        #region Scene processing
+
+        /// <summary>
+        /// Меняет сцену и отключается от сервера, если было подключение.
+        /// </summary>
+        public void ChangeScene(string sceneName)
+        {
+            if(isConnected)
+                Disconnect();
+            
+            if (Application.CanStreamedLevelBeLoaded(sceneName) == false)
+            {
+                Debug.Log($"Scene \"{sceneName}\" not exist in the current build!" +
+                          $" But you are trying to access it!");
+                return;
+            }
+            
+            SceneManager.LoadScene(sceneName);
+        }
+
+        /// <summary>
+        /// Меняет сцену и отключается от сервера, если было подключение.
+        /// </summary>
+        public void ChangeScene(int sceneId)
+        {
+            if(isConnected)
+                Disconnect();
+            
+            if (Application.CanStreamedLevelBeLoaded(sceneId) == false)
+            {
+                Debug.Log($"Scene \"{sceneId}\" not exist in the current build!" +
+                          $" But you are trying to access it!");
+                return;
+            }
+            
+            SceneManager.LoadScene(sceneId);
+        }
+        
+        private void SceneChanged()
+        {
+            NetworkClient.Send<SceneLoadedMessage>(new SceneLoadedMessage());
+            Ready();
+        }
+        
         /// <summary>
         /// Устанавливает флаг NetworkScene.isReady = true.
         /// </summary>
@@ -222,6 +268,8 @@ namespace Game.Net
 
             ClientScene.Ready(NetworkClient.connection);
         }
+
+        #endregion
 
         /// <summary>
         /// Очищение данных лобби.
@@ -262,6 +310,7 @@ namespace Game.Net
         {
             Session = gameObject.AddComponent<ClientSession>();
             Session.NetworkManager = NetworkManager;
+            Session.ClientLobby = this;
         }
 
         private void DestroySession()
