@@ -1100,6 +1100,8 @@ namespace Mirror
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
             {
                 bool isOwner = identity.connectionToClient == conn;
+                
+                // Debug.Log($"{conn.connectionId} is owner {isOwner} of {identity.name}");
 
                 ArraySegment<byte> payload = CreateSpawnMessagePayload(isOwner, identity, ownerWriter, observersWriter);
 

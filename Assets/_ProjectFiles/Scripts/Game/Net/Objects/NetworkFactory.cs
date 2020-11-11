@@ -10,11 +10,18 @@ namespace Game.Net.Objects
 {
     public static class NetworkFactory
     {
-        public static void SpawnForAll(GameObject obj) 
+        public static void SpawnForAll(GameObject obj, UserConnection uc = null) 
         {
             if (LaunchInfo.IsServer)
             {
-                NetworkServer.Spawn(obj.gameObject);
+                if (uc != null && uc.Connection != null)
+                {
+                    NetworkServer.Spawn(obj.gameObject, uc.Connection);
+                }
+                else
+                {
+                    NetworkServer.Spawn(obj.gameObject);   
+                }
                 return;
             }
             

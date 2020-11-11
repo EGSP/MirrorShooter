@@ -740,7 +740,7 @@ namespace Mirror
             identity.transform.localRotation = msg.rotation;
             identity.transform.localScale = msg.scale;
             
-            if (identity.hasAuthority == false)
+            // if (identity.hasAuthority == false)
                 identity.hasAuthority = msg.isOwner;
             identity.netId = msg.netId;
 
