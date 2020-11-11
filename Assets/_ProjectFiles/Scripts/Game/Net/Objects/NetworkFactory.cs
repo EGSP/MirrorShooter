@@ -1,6 +1,7 @@
 ﻿using System;
 using Game.Configuration;
 using Game.Net.Exceptions;
+using Game.Net.Mirrors;
 using Mirror;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -26,7 +27,11 @@ namespace Game.Net.Objects
             {
                 if (uc.Connection != null)
                 {
-                    NetworkServer.SpawnFor(obj.gameObject, uc.Connection);
+                    var identity = obj.GetComponent<NetworkIdentity>();
+                    var visibility = identity.ReplaceVisibility<OneConnectionVisibility>();
+                    visibility.SpecificConnectionToClient = uc.Connection as NetworkConnectionToClient;
+                    
+                    NetworkServer.Spawn(obj.gameObject, uc.Connection);
                     return;
                 }
                 

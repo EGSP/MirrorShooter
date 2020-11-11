@@ -1052,6 +1052,8 @@ namespace Mirror
 
         internal static void SpawnObject(GameObject obj, NetworkConnection ownerConnection)
         {
+            // +
+            
             if (!active)
             {
                 logger.LogError("SpawnObject for " + obj + ", NetworkServer is not active. Cannot spawn objects without an active server.");
@@ -1075,10 +1077,12 @@ namespace Mirror
             identity.connectionToClient = (NetworkConnectionToClient)ownerConnection;
 
             // special case to make sure hasAuthority is set
-            // on start server in host mode
+            // on start server in host mode [HOST CASE]
             if (ownerConnection is ULocalConnectionToClient)
                 identity.hasAuthority = true;
 
+            // +
+            
             identity.OnStartServer();
 
             if (logger.LogEnabled()) logger.Log("SpawnObject instance ID " + identity.netId + " asset ID " + identity.assetId);
@@ -1208,10 +1212,12 @@ namespace Mirror
         /// <param name="ownerConnection">The connection that has authority over the object</param>
         public static void Spawn(GameObject obj, NetworkConnection ownerConnection = null)
         {
+            // +
             if (VerifyCanSpawn(obj))
             {
                 SpawnObject(obj, ownerConnection);
             }
+            // +
         }
 
         /// <summary>

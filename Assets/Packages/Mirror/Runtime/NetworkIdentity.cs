@@ -470,6 +470,8 @@ namespace Mirror
         /// </summary>
         private void ApplyApplicationMode(ApplicationModeType applicationModeType)
         {
+            return;
+            
             switch (applicationModeType)
             {
                 case ApplicationModeType.Client:
@@ -833,7 +835,7 @@ namespace Mirror
             spawned[netId] = this;
 
             // in host mode we set isClient true before calling OnStartServer,
-            // otherwise isClient is false in OnStartServer.
+            // otherwise isClient is false in OnStartServer. [HOST CASE]
             if (NetworkClient.active)
             {
                 isClient = true;
@@ -1469,22 +1471,24 @@ namespace Mirror
         /// This causes the set of players that can see this object to be rebuild.
         /// The OnRebuildObservers callback function will be invoked on each NetworkBehaviour.
         /// </summary>
-        /// <param name="initialize">True if this is the first time.</param>
-        public void RebuildObservers(bool initialize)
+        /// <param name="firstInitialize">True if this is the first time.</param>
+        public void RebuildObservers(bool firstInitialize)
         {
+            // +
             // observers are null until OnStartServer creates them
             if (observers == null)
                 return;
 
             bool changed = false;
 
-            // call OnRebuildObservers function
-            bool rebuildOverwritten = GetNewObservers(newObservers, initialize);
-
+            // call OnRebuildObservers function. Кастомное добавление подписчиков.
+            bool rebuildOverwritten = GetNewObservers(newObservers, firstInitialize);
+            // +
+            
             // if player connection: ensure player always see himself no matter what.
             // -> fixes https://github.com/vis2k/Mirror/issues/692 where a
             //    player might teleport out of the ProximityChecker's cast,
-            //    losing the own connection as observer.
+            //    losing the own connection as observer. Странная вещь. Но пока особо ни на что не влияет.
             if (connectionToClient != null && connectionToClient.isReady)
             {
                 newObservers.Add(connectionToClient);
@@ -1495,7 +1499,7 @@ namespace Mirror
             {
                 // only add all connections when rebuilding the first time.
                 // second time we just keep them without rebuilding anything.
-                if (initialize)
+                if (firstInitialize)
                 {
                     if (isOneClientConnection)
                     {
@@ -1519,7 +1523,7 @@ namespace Mirror
                 // otherwise the player might not be in the world yet or anymore
                 if (conn != null && conn.isReady)
                 {
-                    if (initialize || !observers.ContainsKey(conn.connectionId))
+                    if (firstInitialize || !observers.ContainsKey(conn.connectionId))
                     {
                         // new observer
                         conn.AddToVisList(this);
@@ -1572,7 +1576,7 @@ namespace Mirror
             //   => that was not intended, but let's keep it as it is so we
             //      don't break anything in host mode. it's way easier than
             //      iterating all identities in a special function in StartHost.
-            if (initialize)
+            if (firstInitialize)
             {
                 if (!newObservers.Contains(NetworkServer.localConnection))
                 {
@@ -1794,6 +1798,25 @@ namespace Mirror
             {
                 comp.ResetSyncObjects();
             }
+        }
+
+
+        /// <summary>
+        /// Заменяет текущий visibility
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T ReplaceVisibility<T>() where T : NetworkVisibility
+        {
+            if (visibilityCache != null)
+            {
+                DestroyImmediate(visibilityCache);
+            }
+
+            var networkVisibility = gameObject.AddComponent<T>();
+            visibilityCache = networkVisibility;
+            
+            return networkVisibility;
         }
     }
 }
