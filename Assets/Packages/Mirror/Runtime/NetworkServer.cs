@@ -775,9 +775,6 @@ namespace Mirror
             // internally sends a spawn message for each one to the connection.
             foreach (NetworkIdentity identity in NetworkIdentity.spawned.Values)
             {
-                if(identity.isOneClientConnection)
-                    continue;
-                
                 // try with far away ones in ummorpg!
                 if (identity.gameObject.activeSelf) //TODO this is different
                 {
@@ -1091,40 +1088,6 @@ namespace Mirror
             // Debug.Log(identity.observers.Count);
         }
 
-        /// <summary>
-        /// Spawns object only for one connection.
-        /// </summary>
-        /// <param name="clientConnection">Target connection</param>
-        internal static void SpawnObjectFor(GameObject obj, NetworkConnection clientConnection)
-        {
-            if (!active)
-            {
-                logger.LogError("SpawnObject for " + obj + ", NetworkServer is not active. Cannot spawn objects without an active server.");
-                return;
-            }
-            
-            NetworkIdentity identity = obj.GetComponent<NetworkIdentity>();
-            if (identity == null)
-            {
-                logger.LogError("SpawnObject " + obj + " has no NetworkIdentity. Please add a NetworkIdentity to " + obj);
-                return;
-            }
-            
-            if (identity.SpawnedFromInstantiate)
-            {
-                // Using Instantiate on SceneObject is not allowed, so stop spawning here
-                // NetworkIdentity.Awake already logs error, no need to log a second error here
-                return;
-            }
-            
-            identity.OnStartServer();
-            if (logger.LogEnabled()) logger.Log("SpawnObject instance ID " + identity.netId + " asset ID " + identity.assetId);
-
-            identity.isOneClientConnection = true;
-            identity.oneClientConnection = clientConnection;
-            identity.RebuildObservers(true);
-        }
-
         internal static void SendSpawnMessage(NetworkIdentity identity, NetworkConnection conn)
         {
             if (identity.serverOnly)
@@ -1194,14 +1157,6 @@ namespace Mirror
             // destroy all objects owned by this connection, including the player object
             conn.DestroyOwnedObjects();
             conn.identity = null;
-        }
-
-        public static void SpawnFor(GameObject obj, NetworkConnection connectionToClient)
-        {
-            if (VerifyCanSpawn(obj))
-            {
-                SpawnObjectFor(obj, connectionToClient);
-            }
         }
 
         /// <summary>

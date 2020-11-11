@@ -136,34 +136,6 @@ namespace Mirror
         /// </summary>
         public bool isLocalRepresenter { get; set; }
 
-        public enum ApplicationModeType
-        {
-            None,
-            Client,
-            Server
-        }
-
-        /// <summary>
-        /// Режим работы приложения.
-        /// </summary>
-        public static ApplicationModeType ApplicationMode
-        {
-            get => _applicationMode;
-            set
-            {
-                if (value == _applicationMode)
-                    return;
-                
-                _applicationMode = value;
-                
-                foreach (var identity in spawned.Values)
-                {
-                    identity.ApplyApplicationMode(_applicationMode);
-                }
-            }
-        }
-        private static ApplicationModeType _applicationMode;
-
         /// <summary>
         /// Returns true if NetworkServer.active and server is not stopped.
         /// </summary>
@@ -196,11 +168,6 @@ namespace Mirror
         /// <para>For objects that had their authority set by AssignClientAuthority on the server, this will be true on the client that owns the object. NOT on other clients.</para>
         /// </summary>
         public bool hasAuthority { get;  set; }
-        
-        /// <summary>
-        /// Этот объект принадлежит только одному клиенту?
-        /// </summary>
-        public bool isOneClientConnection { get; internal set; }
 
         /// <summary>
         /// The set of network connections (players) that can see this object.
@@ -232,11 +199,6 @@ namespace Mirror
         /// Set to try before Destroy is called so that OnDestroy doesn't try to destroy the object again
         /// </summary>
         internal bool destroyCalled;
-        
-        /// <summary>
-        /// Соединение для конкретного пользователя.
-        /// </summary>
-        public NetworkConnection oneClientConnection { get; internal set; }
 
         /// <summary>
         /// The NetworkConnection associated with this NetworkIdentity. This is only valid for player objects on a local client.
@@ -461,34 +423,6 @@ namespace Mirror
             }
 
             hasSpawned = true;
-
-            ApplyApplicationMode(ApplicationMode);
-        }
-
-        /// <summary>
-        /// Определяет режим работы идентити. Клиент или сервер.
-        /// </summary>
-        private void ApplyApplicationMode(ApplicationModeType applicationModeType)
-        {
-            return;
-            
-            switch (applicationModeType)
-            {
-                case ApplicationModeType.Client:
-                    isClient = true;
-                    isServer = false;
-                    break;
-                
-                case ApplicationModeType.Server:
-                    isClient = false;
-                    isServer = true;
-                    break;
-                
-                case ApplicationModeType.None:
-                    isClient = false;
-                    isServer = false;
-                    break;
-            }
         }
 
         void OnValidate()
@@ -1444,7 +1378,7 @@ namespace Mirror
             // add all server connections
             foreach (NetworkConnection conn in NetworkServer.connections.Values)
             {
-                if (conn.isReady && !isOneClientConnection)
+                if (conn.isReady)
                     AddObserver(conn);
             }
 
@@ -1453,15 +1387,6 @@ namespace Mirror
             {
                 AddObserver(NetworkServer.localConnection);
             }
-        }
-
-        internal void AddOneConnectionToObservers()
-        {
-            if(oneClientConnection == null)
-                if(logger.LogEnabled())
-                    logger.LogError("OneClientConnection is null!");
-            
-            AddObserver(oneClientConnection);
         }
 
         static readonly HashSet<NetworkConnection> newObservers = new HashSet<NetworkConnection>();
@@ -1501,17 +1426,7 @@ namespace Mirror
                 // second time we just keep them without rebuilding anything.
                 if (firstInitialize)
                 {
-                    if (isOneClientConnection)
-                    {
-                        Debug.Log("IS_ONE_CLIENT_CONNECTION");
-                        // Это условие может конфликтовать с !rebuildOverWritten
-                        AddOneConnectionToObservers();
-                    }
-                    else
-                    {
-                        AddAllReadyServerConnectionsToObservers();
-                    }
-                    
+                    AddAllReadyServerConnectionsToObservers();
                 }
                 return;
             }
