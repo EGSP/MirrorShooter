@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Game;
 using Gasanov.Core;
+using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -13,8 +14,11 @@ namespace Game
     /// </summary>
     public class Preloader : SerializedSingleton<Preloader>
     {
-        [OdinSerialize]
-        public string SceneName { get; private set; }
+        [OdinSerialize] public string FirstScene { get; private set; }
+        
+        [PropertySpace(10)]
+        [InfoBox("Используется клиентской сессией при отключении от сервера.")]
+        [OdinSerialize] public string OfflineScene { get; private set; }
         
         // Входная точка всей игры.
         protected override void Awake()
@@ -25,13 +29,12 @@ namespace Game
             
             PreloaderBack.AfterAwake(this);
             
-            LoadFirstScene(SceneName);
+            LoadFirstScene(FirstScene);
         }
 
         private void LoadFirstScene(string sceneName)
         {
             SceneManager.LoadScene(sceneName);
-            
         }
         
         

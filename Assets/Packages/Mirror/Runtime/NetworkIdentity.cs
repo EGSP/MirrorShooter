@@ -820,7 +820,7 @@ namespace Mirror
                 return;
             clientStarted = true;
 
-            Debug.Log("IS_CLIENT");
+            // Debug.Log("IS_CLIENT");
             isClient = true;
 
             if (logger.LogEnabled()) logger.Log("OnStartClient " + gameObject + " netId:" + netId);

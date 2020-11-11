@@ -762,7 +762,7 @@ namespace Mirror
             // objects spawned as part of initial state are started on a second pass
             if (isSpawnFinished)
             {
-                Debug.Log("SpawnFinished ApplyPayload");
+                // Debug.Log("SpawnFinished ApplyPayload");
                 identity.NotifyAuthority();
                 identity.OnStartClient();
                 CheckForLocalPlayer(identity);
