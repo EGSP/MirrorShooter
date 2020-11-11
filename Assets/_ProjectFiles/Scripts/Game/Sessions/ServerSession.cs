@@ -4,6 +4,7 @@ using System.Linq;
 using Game.Entities;
 using Game.Entities.Controllers;
 using Game.Net;
+using Game.Net.Objects;
 using Game.Sessions.Observers;
 using Game.World;
 using Gasanov.Extensions.Linq;
@@ -207,12 +208,14 @@ namespace Game.Sessions
             var playerEntity = Instantiate(_playerEntityPrefab);
             playerEntity.gameObject.transform.position = SpawnPoint.SpawnPoints.Random().transform.position;
             playerEntity.owner = uc.User;
-            NetworkServer.Spawn(playerEntity.gameObject);
-
+            // NetworkServer.Spawn(playerEntity.gameObject);
+            NetworkFactory.SpawnForAll(playerEntity.gameObject);
+            
             // Спавн контроллера
             var playerController = Instantiate(_playerController);
             playerController.gameObject.name = $"PC [{playerEntity.owner.id}]";
-            NetworkServer.SpawnFor(playerController.gameObject, uc.Connection);
+            // NetworkServer.SpawnFor(playerController.gameObject, uc.Connection);
+            NetworkFactory.SpawnForConnection(playerController.gameObject, uc);
             playerController.SetPlayerEntity(playerEntity);
             playerController.playerEntityId = playerEntity.netId;
             

@@ -17,5 +17,14 @@ namespace Game.Configuration
         public static User User;
 
         public static LaunchModeType LaunchMode;
+
+        public static bool IsServer => LaunchMode == LaunchModeType.Server;
+
+        public static bool IsClient => LaunchMode == LaunchModeType.Client;
+
+        /// <summary>
+        /// Неопределенное состояние.
+        /// </summary>
+        public static bool IsNone => LaunchMode == LaunchModeType.None;
     }
 }
