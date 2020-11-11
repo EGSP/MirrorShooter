@@ -763,11 +763,13 @@ namespace Mirror
 
             if (!conn.isReady)
             {
+                Debug.Log("Connection is not ready");
                 // client needs to finish initializing before we can spawn objects
                 // otherwise it would not find them.
                 return;
             }
 
+            // Debug.Log("Sending spawn started");
             // let connection know that we are about to start spawning...
             conn.Send(new ObjectSpawnStartedMessage());
 
@@ -788,6 +790,7 @@ namespace Mirror
                 }
             }
 
+            // Debug.Log("Sending spawn finished");
             // let connection know that we finished spawning, so it can call
             // OnStartClient on each one (only after all were spawned, which
             // is how Unity's Start() function works too)
@@ -926,9 +929,16 @@ namespace Mirror
             // set ready
             conn.isReady = true;
 
-            // client is ready to start spawning objects
-            if (conn.identity != null)
-                SpawnObserversForConnection(conn);
+            // Debug.Log($"{conn.identity != null}");
+            
+            // client is ready to start spawning objects.
+            // В текущей реализации у игроков нет объекта связанного с соединением.
+            // if (conn.identity != null)
+            // {
+            //     SpawnObserversForConnection(conn);
+            // }
+            
+            SpawnObserversForConnection(conn);
         }
 
         internal static void ShowForConnection(NetworkIdentity identity, NetworkConnection conn)
