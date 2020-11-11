@@ -13,6 +13,8 @@ namespace Game.Sessions
         [NonSerialized] public EventNetworkManager NetworkManager;
         [NonSerialized] public ClientLobby ClientLobby;
 
+        private string offlineScene;
+        
         /// <summary>
         /// Префаб сущности игрока.
         /// </summary>
@@ -45,7 +47,7 @@ namespace Game.Sessions
         public void StopSession()
         {
             ClientLobby.OnDisconnect -= StopSession;
-            ClientLobby.ChangeScene(0);
+            ClientLobby.ChangeScene(Preloader.Instance.OfflineScene);
         }
     }
 }

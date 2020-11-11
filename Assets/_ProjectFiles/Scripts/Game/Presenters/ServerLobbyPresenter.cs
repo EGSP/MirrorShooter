@@ -15,9 +15,7 @@ namespace Game.Presenters
         public ServerLobbyView View { get; private set; }
         [OdinSerialize]
         public ServerLobby Model { get; private set; }
-        
-        public event Action OnDispose;
-        
+
         protected override void Awake()
         {
             base.Awake();
@@ -79,6 +77,8 @@ namespace Game.Presenters
                 Model.OnUserConnected -= AddUser;
                 Model.OnUserDisconnected -= RemoveUser;
             }
+            
+            PresenterMediator.Unregister(this);
         }
 
         private void OnDestroy()

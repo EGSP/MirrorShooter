@@ -740,7 +740,7 @@ namespace Mirror
             identity.transform.localRotation = msg.rotation;
             identity.transform.localScale = msg.scale;
             
-            if (identity.hasAuthority == false)
+            // if (identity.hasAuthority == false)
                 identity.hasAuthority = msg.isOwner;
             identity.netId = msg.netId;
 
@@ -762,6 +762,7 @@ namespace Mirror
             // objects spawned as part of initial state are started on a second pass
             if (isSpawnFinished)
             {
+                // Debug.Log("SpawnFinished ApplyPayload");
                 identity.NotifyAuthority();
                 identity.OnStartClient();
                 CheckForLocalPlayer(identity);
@@ -878,7 +879,9 @@ namespace Mirror
 
         internal static void OnObjectSpawnStarted(ObjectSpawnStartedMessage _)
         {
-            if (logger.LogEnabled()) logger.Log("SpawnStarted");
+            // if (logger.LogEnabled()) logger.Log("SpawnStarted");
+            
+            // Debug.Log("SpawnStarted");
 
             PrepareToSpawnSceneObjects();
             isSpawnFinished = false;
@@ -886,9 +889,9 @@ namespace Mirror
 
         internal static void OnObjectSpawnFinished(ObjectSpawnFinishedMessage _)
         {
-            logger.Log("SpawnFinished");
+            // logger.Log("SpawnFinished");
             
-            Debug.Log("SpawnFinished");
+            // Debug.Log("SpawnFinished OnObjectSpawnFinished");
 
             // paul: Initialize the objects in the same order as they were initialized
             // in the server.   This is important if spawned objects

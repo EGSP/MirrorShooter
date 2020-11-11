@@ -136,34 +136,6 @@ namespace Mirror
         /// </summary>
         public bool isLocalRepresenter { get; set; }
 
-        public enum ApplicationModeType
-        {
-            None,
-            Client,
-            Server
-        }
-
-        /// <summary>
-        /// Режим работы приложения.
-        /// </summary>
-        public static ApplicationModeType ApplicationMode
-        {
-            get => _applicationMode;
-            set
-            {
-                if (value == _applicationMode)
-                    return;
-                
-                _applicationMode = value;
-                
-                foreach (var identity in spawned.Values)
-                {
-                    identity.ApplyApplicationMode(_applicationMode);
-                }
-            }
-        }
-        private static ApplicationModeType _applicationMode;
-
         /// <summary>
         /// Returns true if NetworkServer.active and server is not stopped.
         /// </summary>
@@ -196,11 +168,6 @@ namespace Mirror
         /// <para>For objects that had their authority set by AssignClientAuthority on the server, this will be true on the client that owns the object. NOT on other clients.</para>
         /// </summary>
         public bool hasAuthority { get;  set; }
-        
-        /// <summary>
-        /// Этот объект принадлежит только одному клиенту?
-        /// </summary>
-        public bool isOneClientConnection { get; internal set; }
 
         /// <summary>
         /// The set of network connections (players) that can see this object.
@@ -232,11 +199,6 @@ namespace Mirror
         /// Set to try before Destroy is called so that OnDestroy doesn't try to destroy the object again
         /// </summary>
         internal bool destroyCalled;
-        
-        /// <summary>
-        /// Соединение для конкретного пользователя.
-        /// </summary>
-        public NetworkConnection oneClientConnection { get; internal set; }
 
         /// <summary>
         /// The NetworkConnection associated with this NetworkIdentity. This is only valid for player objects on a local client.
@@ -461,32 +423,6 @@ namespace Mirror
             }
 
             hasSpawned = true;
-
-            ApplyApplicationMode(ApplicationMode);
-        }
-
-        /// <summary>
-        /// Определяет режим работы идентити. Клиент или сервер.
-        /// </summary>
-        private void ApplyApplicationMode(ApplicationModeType applicationModeType)
-        {
-            switch (applicationModeType)
-            {
-                case ApplicationModeType.Client:
-                    isClient = true;
-                    isServer = false;
-                    break;
-                
-                case ApplicationModeType.Server:
-                    isClient = false;
-                    isServer = true;
-                    break;
-                
-                case ApplicationModeType.None:
-                    isClient = false;
-                    isServer = false;
-                    break;
-            }
         }
 
         void OnValidate()
@@ -833,7 +769,7 @@ namespace Mirror
             spawned[netId] = this;
 
             // in host mode we set isClient true before calling OnStartServer,
-            // otherwise isClient is false in OnStartServer.
+            // otherwise isClient is false in OnStartServer. [HOST CASE]
             if (NetworkClient.active)
             {
                 isClient = true;
@@ -884,7 +820,7 @@ namespace Mirror
                 return;
             clientStarted = true;
 
-            Debug.Log("IS_CLIENT");
+            // Debug.Log("IS_CLIENT");
             isClient = true;
 
             if (logger.LogEnabled()) logger.Log("OnStartClient " + gameObject + " netId:" + netId);
@@ -1442,7 +1378,7 @@ namespace Mirror
             // add all server connections
             foreach (NetworkConnection conn in NetworkServer.connections.Values)
             {
-                if (conn.isReady && !isOneClientConnection)
+                if (conn.isReady)
                     AddObserver(conn);
             }
 
@@ -1453,15 +1389,6 @@ namespace Mirror
             }
         }
 
-        internal void AddOneConnectionToObservers()
-        {
-            if(oneClientConnection == null)
-                if(logger.LogEnabled())
-                    logger.LogError("OneClientConnection is null!");
-            
-            AddObserver(oneClientConnection);
-        }
-
         static readonly HashSet<NetworkConnection> newObservers = new HashSet<NetworkConnection>();
         
 
@@ -1469,22 +1396,24 @@ namespace Mirror
         /// This causes the set of players that can see this object to be rebuild.
         /// The OnRebuildObservers callback function will be invoked on each NetworkBehaviour.
         /// </summary>
-        /// <param name="initialize">True if this is the first time.</param>
-        public void RebuildObservers(bool initialize)
+        /// <param name="firstInitialize">True if this is the first time.</param>
+        public void RebuildObservers(bool firstInitialize)
         {
+            // +
             // observers are null until OnStartServer creates them
             if (observers == null)
                 return;
 
             bool changed = false;
 
-            // call OnRebuildObservers function
-            bool rebuildOverwritten = GetNewObservers(newObservers, initialize);
-
+            // call OnRebuildObservers function. Кастомное добавление подписчиков.
+            bool rebuildOverwritten = GetNewObservers(newObservers, firstInitialize);
+            // +
+            
             // if player connection: ensure player always see himself no matter what.
             // -> fixes https://github.com/vis2k/Mirror/issues/692 where a
             //    player might teleport out of the ProximityChecker's cast,
-            //    losing the own connection as observer.
+            //    losing the own connection as observer. Странная вещь. Но пока особо ни на что не влияет.
             if (connectionToClient != null && connectionToClient.isReady)
             {
                 newObservers.Add(connectionToClient);
@@ -1495,19 +1424,9 @@ namespace Mirror
             {
                 // only add all connections when rebuilding the first time.
                 // second time we just keep them without rebuilding anything.
-                if (initialize)
+                if (firstInitialize)
                 {
-                    if (isOneClientConnection)
-                    {
-                        Debug.Log("IS_ONE_CLIENT_CONNECTION");
-                        // Это условие может конфликтовать с !rebuildOverWritten
-                        AddOneConnectionToObservers();
-                    }
-                    else
-                    {
-                        AddAllReadyServerConnectionsToObservers();
-                    }
-                    
+                    AddAllReadyServerConnectionsToObservers();
                 }
                 return;
             }
@@ -1519,7 +1438,7 @@ namespace Mirror
                 // otherwise the player might not be in the world yet or anymore
                 if (conn != null && conn.isReady)
                 {
-                    if (initialize || !observers.ContainsKey(conn.connectionId))
+                    if (firstInitialize || !observers.ContainsKey(conn.connectionId))
                     {
                         // new observer
                         conn.AddToVisList(this);
@@ -1572,7 +1491,7 @@ namespace Mirror
             //   => that was not intended, but let's keep it as it is so we
             //      don't break anything in host mode. it's way easier than
             //      iterating all identities in a special function in StartHost.
-            if (initialize)
+            if (firstInitialize)
             {
                 if (!newObservers.Contains(NetworkServer.localConnection))
                 {
@@ -1794,6 +1713,25 @@ namespace Mirror
             {
                 comp.ResetSyncObjects();
             }
+        }
+
+
+        /// <summary>
+        /// Заменяет текущий visibility
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T ReplaceVisibility<T>() where T : NetworkVisibility
+        {
+            if (visibilityCache != null)
+            {
+                DestroyImmediate(visibilityCache);
+            }
+
+            var networkVisibility = gameObject.AddComponent<T>();
+            visibilityCache = networkVisibility;
+            
+            return networkVisibility;
         }
     }
 }

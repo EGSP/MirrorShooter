@@ -81,7 +81,6 @@ namespace Game.Net
             NetworkManager.OnClientSceneChangedEvent += SceneChanged;
 
             LaunchInfo.LaunchMode = LaunchModeType.Client;
-            NetworkIdentity.ApplicationMode = NetworkIdentity.ApplicationModeType.Client;
 
             IsInitialized = true;
         }

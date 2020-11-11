@@ -149,7 +149,6 @@ namespace Game.Entities.Controllers
             if (NetworkIdentity.spawned.TryGetValue(newEntity, out NetworkIdentity identity))
             {
                 PlayerEntity = identity.GetComponent<PlayerEntity>();
-                PlayerEntity.netIdentity.hasAuthority = true;
                 PlayerEntity.netIdentity.isLocalRepresenter = true;
 
                 // PlayerEntity.GetComponent<Rigidbody>().useGravity = false;

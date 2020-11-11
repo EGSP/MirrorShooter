@@ -133,6 +133,8 @@ namespace Game.Presenters
             Model.OnServerLobby -= RequestServerLobby;
             Model.OnMainLobby -= ShowSelectModeWindow;
             Model.OnFailedConnection -= NotifyFailedConnection;
+            
+            PresenterMediator.Unregister(this);
         }
 
         private void RequestClientLobby()

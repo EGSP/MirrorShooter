@@ -763,11 +763,13 @@ namespace Mirror
 
             if (!conn.isReady)
             {
+                Debug.Log("Connection is not ready");
                 // client needs to finish initializing before we can spawn objects
                 // otherwise it would not find them.
                 return;
             }
 
+            // Debug.Log("Sending spawn started");
             // let connection know that we are about to start spawning...
             conn.Send(new ObjectSpawnStartedMessage());
 
@@ -775,9 +777,6 @@ namespace Mirror
             // internally sends a spawn message for each one to the connection.
             foreach (NetworkIdentity identity in NetworkIdentity.spawned.Values)
             {
-                if(identity.isOneClientConnection)
-                    continue;
-                
                 // try with far away ones in ummorpg!
                 if (identity.gameObject.activeSelf) //TODO this is different
                 {
@@ -791,6 +790,7 @@ namespace Mirror
                 }
             }
 
+            // Debug.Log("Sending spawn finished");
             // let connection know that we finished spawning, so it can call
             // OnStartClient on each one (only after all were spawned, which
             // is how Unity's Start() function works too)
@@ -929,9 +929,16 @@ namespace Mirror
             // set ready
             conn.isReady = true;
 
-            // client is ready to start spawning objects
-            if (conn.identity != null)
-                SpawnObserversForConnection(conn);
+            // Debug.Log($"{conn.identity != null}");
+            
+            // client is ready to start spawning objects.
+            // В текущей реализации у игроков нет объекта связанного с соединением.
+            // if (conn.identity != null)
+            // {
+            //     SpawnObserversForConnection(conn);
+            // }
+            
+            SpawnObserversForConnection(conn);
         }
 
         internal static void ShowForConnection(NetworkIdentity identity, NetworkConnection conn)
@@ -1052,6 +1059,8 @@ namespace Mirror
 
         internal static void SpawnObject(GameObject obj, NetworkConnection ownerConnection)
         {
+            // +
+            
             if (!active)
             {
                 logger.LogError("SpawnObject for " + obj + ", NetworkServer is not active. Cannot spawn objects without an active server.");
@@ -1075,50 +1084,18 @@ namespace Mirror
             identity.connectionToClient = (NetworkConnectionToClient)ownerConnection;
 
             // special case to make sure hasAuthority is set
-            // on start server in host mode
+            // on start server in host mode [HOST CASE]
             if (ownerConnection is ULocalConnectionToClient)
                 identity.hasAuthority = true;
 
+            // +
+            
             identity.OnStartServer();
 
             if (logger.LogEnabled()) logger.Log("SpawnObject instance ID " + identity.netId + " asset ID " + identity.assetId);
 
             identity.RebuildObservers(true);
             // Debug.Log(identity.observers.Count);
-        }
-
-        /// <summary>
-        /// Spawns object only for one connection.
-        /// </summary>
-        /// <param name="clientConnection">Target connection</param>
-        internal static void SpawnObjectFor(GameObject obj, NetworkConnection clientConnection)
-        {
-            if (!active)
-            {
-                logger.LogError("SpawnObject for " + obj + ", NetworkServer is not active. Cannot spawn objects without an active server.");
-                return;
-            }
-            
-            NetworkIdentity identity = obj.GetComponent<NetworkIdentity>();
-            if (identity == null)
-            {
-                logger.LogError("SpawnObject " + obj + " has no NetworkIdentity. Please add a NetworkIdentity to " + obj);
-                return;
-            }
-            
-            if (identity.SpawnedFromInstantiate)
-            {
-                // Using Instantiate on SceneObject is not allowed, so stop spawning here
-                // NetworkIdentity.Awake already logs error, no need to log a second error here
-                return;
-            }
-            
-            identity.OnStartServer();
-            if (logger.LogEnabled()) logger.Log("SpawnObject instance ID " + identity.netId + " asset ID " + identity.assetId);
-
-            identity.isOneClientConnection = true;
-            identity.oneClientConnection = clientConnection;
-            identity.RebuildObservers(true);
         }
 
         internal static void SendSpawnMessage(NetworkIdentity identity, NetworkConnection conn)
@@ -1133,6 +1110,8 @@ namespace Mirror
             using (PooledNetworkWriter ownerWriter = NetworkWriterPool.GetWriter(), observersWriter = NetworkWriterPool.GetWriter())
             {
                 bool isOwner = identity.connectionToClient == conn;
+                
+                // Debug.Log($"{conn.connectionId} is owner {isOwner} of {identity.name}");
 
                 ArraySegment<byte> payload = CreateSpawnMessagePayload(isOwner, identity, ownerWriter, observersWriter);
 
@@ -1192,14 +1171,6 @@ namespace Mirror
             conn.identity = null;
         }
 
-        public static void SpawnFor(GameObject obj, NetworkConnection connectionToClient)
-        {
-            if (VerifyCanSpawn(obj))
-            {
-                SpawnObjectFor(obj, connectionToClient);
-            }
-        }
-
         /// <summary>
         /// Spawn the given game object on all clients which are ready.
         /// <para>This will cause a new object to be instantiated from the registered prefab, or from a custom spawn function.</para>
@@ -1208,10 +1179,12 @@ namespace Mirror
         /// <param name="ownerConnection">The connection that has authority over the object</param>
         public static void Spawn(GameObject obj, NetworkConnection ownerConnection = null)
         {
+            // +
             if (VerifyCanSpawn(obj))
             {
                 SpawnObject(obj, ownerConnection);
             }
+            // +
         }
 
         /// <summary>

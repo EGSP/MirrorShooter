@@ -9,7 +9,7 @@ namespace Gasanov.Core.Mvp
         TModel Model { get; }
     }
 
-    public interface IPresenter : IHandledDisposable
+    public interface IPresenter
     {
         /// <summary>
         /// Презентер говорит о своем существовании.
