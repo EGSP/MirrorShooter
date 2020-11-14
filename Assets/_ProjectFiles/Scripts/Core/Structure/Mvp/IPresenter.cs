@@ -7,6 +7,8 @@ namespace Gasanov.Core.Mvp
     {
         TView View { get; }
         TModel Model { get; }
+        
+        string Key { get;}
     }
 
     public interface IPresenter

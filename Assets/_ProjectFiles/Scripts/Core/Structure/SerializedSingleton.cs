@@ -62,8 +62,11 @@ namespace Gasanov.Core
                 Destroy(gameObject);
                 return;
             }
-            
-            var instance = Instance;
+            else
+            {
+                _instance = this as TSingleton;
+                _instanceGameObject = gameObject;
+            }
         }
 
         /// <summary>
@@ -110,7 +113,17 @@ namespace Gasanov.Core
             var singGameObject = new GameObject("[Singleton]" + typeof(TSingleton));
             _instance = singGameObject.AddComponent<TSingleton>();
             _instanceGameObject = singGameObject;
+
+            var singletone = _instance as SerializedSingleton<TSingleton>;
+            if (singletone != null)
+            {
+                singletone.OnInstanceCreated();
+            }
         }
-        
+
+        protected virtual void OnInstanceCreated()
+        {
+            
+        } 
     }
 }
