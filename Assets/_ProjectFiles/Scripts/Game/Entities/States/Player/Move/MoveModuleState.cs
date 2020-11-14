@@ -1,7 +1,6 @@
 ﻿using Game.Configuration;
 using Game.Entities.Controllers;
 using Game.Entities.Modules;
-using Gasanov.Eppd.Proceeders;
 using UnityEngine;
 
 namespace Game.Entities.States.Player
