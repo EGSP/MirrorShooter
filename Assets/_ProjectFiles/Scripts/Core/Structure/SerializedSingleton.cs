@@ -1,4 +1,5 @@
-﻿using Sirenix.OdinInspector;
+﻿using System;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Gasanov.Core
@@ -11,6 +12,9 @@ namespace Gasanov.Core
             {
                 if (_instance == null)
                 {
+                    if(!AllowLazyInstance)
+                        throw new LazyInstanceException(typeof(TSingleton));
+                    
                     _instance = FindObjectOfType<TSingleton>();
 
                     if (_instance == null)
@@ -33,6 +37,23 @@ namespace Gasanov.Core
 
         private static TSingleton _instance;
         private static GameObject _instanceGameObject;
+
+        /// <summary>
+        /// Создание при первом обращении.
+        /// </summary>
+        protected static bool AllowLazyInstance
+        {
+            get
+            {
+                var lazyAttribute = 
+                    (LazyInstanceAttribute)Attribute.GetCustomAttribute(typeof(TSingleton), typeof(LazyInstanceAttribute));
+
+                if (lazyAttribute == null)
+                    return true;
+
+                return lazyAttribute.AllowLazyInstance;
+            }
+        }
 
         protected virtual void Awake()
         {
@@ -74,6 +95,21 @@ namespace Gasanov.Core
                     Destroy(_instanceGameObject);
                 }
             }
+        }
+
+        public static void CreateInstance()
+        {
+            if (_instance != null)
+            {
+                if (_instanceGameObject != null)
+                    DestroyImmediate(_instanceGameObject);
+
+                _instance = null;
+            }
+            
+            var singGameObject = new GameObject("[Singleton]" + typeof(TSingleton));
+            _instance = singGameObject.AddComponent<TSingleton>();
+            _instanceGameObject = singGameObject;
         }
         
     }

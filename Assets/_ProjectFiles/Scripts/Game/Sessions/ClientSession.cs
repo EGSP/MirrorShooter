@@ -1,13 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using Game.Entities;
 using Game.Entities.Controllers;
 using Game.Net;
+using Game.Net.Resources;
+using Gasanov.Core;
 using Mirror;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Sessions
 {
+    [LazyInstance(false)]
     public class ClientSession : SerializedMonoBehaviour
     {
         [NonSerialized] public EventNetworkManager NetworkManager;
@@ -15,30 +19,6 @@ namespace Game.Sessions
 
         private string offlineScene;
         
-        /// <summary>
-        /// Префаб сущности игрока.
-        /// </summary>
-        private PlayerEntity _playerEntityPrefab;
-        
-        /// <summary>
-        /// Префаб контроллера игрока.
-        /// </summary>
-        private PlayerController _playerController;
-        
-        private void Start()
-        {
-            _playerEntityPrefab = Resources.Load<PlayerEntity>("Prefabs/Player");
-            if(_playerEntityPrefab == null)
-                throw new NullReferenceException();
-
-            _playerController = Resources.Load<PlayerController>("Prefabs/PC");
-            if (_playerController == null)
-                throw new NullReferenceException();
-            
-            ClientScene.RegisterPrefab(_playerEntityPrefab.gameObject);
-            ClientScene.RegisterPrefab(_playerController.gameObject);
-        }
-
         public void StartSession()
         {
             ClientLobby.OnDisconnect += StopSession;
@@ -48,6 +28,32 @@ namespace Game.Sessions
         {
             ClientLobby.OnDisconnect -= StopSession;
             ClientLobby.ChangeScene(Preloader.Instance.OfflineScene);
+        }
+
+        public List<GameObject> LoadPrefabs()
+        {
+            throw new NotImplementedException();
+        }
+    }
+    
+    public class ClientSessionLoader : IResourceLoader
+    {
+        public List<GameObject> LoadPrefabs()
+        {
+            var list = new List<GameObject>();
+            
+            var playerEntityPrefab = Resources.Load<PlayerEntity>("Prefabs/Player");
+            if(playerEntityPrefab == null)
+                throw new NullReferenceException();
+
+            var playerController = Resources.Load<PlayerController>("Prefabs/PC");
+            if (playerController == null)
+                throw new NullReferenceException();
+            
+            list.Add(playerEntityPrefab.gameObject);
+            list.Add(playerController.gameObject);
+            
+            return list;
         }
     }
 }
