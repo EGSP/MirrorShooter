@@ -1,42 +1,34 @@
 ﻿using System;
+using System.Collections.Generic;
 using Game.Entities;
 using Game.Entities.Controllers;
 using Game.Net;
+using Game.Net.Objects;
+using Game.Net.Resources;
+using Gasanov.Core;
 using Mirror;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Sessions
 {
-    public class ClientSession : SerializedMonoBehaviour
+    [LazyInstance(false)]
+    public class ClientSession : SerializedSingleton<ClientSession>
     {
         [NonSerialized] public EventNetworkManager NetworkManager;
         [NonSerialized] public ClientLobby ClientLobby;
 
         private string offlineScene;
-        
-        /// <summary>
-        /// Префаб сущности игрока.
-        /// </summary>
-        private PlayerEntity _playerEntityPrefab;
-        
-        /// <summary>
-        /// Префаб контроллера игрока.
-        /// </summary>
-        private PlayerController _playerController;
-        
-        private void Start()
-        {
-            _playerEntityPrefab = Resources.Load<PlayerEntity>("Prefabs/Player");
-            if(_playerEntityPrefab == null)
-                throw new NullReferenceException();
 
-            _playerController = Resources.Load<PlayerController>("Prefabs/PC");
-            if (_playerController == null)
-                throw new NullReferenceException();
+        protected override void OnInstanceCreated()
+        {
+            // base.OnInstanceCreated();
             
-            ClientScene.RegisterPrefab(_playerEntityPrefab.gameObject);
-            ClientScene.RegisterPrefab(_playerController.gameObject);
+            NetworkManager = Mirror.NetworkManager.singleton as EventNetworkManager;
+            ClientLobby = ClientLobby.Instance;
+            
+            NetworkResources.LoadAndRegister(new ClientSessionLoader());
+            AlwaysExist = true;
         }
 
         public void StartSession()
@@ -48,6 +40,27 @@ namespace Game.Sessions
         {
             ClientLobby.OnDisconnect -= StopSession;
             ClientLobby.ChangeScene(Preloader.Instance.OfflineScene);
+        }
+    }
+    
+    public class ClientSessionLoader : IResourceLoader
+    {
+        public List<GameObject> LoadPrefabs()
+        {
+            var list = new List<GameObject>();
+            
+            var playerEntityPrefab = Resources.Load<PlayerEntity>("Prefabs/Player");
+            if(playerEntityPrefab == null)
+                throw new NullReferenceException();
+
+            var playerController = Resources.Load<PlayerController>("Prefabs/PC");
+            if (playerController == null)
+                throw new NullReferenceException();
+            
+            list.Add(playerEntityPrefab.gameObject);
+            list.Add(playerController.gameObject);
+            
+            return list;
         }
     }
 }

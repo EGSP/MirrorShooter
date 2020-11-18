@@ -1,4 +1,5 @@
-﻿using Sirenix.OdinInspector;
+﻿using System;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Gasanov.Core
@@ -11,18 +12,20 @@ namespace Gasanov.Core
             {
                 if (_instance == null)
                 {
+                    if(!AllowLazyInstance)
+                        throw new LazyInstanceException(typeof(TSingleton));
+                    
                     _instance = FindObjectOfType<TSingleton>();
 
                     if (_instance == null)
                     {
-
-                        var singGameObject = new GameObject("[Singleton]" + typeof(TSingleton));
-                        _instance = singGameObject.AddComponent<TSingleton>();
-                        _instanceGameObject = singGameObject;
+                        CreateInstanceSafely();
+                        CallOnInstanceCreated();
                     }
                     else
                     {
-                        _instanceGameObject = _instance.gameObject;
+                        if (_instanceGameObject == null)
+                            _instanceGameObject = _instance.gameObject;
                     }
                 }
 
@@ -30,23 +33,27 @@ namespace Gasanov.Core
             }
             protected set => _instance = value;
         }
-
-        private static TSingleton _instance;
-        private static GameObject _instanceGameObject;
-
-        protected virtual void Awake()
+        
+        /// <summary>
+        /// Разрешена ли инициализация при обращении к экземпляру.
+        /// </summary>
+        protected static bool AllowLazyInstance
         {
-            if (_instance != null)
+            get
             {
-                Destroy(gameObject);
-                return;
-            }
-            
-            var instance = Instance;
-        }
+                var lazyAttribute = (LazyInstanceAttribute)Attribute.GetCustomAttribute(typeof(TSingleton), 
+                        typeof(LazyInstanceAttribute));
 
+                if (lazyAttribute == null)
+                    return true;
+
+                return lazyAttribute.AllowLazyInstance;
+            }
+        }
+        
         /// <summary>
         /// Помечает экземпляр как DontDestroyOnLoad.
+        /// Изначальное значение false.
         /// </summary>
         public static bool AlwaysExist
         {
@@ -59,13 +66,21 @@ namespace Gasanov.Core
         }
         private static bool alwaysExist;
 
-        
-        /// <param name="immidiate">Уничтожить мгновенно, а не в конце кадра.</param>
-        public static void DestroyIfExist(bool immidiate = false)
+        private static TSingleton _instance;
+        private static GameObject _instanceGameObject;
+
+
+        /// <param name="immediate">Уничтожить мгновенно, а не в конце кадра.</param>
+        public static void DestroyIfExist(bool immediate = false)
         {
             if (_instance != null)
             {
-                if (immidiate)
+                _instance = null;
+                
+                if (_instanceGameObject == null)
+                    return;
+                
+                if (immediate)
                 {
                     DestroyImmediate(_instanceGameObject);
                 }
@@ -75,6 +90,86 @@ namespace Gasanov.Core
                 }
             }
         }
+
+        /// <summary>
+        /// Нужно использовать если объект имеет атрибут LazyInstance(false).
+        /// Можно использовать для ручного создания.
+        /// </summary>
+        public static TSingleton CreateInstance()
+        {
+            if (_instance != null)
+            {
+                if (_instanceGameObject != null)
+                    DestroyImmediate(_instanceGameObject);
+
+                _instance = null;
+            }
+            
+            CreateInstanceSafely();
+            
+            CallOnInstanceCreated();
+
+            return _instance;
+        }
+
+        /// <summary>
+        /// При добавлении компонента у него пройдет вызов метода Awake и значения будут записаны компонентом.
+        /// И хотя вызов пройдет, значения будут перезаписаны нами для надежности.
+        /// Дочерние классы могут сокрыть определение метода Awake.
+        /// </summary>
+        private static void CreateInstanceSafely()
+        {
+            var singletonGameObject = new GameObject("[Singleton]" + typeof(TSingleton));
+            _instance = singletonGameObject.AddComponent<TSingleton>();
+            _instanceGameObject = singletonGameObject;
+        }
+
+        /// <summary>
+        /// В этом случае значения экземпляра и объекта НЕ будут записаны вручную! 
+        /// Это нужно в том случае, если вы НЕ допускаете возможность сокрытия метода Awake в дочерних классах.
+        /// НЕ РЕКОМЕНДОВАНО!
+        /// </summary>
+        private static void CreateInstanceUnsafely()
+        {
+            var singletonGameObject = new GameObject("[Singleton]" + typeof(TSingleton),
+                typeof(TSingleton));
+        }
+
+        /// <summary>
+        /// Вызывает метод-событие уведомлящий экземпляр о появлении.
+        /// Вызывается после Awake.
+        /// </summary>
+        private static void CallOnInstanceCreated()
+        {
+            var singletone = _instance as SerializedSingleton<TSingleton>;
+            if (singletone != null)
+            {
+                singletone.OnInstanceCreated();
+            }
+        }
+
+        protected virtual void Awake()
+        {
+            // Если на сцене уже существует экземпляр, то текущий нужно уничтожить.
+            if (_instance != null)
+            {
+                DestroyImmediate(gameObject);
+                return;
+            }
+            // Этот блок кода обрабатывает ситуацию, когда объект не создается из вне, а существует при старте сцены.
+            // Также он сработает при вызове CreateInstance и сам назначит значения.
+            else
+            {
+                _instance = this as TSingleton;
+                _instanceGameObject = gameObject;
+            }
+        }
         
+        /// <summary>
+        /// Вызывается при создании экземпляра.
+        /// </summary>
+        protected virtual void OnInstanceCreated()
+        {
+        } 
     }
 }

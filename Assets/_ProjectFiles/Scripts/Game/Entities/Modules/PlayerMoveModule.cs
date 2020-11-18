@@ -2,7 +2,6 @@
 using Game.Entities.Controllers;
 using Game.Entities.Modules;
 using Game.Entities.States.Player;
-using Gasanov.Eppd.Proceeders;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using UnityEngine;

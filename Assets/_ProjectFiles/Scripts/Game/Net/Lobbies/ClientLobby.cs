@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Game.Configuration;
 using Game.Sessions;
+using Game.Views;
+using Game.Views.Client;
 using Gasanov.Core;
+using Gasanov.Core.Mvp;
 using Gasanov.Extensions.Mono;
 using Mirror;
 using Sirenix.Serialization;
@@ -12,7 +15,7 @@ using UnityEngine.SceneManagement;
 
 namespace Game.Net
 {
-    
+    [LazyInstance(false)]
     public class ClientLobby : SerializedSingleton<ClientLobby>
     {
         public event Action OnConnected = delegate {  };
@@ -39,8 +42,6 @@ namespace Game.Net
         /// Инициализировано ли лобби.
         /// </summary>
         public bool IsInitialized { get; private set; }
-        
-        public ClientSession Session { get; private set; }
 
         [OdinSerialize]
         public EventNetworkManager NetworkManager { get; set; }
@@ -76,13 +77,20 @@ namespace Game.Net
             
             NetworkManager.OnConnectedToServer += Connected;
             NetworkManager.OnDisconnectedFromServer += DisconnectedFromServer;
-            NetworkManager.OnClientChangeSceneEvent += CreateSession;
+            // NetworkManager.OnClientChangeSceneEvent += CreateSession;
             NetworkManager.OnClientSceneChangedEvent += StartSession;
             NetworkManager.OnClientSceneChangedEvent += SceneChanged;
 
-            LaunchInfo.LaunchMode = LaunchModeType.Client;
-
             IsInitialized = true;
+            
+            InitializeView();
+        }
+
+        private void InitializeView()
+        {
+            var view = ViewFactory.LoadAndInstantiateView<ClientMenuView>("client_menu");
+            ViewFactory.LoadAndInstantiateView<ClientInLobbyView>("client_lobby", false);
+            
         }
 
         /// <summary>
@@ -99,7 +107,7 @@ namespace Game.Net
             NetworkClient.RegisterHandler<DisconnectUserMessage>(DisconnectUser);
             NetworkClient.RegisterHandler<UpdateUserMessage>(UpdateUserInfo);
             
-            NetworkClient.RegisterHandler<SessionStateMessage>(OnServerSessionChanged);
+            NetworkClient.RegisterHandler<SessionStateMessage>(OnServerSessionStateChanged);
 
             NetworkManager.StartClient();
         }
@@ -153,6 +161,11 @@ namespace Game.Net
 
         #region User processing
 
+        public void LoginAs(User user)
+        {
+            LaunchInfo.User = user;
+        }
+        
         /// <summary>
         /// Обработка информации о лобби. 
         /// </summary>
@@ -254,18 +267,26 @@ namespace Game.Net
         
         private void SceneChanged()
         {
+            Debug.Log("Scene Changed");
             NetworkClient.Send<SceneLoadedMessage>(new SceneLoadedMessage());
-            Ready();
+            // SetReady();
         }
         
         /// <summary>
         /// Устанавливает флаг NetworkScene.isReady = true.
         /// </summary>
-        public void Ready()
+        public void ReadyForChangeScene()
         {
+            Debug.Log("READY FOR CHANGE SCENE");
             if (!IsAcceptedUser)
                 return;
 
+            CreateSession();
+            SetReady();
+        }
+        
+        private void SetReady()
+        {
             ClientScene.Ready(NetworkClient.connection);
         }
 
@@ -286,46 +307,34 @@ namespace Game.Net
         {
             NetworkManager.OnConnectedToServer -= Connected;
             NetworkManager.OnDisconnectedFromServer -= DisconnectedFromServer;
-            NetworkManager.OnClientChangeSceneEvent -= CreateSession;
+            // NetworkManager.OnClientChangeSceneEvent -= CreateSession;
             NetworkManager.OnClientSceneChangedEvent -= StartSession;
             NetworkManager.OnClientSceneChangedEvent -= SceneChanged;
             
-            DestroySession();
             Destroy(gameObject);
         }
 
         #region Session setup
 
-        public void GetServerSession()
+        public void GetServerSessionState()
         {
             NetworkClient.Send<SessionStateMessage>(new SessionStateMessage());
         }
         
-        private void OnServerSessionChanged(SessionStateMessage msg)
+        private void OnServerSessionStateChanged(SessionStateMessage msg)
         {
             OnServerSession(msg);
         }
         
         private void CreateSession()
         {
-            Session = gameObject.AddComponent<ClientSession>();
-            Session.NetworkManager = NetworkManager;
-            Session.ClientLobby = this;
-        }
-
-        private void DestroySession()
-        {
-            Destroy(Session.gameObject);
+            ClientSession.CreateInstance();
         }
 
         private void StartSession()
         {
-            if (Session == null)
-            {
-                throw new NullReferenceException();
-            }
-
-            Session.StartSession();
+            Debug.Log("StartSession");
+            ClientSession.Instance.StartSession();
         }
 
         #endregion

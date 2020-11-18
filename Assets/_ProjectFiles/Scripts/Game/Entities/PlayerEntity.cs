@@ -46,6 +46,8 @@ namespace Game.Entities
             MoveModule.Initialize(this);
             MoveModule.Setup(this, rigidBody);
             AnimationModule.Initialize(this);
+            
+            // DontDestroyOnLoad(this);
         }
         
         public override void AwakeOnServer()
@@ -54,7 +56,7 @@ namespace Game.Entities
             if(rigidBody == null)
                 throw new NullReferenceException();
             
-            ServerSession.singletone.AddPlayerEntity(this);
+            ServerSession.Instance.AddPlayerEntity(this);
             
             BodyModule.Initialize(this);
             

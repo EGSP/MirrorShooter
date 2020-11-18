@@ -6,7 +6,7 @@ namespace FirstGearGames.Mirrors.Assets.ReactivePhyics.Editors
 {
 
     [CustomEditor(typeof(ReactivePhysicsObject), true)]
-    public class ReactivePhysicsObjectEditor : Editor
+    public class ReactivePhysicsObjectEditor : UnityEditor.Editor
     {
         private SerializedProperty _useLocalSpace;
 

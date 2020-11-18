@@ -472,10 +472,10 @@ MonoBehaviour:
     SerializationNodes:
     - Name: FirstScene
       Entry: 1
-      Data: main_menu
+      Data: _gamestarter
     - Name: OfflineScene
       Entry: 1
-      Data: main_menu
+      Data: _gamestarter
 --- !u!1 &1445841844
 GameObject:
   m_ObjectHideFlags: 0

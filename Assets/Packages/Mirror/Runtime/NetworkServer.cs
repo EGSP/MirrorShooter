@@ -1100,6 +1100,8 @@ namespace Mirror
 
         internal static void SendSpawnMessage(NetworkIdentity identity, NetworkConnection conn)
         {
+            Debug.Log($"SEND SPAWN MESSAGE {identity.name} : netID {conn.connectionId}");
+            
             if (identity.serverOnly)
                 return;
             

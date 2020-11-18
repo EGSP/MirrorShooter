@@ -416,6 +416,7 @@ namespace Mirror
         {
             if (hasSpawned)
             {
+                Debug.Log($"Has spawned {hasSpawned} - netID {netId}");
                 logger.LogError($"{name} has already spawned. Don't call Instantiate for NetworkIdentities that were in the scene since the beginning (aka scene objects).  Otherwise the client won't know which object to use for a SpawnSceneObject message.");
 
                 SpawnedFromInstantiate = true;
@@ -722,6 +723,8 @@ namespace Mirror
         /// </summary>
         void OnDestroy()
         {
+            Debug.Log($"netID {netId} gameobject {name} has destroyed");
+            
             // Objects spawned from Instantiate are not allowed so are destroyed right away
             // we don't want to call NetworkServer.Destroy if this is the case
             if (SpawnedFromInstantiate)
@@ -1323,7 +1326,7 @@ namespace Mirror
             }
         }
 
-        internal void AddObserver(NetworkConnection conn)
+        public void AddObserver(NetworkConnection conn)
         {
             if (observers == null)
             {
@@ -1723,6 +1726,7 @@ namespace Mirror
         /// <returns></returns>
         public T ReplaceVisibility<T>() where T : NetworkVisibility
         {
+            Debug.Log($"REPLACE VISIBILITY by {typeof(T).Name}");
             if (visibilityCache != null)
             {
                 DestroyImmediate(visibilityCache);
