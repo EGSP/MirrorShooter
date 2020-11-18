@@ -130,11 +130,18 @@ namespace Game.Net
         /// <summary>
         /// Меняет сцену сервера и только заданным пользователям.
         /// </summary>
-        public virtual void ServerChangeSceneUsers(string newSceneName, IEnumerable<NetworkConnection> connections)
+        public virtual void ServerChangeSceneWith(string newSceneName, IEnumerable<NetworkConnection> connections)
         {
             if (string.IsNullOrEmpty(newSceneName))
             {
-                logger.LogError("ServerChangeScene empty scene name");
+                logger.LogError("ServerChangeSceneWith empty scene name");
+                return;
+            }
+            
+            if (Application.CanStreamedLevelBeLoaded(newSceneName) == false)
+            {
+                Debug.Log($"Scene \"{newSceneName}\" not exist in the current build!" +
+                          $" But you are trying to access it!");
                 return;
             }
 
@@ -167,6 +174,16 @@ namespace Game.Net
 
             startPositionIndex = 0;
             startPositions.Clear();
+        }
+
+        /// <summary>
+        /// Меняет сцену у пользователя на текщую сцену сервера.
+        /// </summary>
+        public virtual void ServerChangeSceneFor(NetworkConnection connection)
+        {
+            NetworkServer.SetClientNotReady(connection);
+            
+            connection.Send(new SceneMessage {sceneName = networkSceneName});
         }
     }
 }

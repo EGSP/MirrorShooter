@@ -10,17 +10,21 @@ namespace Game.Net.Objects
 {
     public static class NetworkFactory
     {
+        /// <param name="uc">Соединение, которому будут присвоены права на объект.</param>
         public static void SpawnForAll(GameObject obj, UserConnection uc = null) 
         {
             if (LaunchInfo.IsServer)
             {
+                // Объект будет видем только тем, кто загрузился на сцену.
+                AddLoadedVisibility(obj);
+                
                 if (uc != null && uc.Connection != null)
                 {
-                    NetworkServer.Spawn(obj.gameObject, uc.Connection);
+                    NetworkServer.Spawn(obj, uc.Connection);
                 }
                 else
                 {
-                    NetworkServer.Spawn(obj.gameObject);   
+                    NetworkServer.Spawn(obj);   
                 }
                 return;
             }
@@ -38,7 +42,7 @@ namespace Game.Net.Objects
                     var visibility = identity.ReplaceVisibility<OneConnectionVisibility>();
                     visibility.SpecificConnectionToClient = uc.Connection as NetworkConnectionToClient;
                     
-                    NetworkServer.Spawn(obj.gameObject, uc.Connection);
+                    NetworkServer.Spawn(obj, uc.Connection);
                     return;
                 }
                 
@@ -68,6 +72,12 @@ namespace Game.Net.Objects
             }    
             
             throw new NotServerException();
+        }
+
+        private static void AddLoadedVisibility(GameObject obj)
+        {
+            var identity = obj.GetComponent<NetworkIdentity>();
+            identity.ReplaceVisibility<UserSceneStateVisibility>();
         }
     }
 }

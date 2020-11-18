@@ -9,6 +9,7 @@ namespace Game.Sessions.Observers
         protected readonly ServerSession ServerSession;
         
         protected readonly List<PlayerEntity> PlayerEntities;
+        
         protected SessionObserver(ServerSession serverSession)
         {
             ServerSession = serverSession;

@@ -2,8 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using Game.Configuration;
+using Game.Presenters.Server;
 using Game.Sessions;
+using Game.Views;
+using Game.Views.Server;
 using Gasanov.Core;
+using Gasanov.Core.Mvp;
 using Gasanov.Extensions.Mono;
 using Mirror;
 using Sirenix.Serialization;
@@ -13,7 +17,7 @@ using Random = UnityEngine.Random;
 
 namespace Game.Net
 {
-    
+    [LazyInstance(false)]
     public class ServerLobby : SerializedSingleton<ServerLobby>
     {
         public event Action OnStarted = delegate {  };
@@ -34,8 +38,11 @@ namespace Game.Net
         /// Вызывается когда пользователь готов принимать данные.
         /// </summary>
         public event Action<UserConnection> OnUserReady = delegate(UserConnection user) {  };
+        /// <summary>
+        /// Вызывается когда пользователь сообщает о своей загрузке на сцену.
+        /// </summary>
+        public event Action<UserConnection> OnUserLoadedToScene = delegate(UserConnection connection) {  };
 
-        [OdinSerialize]
         public EventNetworkManager NetworkManager { get; set; }
 
         public bool HasStarted { get ; private set; }
@@ -51,19 +58,22 @@ namespace Game.Net
         /// <summary>
         /// Все обработанные подключения подключения.
         /// </summary>
-        public IEnumerable<UserConnection> FullValConnections =>
-            Connections.Where(x => x.FullVal);
+        public IEnumerable<UserConnection> RegisteredUsers =>
+            Connections.Where(x => x.IsValidated);
 
         /// <summary>
         /// Все обработанные и готовые подключения.
         /// </summary>
-        public IEnumerable<NetworkConnection> FullValReadyConnections =>
-            Connections.Where(x => x.FullVal && x.User.IsReady).Select(x=>x.Connection);
+        public IEnumerable<UserConnection> ReadyUsers =>
+            Connections.Where(x => x.IsValidated && x.User.IsReady);
+
+        
+        public ServerScene Scene { get; private set; }
 
         /// <summary>
         /// Текущая сессия сервера.
         /// </summary>
-        public ServerSession Session { get; private set; }
+        public ServerSession Session => ServerSession.Instance;
 
         #region Setup
         protected override void Awake()
@@ -77,20 +87,30 @@ namespace Game.Net
         {
             if (IsInitialized == true) 
                 return;
+         
+            Debug.Log("Initialize");
             
             NetworkManager.OnServerStarted += Started;
             NetworkManager.OnServerStopped += Stopped;
             NetworkManager.OnServerConnectEvent += ClientConnected;
             NetworkManager.OnServerDisconnectEvent += ClientDisconnected;
             NetworkManager.OnServerReadyEvent += ClientReady;
-
-            LaunchInfo.LaunchMode = LaunchModeType.Server;
-
-            Session = gameObject.AddComponent<ServerSession>();
-            Session.NetworkManager = NetworkManager;
-            Session.ServerLobby = this;
+            
+            Scene = new ServerScene(this);
+            
+            CreateSession();
+            
             IsInitialized = true;
+            
+            InitializeView();
         }
+        
+        private void InitializeView()
+        {
+            ViewFactory.LoadAndInstantiateView<ServerMenuView>("server_menu");
+            ViewFactory.LoadAndInstantiateView<ServerInLobbyView>("server_lobby", false);
+        }
+        
         #endregion
         
         #region Base work
@@ -101,7 +121,7 @@ namespace Game.Net
             transportAdapter.SetPort(port);
 
             NetworkServer.RegisterHandler<AddUserMessage>(RegisterUser);
-            
+            NetworkServer.RegisterHandler<SceneLoadedMessage>(OnSceneLoadedMessage);
             NetworkServer.RegisterHandler<SessionStateMessage>(ShareServerSession);
             
             NetworkManager.StartServer();
@@ -159,7 +179,7 @@ namespace Game.Net
             // Если готовый клиент - пользователь
             var uc = Val(clientConnection);
 
-            if (uc.FullVal)
+            if (uc.IsValidated)
             {
                 uc.User.IsReady = true;
                 OnUserReady(uc);
@@ -277,7 +297,7 @@ namespace Game.Net
                 }
             }
 
-            Debug.Log($"Sended lobby users : {lobbyMessage.AddUserMessages.Count}");
+            // Debug.Log($"Sended lobby users : {lobbyMessage.AddUserMessages.Count}");
             
             userConnection.Connection.Send<LobbyUsersMessage>(lobbyMessage);
         }
@@ -309,17 +329,14 @@ namespace Game.Net
 
             userConnection.Connection.Send<UpdateUserMessage>(message);
         }
-
-        /// <summary>
-        /// Меняет сцену пользователю. Посылает SceneMessage с текущей открытой сценой на сервере.
-        /// Соединение должно иметь флаг isReady == true.
-        /// </summary>
-        public void ChangeUserScene(UserConnection uc)
+        
+        private void OnSceneLoadedMessage(NetworkConnection connection, SceneLoadedMessage msg)
         {
-            var msg = new SceneMessage() { sceneName = SceneManager.GetActiveScene().name};
-
-            if (uc.Connection.isReady)
-                uc.Connection.Send(msg);
+            var uc = Val(connection);
+            if (uc != null)
+            {
+                OnUserLoadedToScene(uc);
+            }
         }
 
         #endregion
@@ -385,6 +402,21 @@ namespace Game.Net
                 userConnection.Connection.Send<SessionStateMessage>(msg);
             }
         }
+
+        private void CreateSession()
+        {
+            ServerSession.CreateInstance();
+        }
+
+        public void StartSession()
+        {
+            throw new Exception();
+        }
+
+        public void ChangeServerScene(string sceneName)
+        {
+            Scene.ChangeServerScene(sceneName);
+        }
         
         /// <summary>
         /// Ищет пользовательское соединение связанное с этим NetworkConnection.
@@ -396,6 +428,51 @@ namespace Game.Net
                 => x.Connection == conn);
 
             return coincidence;
+        }
+    }
+
+    public class ServerScene
+    {
+        private readonly ServerLobby _lobby;
+
+        public ServerScene(ServerLobby lobby)
+        {
+            _lobby = lobby;
+            _lobby.OnUserLoadedToScene += UserLoadedToScene;
+        }
+        
+        public string Current { get; private set; }
+
+        public void ChangeServerScene(string newScene)
+        {
+            Current = newScene;
+            
+            var readyUsers = _lobby.ReadyUsers;
+
+            foreach (var userConnection in readyUsers)
+            {
+                userConnection.SceneState = UserConnection.UserSceneState.IsLoading;
+            }   
+            
+            _lobby.NetworkManager.ServerChangeSceneWith(newScene,
+                readyUsers.Select(x=>x.Connection));
+        }
+
+        /// <summary>
+        /// Меняет сцену у заданного пользователя.
+        /// </summary>
+        /// <param name="userConnection"></param>
+        public void ChangeUserScene(UserConnection userConnection)
+        {
+            userConnection.SceneState = UserConnection.UserSceneState.IsLoading;
+            
+            _lobby.NetworkManager.ServerChangeSceneFor(userConnection.Connection);
+        }
+        
+        
+        private void UserLoadedToScene(UserConnection userConnection)
+        {
+            userConnection.SceneState = UserConnection.UserSceneState.Loaded;
         }
     }
 }

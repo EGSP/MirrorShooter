@@ -848,6 +848,8 @@ namespace Mirror
 
         internal void ClientChangeScene(string newSceneName, SceneOperation sceneOperation = SceneOperation.Normal, bool customHandling = false)
         {
+            // Debug.Log("ClientChangeScene");
+            
             if (string.IsNullOrEmpty(newSceneName))
             {
                 logger.LogError("ClientChangeScene empty scene name");
@@ -972,6 +974,7 @@ namespace Mirror
             // client-only mode?
             else if (mode == NetworkManagerMode.ClientOnly)
             {
+                Debug.Log("Finish Load Scene");
                 FinishLoadSceneClientOnly();
             }
             // otherwise we called it after stopping when loading offline scene.
