@@ -7,6 +7,7 @@ using Game.Net;
 using Game.Net.Objects;
 using Game.Sessions.Observers;
 using Game.World;
+using Gasanov.Core;
 using Gasanov.Extensions.Linq;
 using Mirror;
 using Sirenix.OdinInspector;
@@ -14,10 +15,9 @@ using UnityEngine;
 
 namespace Game.Sessions
 {
-    public class ServerSession : SerializedMonoBehaviour
-    {
-        public static ServerSession singletone;
-        
+    [LazyInstance(false)]
+    public class ServerSession : SerializedSingleton<ServerSession>
+    {   
         [NonSerialized] public EventNetworkManager NetworkManager;
         [NonSerialized] public ServerLobby ServerLobby;
         
@@ -55,7 +55,7 @@ namespace Game.Sessions
         
 
         /// <summary>
-        /// Список пользователей находящихся на сцене.
+        /// Список пользователей находящихся на сцене. ПЕРЕНЕСТИ В ЛОГИКУ СЦЕНЫ
         /// </summary>
         private List<UserHandler> _userConnectionsInScene;
 
@@ -75,9 +75,17 @@ namespace Game.Sessions
 
         public List<SessionObserver> SessionObservers { get; private set; }
 
-        private void Awake()
+        protected override void OnInstanceCreated()
         {
-            singletone = this;
+            base.OnInstanceCreated();
+            
+            NetworkManager = Mirror.NetworkManager.singleton as EventNetworkManager;
+            ServerLobby = ServerLobby.Instance;
+            
+            NetworkManager.OnServerSceneChangedEvent += StartSession;
+            ServerLobby.OnUserLoadedToScene += ProcessLoadedUser;
+            
+            AlwaysExist = true;
         }
 
         private void Start()
@@ -142,27 +150,6 @@ namespace Game.Sessions
             IsStarted = false;
             ServerLobby.ShareServerSessionForConnections(StateMessage);
         }
-
-       
-        
-        /// <summary>
-        /// Смена сцены сервера.
-        /// </summary>
-        /// <param name="sceneName"></param>
-        public void ChangeScene(string sceneName)
-        {
-            if (Application.CanStreamedLevelBeLoaded(sceneName) == false)
-            {
-                Debug.Log($"Scene \"{sceneName}\" not exist in the current build!" +
-                          $" But you are trying to access it!");
-                return;
-            }
-            
-            NetworkServer.RegisterHandler<SceneLoadedMessage>(ProcessLoadedUser);
-
-            NetworkManager.OnServerSceneChangedEvent += StartSession;
-            NetworkManager.ServerChangeSceneUsers(sceneName, ServerLobby.FullValReadyConnections);
-        }
         
         private void UpdateObservers()
         {
@@ -175,49 +162,44 @@ namespace Game.Sessions
         /// <summary>
         /// Обработка готового пользователя.
         /// </summary>
-        private void ProcessReadyUser(UserConnection uc)
+        private void ProcessReadyUser(UserConnection userConnection)
         {
-            Debug.Log("PROCESS_USER_READY");
+            Debug.Log($"PROCESS_USER_READY: {userConnection.User.id} / {userConnection.User.name}");
 
             // Если пользователь уже на сцене, то ничего не делаем.
-            if (_userConnectionsInScene.Exists(x=>x.UserConnection == uc))
+            if (userConnection.SceneState != UserConnection.UserSceneState.NotLoaded)
                 return;
             
-            ServerLobby.ChangeUserScene(uc);
+            Debug.Log("CHANGE SCENE FOR USER");
+            
+            // Добавить в серверную сцену автоматический редирект. !!!!!!!!!!!!!!!!
+            ServerLobby.Scene.ChangeUserScene(userConnection);
         }
         
         /// <summary>
         /// Обработка загрузившегося пользователя.
         /// </summary>
-        private void ProcessLoadedUser(NetworkConnection conn, SceneLoadedMessage msg)
+        private void ProcessLoadedUser(UserConnection userConnection)
         {
-            Debug.Log("PROCESS_USER_LOADED");
+            Debug.Log($"PROCESS_USER_LOADED: {userConnection.User.id} / {userConnection.User.name}");
 
-            var uc = ServerLobby.Val(conn);
-            if (uc == null)
-                return;
-
-            if (_userConnectionsInScene.Exists(x=>x.UserConnection == uc))
-                return;
-
-            var userHandler = new UserHandler(uc);
+            var userHandler = new UserHandler(userConnection);
+            
             // Заносим в пользователей сцены.
             _userConnectionsInScene.Add(userHandler);
             
             // Спавним игрока
             var playerEntity = Instantiate(_playerEntityPrefab);
             playerEntity.gameObject.transform.position = SpawnPoint.SpawnPoints.Random().transform.position;
-            playerEntity.owner = uc.User;
-            NetworkFactory.SpawnForAll(playerEntity.gameObject, uc);
+            playerEntity.owner = userConnection.User;
+            NetworkFactory.SpawnForAll(playerEntity.gameObject, userConnection);
             
             // Спавн контроллера
             var playerController = Instantiate(_playerController);
             playerController.gameObject.name = $"PC [{playerEntity.owner.id}]";
-            NetworkFactory.SpawnForConnection(playerController.gameObject, uc);
+            NetworkFactory.SpawnForConnection(playerController.gameObject, userConnection);
             playerController.SetPlayerEntity(playerEntity);
             playerController.playerEntityId = playerEntity.netId;
-            
-            NetworkIdentity.RebuildObserversForAll();
 
             userHandler.RelatedPlayerEntity = playerEntity;
             userHandler.AddGameObject(playerEntity.gameObject);
@@ -269,6 +251,12 @@ namespace Game.Sessions
                 PlayerEntities.Remove(playerEntity);
                 OnPlayerEntityRemove(playerEntity);
             }
+        }
+
+        private void OnDestroy()
+        {
+            NetworkManager.OnServerSceneChangedEvent -= StartSession;
+            ServerLobby.OnUserLoadedToScene -= ProcessLoadedUser;
         }
     }
 }

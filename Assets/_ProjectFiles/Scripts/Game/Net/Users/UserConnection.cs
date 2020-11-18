@@ -4,6 +4,13 @@ namespace Game.Net
 {
     public class UserConnection
     {
+        public enum UserSceneState
+        {
+            NotLoaded,
+            IsLoading,
+            Loaded
+        }
+        
         public UserConnection(NetworkConnection conn)
         {
             Connection = conn;
@@ -20,9 +27,14 @@ namespace Game.Net
         public User User;
 
         /// <summary>
+        /// Загружен ли пользователь на текущую сцену.
+        /// </summary>
+        public UserSceneState SceneState;
+
+        /// <summary>
         /// Свойство заполненности всех данных.
         /// </summary>
-        public bool FullVal
+        public bool IsValidated
         {
             get
             {

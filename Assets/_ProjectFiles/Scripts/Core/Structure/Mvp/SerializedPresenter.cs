@@ -20,6 +20,10 @@ namespace Gasanov.Core.Mvp
             {
                 View = GetComponent<TView>();
             }
+            
+            Share();
+            
+            OnAwake();
         }
 
         public void Share()
@@ -37,7 +41,9 @@ namespace Gasanov.Core.Mvp
             
             return false;
         }
-        
+
+        public abstract void OnAwake();
+
         protected abstract void OnResponse();
 
         protected virtual void OnDestroy()

@@ -7,7 +7,7 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkAnimators.Editors
 
     [CustomEditor(typeof(FlexNetworkAnimator), true)]
     [CanEditMultipleObjects]
-    public class FlexNetworkAnimatorEditor : Editor
+    public class FlexNetworkAnimatorEditor : UnityEditor.Editor
     {
         private SerializedProperty _animator;
         private SerializedProperty _clientAuthoritative;

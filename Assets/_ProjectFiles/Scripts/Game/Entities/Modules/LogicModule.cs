@@ -81,7 +81,6 @@ namespace Game.Entities.Modules
 
         private void Awake()
         {
-            Debug.Log("AWAKE LOGIC");
             _cachedUpdateManager.AwakeMe(this);
         }
 

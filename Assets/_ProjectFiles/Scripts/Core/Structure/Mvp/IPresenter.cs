@@ -22,5 +22,10 @@ namespace Gasanov.Core.Mvp
         /// Передается ключ для активации из вне и аргументы.
         /// </summary>
         bool Response(string key, object arg);
+
+        /// <summary>
+        /// Вызывается после создания.
+        /// </summary>
+        void OnAwake();
     }
 }

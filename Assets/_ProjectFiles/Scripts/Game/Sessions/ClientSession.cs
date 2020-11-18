@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Game.Entities;
 using Game.Entities.Controllers;
 using Game.Net;
+using Game.Net.Objects;
 using Game.Net.Resources;
 using Gasanov.Core;
 using Mirror;
@@ -12,13 +13,24 @@ using UnityEngine;
 namespace Game.Sessions
 {
     [LazyInstance(false)]
-    public class ClientSession : SerializedMonoBehaviour
+    public class ClientSession : SerializedSingleton<ClientSession>
     {
         [NonSerialized] public EventNetworkManager NetworkManager;
         [NonSerialized] public ClientLobby ClientLobby;
 
         private string offlineScene;
-        
+
+        protected override void OnInstanceCreated()
+        {
+            // base.OnInstanceCreated();
+            
+            NetworkManager = Mirror.NetworkManager.singleton as EventNetworkManager;
+            ClientLobby = ClientLobby.Instance;
+            
+            NetworkResources.LoadAndRegister(new ClientSessionLoader());
+            AlwaysExist = true;
+        }
+
         public void StartSession()
         {
             ClientLobby.OnDisconnect += StopSession;
@@ -28,11 +40,6 @@ namespace Game.Sessions
         {
             ClientLobby.OnDisconnect -= StopSession;
             ClientLobby.ChangeScene(Preloader.Instance.OfflineScene);
-        }
-
-        public List<GameObject> LoadPrefabs()
-        {
-            throw new NotImplementedException();
         }
     }
     

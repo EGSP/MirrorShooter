@@ -6,7 +6,7 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkTransforms.Editors
 {
 
     [CustomEditor(typeof(FlexNetworkTransformBase), true)]
-    public class FlexNetworkTransformBaseEditor : Editor
+    public class FlexNetworkTransformBaseEditor : UnityEditor.Editor
     {
         private SerializedProperty _useLocalSpace;
 

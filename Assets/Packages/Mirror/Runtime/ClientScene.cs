@@ -241,6 +241,7 @@ namespace Mirror
         /// <param name="prefab">NetworkIdentity on Prefab GameObject</param>
         static void RegisterPrefabIdentity(NetworkIdentity prefab)
         {
+            Debug.Log($"Register prefab {prefab.name}");
             if (prefab.assetId == Guid.Empty)
             {
                 logger.LogError($"Can not Register '{prefab.name}' because it had empty assetid. If this is a scene Object use RegisterSpawnHandler instead");
@@ -727,6 +728,13 @@ namespace Mirror
 
         internal static void ApplySpawnPayload(NetworkIdentity identity, SpawnMessage msg)
         {
+            Debug.Log("APPLY SPAWN PAYLOAD");
+
+            if (msg.netId == 1)
+            {
+                
+            }
+            
             if (msg.assetId != Guid.Empty)
                 identity.assetId = msg.assetId;
 
@@ -762,7 +770,7 @@ namespace Mirror
             // objects spawned as part of initial state are started on a second pass
             if (isSpawnFinished)
             {
-                // Debug.Log("SpawnFinished ApplyPayload");
+                Debug.Log("SpawnFinished ApplyPayload");
                 identity.NotifyAuthority();
                 identity.OnStartClient();
                 CheckForLocalPlayer(identity);
@@ -771,6 +779,8 @@ namespace Mirror
 
         internal static void OnSpawn(SpawnMessage msg)
         {
+            Debug.Log($"SPAWN MESSAGE {msg.assetId} : netId {msg.netId}");
+            
             if (logger.LogEnabled()) logger.Log($"Client spawn handler instantiating netId={msg.netId} assetID={msg.assetId} sceneId={msg.sceneId} pos={msg.position}");
 
             if (FindOrSpawnObject(msg, out NetworkIdentity identity))
@@ -821,6 +831,7 @@ namespace Mirror
             if (GetPrefab(msg.assetId, out GameObject prefab))
             {
                 GameObject obj = Object.Instantiate(prefab, msg.position, msg.rotation);
+                Debug.Log($"{obj.name} with netID {msg.netId}");
                 if (logger.LogEnabled())
                 {
                     logger.Log("Client spawn handler instantiating [netId:" + msg.netId + " asset ID:" + msg.assetId + " pos:" + msg.position + " rotation: " + msg.rotation + "]");
@@ -917,6 +928,8 @@ namespace Mirror
 
         static void DestroyObject(uint netId)
         {
+            Debug.Log($"Client scene call destroy object with netID {netId}");
+            
             if (logger.LogEnabled()) logger.Log("ClientScene.OnObjDestroy netId:" + netId);
 
             if (NetworkIdentity.spawned.TryGetValue(netId, out NetworkIdentity localObject) && localObject != null)

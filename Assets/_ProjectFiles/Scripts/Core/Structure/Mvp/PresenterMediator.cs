@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Gasanov.Core.Mvp
 {
@@ -34,12 +35,14 @@ namespace Gasanov.Core.Mvp
         /// <summary>
         /// Отправляет сообщение всем остальным презентерам до первого положительного ответа.
         /// </summary>
-        public static void Request(IPresenter sender,string message, object arg)
+        public static void Request(IPresenter sender,string message, object arg = null)
         {
+            // Debug.Log(message);
             for (var i = 0; i < _presenters.Count; i++)
             {
                 var presenter = _presenters[i];
 
+                // Debug.Log(message);
                 if (presenter != sender)
                 {
                     // Если презентер ответил на сообщение

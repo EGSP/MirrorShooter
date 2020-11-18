@@ -146,8 +146,10 @@ namespace Game.Entities.Controllers
         
         public void OnEntityChanged(uint _, uint newEntity)
         {
+            Debug.Log("ENTITY CHANGED");
             if (NetworkIdentity.spawned.TryGetValue(newEntity, out NetworkIdentity identity))
             {
+                Debug.Log($"ENTITY FINDED with netID {identity.netId}");
                 PlayerEntity = identity.GetComponent<PlayerEntity>();
                 PlayerEntity.netIdentity.isLocalRepresenter = true;
 
