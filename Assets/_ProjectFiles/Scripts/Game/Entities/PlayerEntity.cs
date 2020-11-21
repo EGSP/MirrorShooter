@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Game.Entities.Controllers;
 using Game.Entities.Modules;
 using Game.Net;
@@ -33,6 +34,8 @@ namespace Game.Entities
         
         // SERVER
         private PlayerInputManager _playerInputManager;
+
+        private Dictionary<string, LogicModule> definedModules = new Dictionary<string, LogicModule>(); 
         
         public override void AwakeOnClient()
         {
@@ -47,9 +50,11 @@ namespace Game.Entities
             MoveModule.Setup(this, rigidBody);
             AnimationModule.Initialize(this);
             
-            // DontDestroyOnLoad(this);
+            definedModules.Add(BodyModule.ID,BodyModule);
+            definedModules.Add(MoveModule.ID,MoveModule);
+            definedModules.Add(AnimationModule.ID, AnimationModule);
         }
-        
+
         public override void AwakeOnServer()
         {
             var rigidBody = GetComponent<Rigidbody>();
@@ -64,9 +69,13 @@ namespace Game.Entities
             MoveModule.Setup(this, rigidBody);
 
             AnimationModule.Initialize(this);
+
+            BodyModule.OnStateChanged += OnStateChanged;
+            MoveModule.OnStateChanged += OnStateChanged;
+            AnimationModule.OnStateChanged += OnStateChanged;
         }
         
-
+        
 
         public void SetInput(PlayerInputManager playerInputManager)
         {
@@ -74,6 +83,18 @@ namespace Game.Entities
 
             MoveModule.PlayerInputManager = _playerInputManager;
             BodyModule.PlayerInputManager = _playerInputManager;
+        }
+
+        [TargetRpc]
+        public void TargetSyncState(NetworkConnection connection, string module, string state)
+        {
+            Debug.Log($"STATE SYNC : {module} -> {state}");            
+        }
+
+        private void OnStateChanged(string module, string state)
+        {
+            // Debug.Log($"ONSTATECHANGED ({module}, {state})");
+            TargetSyncState(netIdentity.connectionToClient, module, state);
         }
         
 

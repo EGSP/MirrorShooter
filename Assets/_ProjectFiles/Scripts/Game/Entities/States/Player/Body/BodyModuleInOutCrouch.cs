@@ -24,7 +24,7 @@ namespace Game.Entities.States.Player.Body
         }
 
         private float _crouchingTime;
-
+        
         public override BodyModuleState UpdateOnServer(float deltaTime)
         {
             if (_crouchingTime > Module.InOutCrouchTime)

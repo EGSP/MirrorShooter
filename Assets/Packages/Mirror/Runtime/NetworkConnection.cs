@@ -148,7 +148,7 @@ namespace Mirror
         /// <returns></returns>
         public bool Send<T>(T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
         {
-            Debug.Log($"Send message: {typeof(T).Name}");
+            // Debug.Log($"Send message: {typeof(T).Name}");
             
             using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
             {

@@ -11,18 +11,15 @@ namespace Game.Entities.States.Player
         private Vector3 _targetDirection;
 
         private readonly float _baseSpeed;
-        private readonly bool _longJump;
          
         /// <param name="baseSpeed">Базовая скорость для перемещения во время полета</param>
         /// <param name="startSpeed">Стартовая скорость. 0 - если прыжок с места, 1 - если во время движения</param>
-        public MoveModuleJump(PlayerMoveModule moveModule, float baseSpeed, int isWalking = 1, bool longJump = false) : base(moveModule)
+        public MoveModuleJump(PlayerMoveModule moveModule, float baseSpeed, int isWalking = 1) : base(moveModule)
         {
             Module.JumpInitiated();
             
             Module.Rigidbody.AddForce(Module.Rigidbody.transform.up * Module.JumpForce,
                 ForceMode.Impulse);
-            
-            var direction = ExtractOverallInputDirection();
 
             var vertical = ExtractVerticalInput();
             _targetDirection += Module.Rigidbody.transform.forward * vertical * isWalking;
@@ -31,7 +28,6 @@ namespace Game.Entities.States.Player
             _targetDirection += Module.Rigidbody.transform.right * horizontal * isWalking;
             
             _baseSpeed = baseSpeed;
-            _longJump = longJump;
         }
 
         public override MoveModuleState FixedUpdateOnServer(float deltaTime)
@@ -65,14 +61,6 @@ namespace Game.Entities.States.Player
                 _targetDirection = Vector3.zero;
                 return;
             }
-
-            // Если длинный прыжок, то игрок не может изменить свою траекторию.
-            if (_longJump)
-            {
-                Move(_targetDirection, _baseSpeed, deltaTime);
-                return;
-            }
-            
             
             // Направление относительно взгляда (текущего вращения). 
             var horizontal = ExtractHorizontalInput();

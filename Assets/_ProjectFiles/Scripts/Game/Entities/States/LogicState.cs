@@ -2,7 +2,21 @@
 
 namespace Game.Entities.States
 {
-    public abstract class LogicState<TState, TModule>
+    public abstract class LogicState
+    {
+        protected LogicState()
+        {
+            CachedId = ID;
+        }
+        
+        /// <summary>
+        /// Идентификатор состояния.
+        /// </summary>
+        public string ID => this.GetType().Name;
+        public string CachedId { get; private set; }
+    }
+    
+    public abstract class LogicState<TState, TModule> : LogicState
         where TState : LogicState<TState, TModule>
         where TModule : LogicModule<TState, TModule>
     {
@@ -11,7 +25,7 @@ namespace Game.Entities.States
         /// </summary>
         protected readonly TModule Module;
         
-        protected LogicState(TModule module)
+        protected LogicState(TModule module) : base()
         {
             Module = module;
         }

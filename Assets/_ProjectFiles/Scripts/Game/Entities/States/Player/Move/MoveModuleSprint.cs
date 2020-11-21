@@ -65,8 +65,7 @@ namespace Game.Entities.States.Player
             {
                 // Над головой нет препятствия.
                 if (Module.IsHeadUnderObstacle == false)
-                    return new MoveModuleJump(Module, Module.MoveSpeed * Module.RunSpeedModifier,
-                        isWalking, true);
+                    return new MoveModuleLongJump(Module, Module.MoveSpeed * Module.RunSpeedModifier);
             }
             
             // Вышло время спринта.
