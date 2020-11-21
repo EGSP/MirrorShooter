@@ -11,6 +11,12 @@ namespace Game.Entities.States.Player
         public MoveModuleSprint(PlayerMoveModule moveModule) : base(moveModule)
         {
             _sprintTime = 0;
+            CallDualConstructor();
+        }
+
+        protected override void ConstructorServer()
+        {
+            base.ConstructorServer();
             
             Module.PlayerEntity.BodyModule
                 .SetState(new BodyModuleInOutCrouch(Module.PlayerEntity.BodyModule, InOut.Out));

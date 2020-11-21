@@ -12,7 +12,7 @@ namespace Game.Entities.Modules
         public event Action<string,string> OnStateChanged = delegate(string s, string s1) {  };
         
         
-        private DualUpdateManager _cachedUpdateManager;
+        protected DualUpdateManager _cachedUpdateManager;
 
         private IUnityMethodsHook _hook;
 
@@ -189,7 +189,7 @@ namespace Game.Entities.Modules
             DefineStates();
         }
 
-        protected void UpdateState()
+        protected void UpdateStateOnServer()
         {
             if (CurrentState != null)
             {
@@ -203,17 +203,37 @@ namespace Game.Entities.Modules
             }
         }
 
-        protected void FixedUpdateState()
+        protected void FixedUpdateStateOnServer()
         {
             if (CurrentState != null)
             {
-                currentStateName = CurrentState.GetType().Name;
+                currentStateName = CurrentState.CachedId;
                 
                 var newState = CurrentState.FixedUpdateOnServer(Time.fixedDeltaTime);
                 
                 CheckState(newState, CurrentState);
 
                 CurrentState = newState;
+            }
+        }
+
+        protected void UpdateStateOnClient()
+        {
+            if (CurrentState != null)
+            {
+                currentStateName = CurrentState.CachedId;
+
+                CurrentState = CurrentState.UpdateOnClient(Time.deltaTime);
+            }
+        }
+        
+        protected void FixedUpdateStateOnClient()
+        {
+            if (CurrentState != null)
+            {
+                currentStateName = CurrentState.CachedId;
+
+                CurrentState = CurrentState.FixedUpdateOnClient(Time.deltaTime);
             }
         }
 
@@ -240,12 +260,14 @@ namespace Game.Entities.Modules
         
         public virtual void SetState(TState state)
         {
+            Debug.Log($"NEW STATE ON {GetType().Name}");
             if (state == null)
                 return;
 
             CurrentState = state;
-            
-            CheckState(CurrentState, null);
+
+            if (DualUpdateManager.IsServer)
+                CheckState(CurrentState, null);
         }
         
         protected void DefineState(string key, Func<TState> creationMethod)

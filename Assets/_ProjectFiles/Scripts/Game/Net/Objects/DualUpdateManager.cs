@@ -114,6 +114,10 @@ namespace Game.Net.Objects
         }    
         #endregion
 
+        public static bool IsClient { get; private set; }
+        
+        public static bool IsServer { get; private set; }
+        
         /// <summary>
         /// Текущий режим обновления.
         /// </summary>
@@ -188,10 +192,14 @@ namespace Game.Net.Objects
             // Debug.Log(newMode);
             if (newMode == UpdateModeType.Server)
             {
+                IsServer = true;
+                IsClient = false;
                 _abstractUpdateMode = new ServerUpdateMode();
             }
             else
             {
+                IsClient = true;
+                IsServer = false;
                 _abstractUpdateMode = new ClientUpdateMode();
             }
         }

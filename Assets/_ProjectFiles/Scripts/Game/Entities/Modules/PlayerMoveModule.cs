@@ -116,7 +116,8 @@ namespace Game.Entities.Modules
                 return;
             }
 
-            UpdateState();
+            UpdateStateOnClient();
+            UpdateStateOnServer();
             
             CheckJumpInterval();
             
@@ -131,7 +132,8 @@ namespace Game.Entities.Modules
                 return;
             }
 
-            FixedUpdateState();
+            FixedUpdateStateOnClient();
+            FixedUpdateStateOnServer();
         }
 
         /// <summary>

@@ -98,8 +98,13 @@ namespace Game.Entities.Modules
                 return;
             }
             
-            UpdateState();
+            UpdateStateOnServer();
             MoveCameraTarget();
+        }
+
+        public override void UpdateOnClient()
+        {
+            UpdateStateOnClient();
         }
 
         private void MoveCameraTarget()

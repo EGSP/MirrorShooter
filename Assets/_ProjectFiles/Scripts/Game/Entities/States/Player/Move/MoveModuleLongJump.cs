@@ -16,6 +16,15 @@ namespace Game.Entities.States.Player
         {
             Module.JumpInitiated();
             
+            _baseSpeed = baseSpeed;
+            
+            CallDualConstructor();
+        }
+        
+        protected override void ConstructorServer()
+        {
+            base.ConstructorServer();
+            
             Module.Rigidbody.AddForce(Module.Rigidbody.transform.up * Module.JumpForce,
                 ForceMode.Impulse);
             
@@ -24,8 +33,6 @@ namespace Game.Entities.States.Player
 
             var horizontal = ExtractHorizontalInput();
             _targetDirection += Module.Rigidbody.transform.right * horizontal;
-            
-            _baseSpeed = baseSpeed;
         }
         
         public override MoveModuleState FixedUpdateOnServer(float deltaTime)

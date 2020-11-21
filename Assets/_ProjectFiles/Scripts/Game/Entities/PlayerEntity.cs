@@ -64,10 +64,8 @@ namespace Game.Entities
             ServerSession.Instance.AddPlayerEntity(this);
             
             BodyModule.Initialize(this);
-            
             MoveModule.Initialize(this);
             MoveModule.Setup(this, rigidBody);
-
             AnimationModule.Initialize(this);
 
             BodyModule.OnStateChanged += OnStateChanged;
@@ -88,12 +86,24 @@ namespace Game.Entities
         [TargetRpc]
         public void TargetSyncState(NetworkConnection connection, string module, string state)
         {
-            Debug.Log($"STATE SYNC : {module} -> {state}");            
+            Debug.Log($"STATE SYNC : {module} -> {state}");
+            if (definedModules.ContainsKey(module))
+            {
+                var playerModule = definedModules[module];
+                
+                playerModule.RecognizeState(state);
+            }
         }
 
         private void OnStateChanged(string module, string state)
         {
-            // Debug.Log($"ONSTATECHANGED ({module}, {state})");
+            if (state == null)
+                return;
+            
+            if (state == "null")
+                return;
+            
+            Debug.Log($"ONSTATECHANGED ({module}, {state})");
             TargetSyncState(netIdentity.connectionToClient, module, state);
         }
         

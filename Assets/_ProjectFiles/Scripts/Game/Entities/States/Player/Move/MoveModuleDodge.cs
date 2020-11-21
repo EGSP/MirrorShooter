@@ -14,10 +14,15 @@ namespace Game.Entities.States.Player
             _baseSpeed = baseSpeed;
             
             Module.JumpInitiated();
+            CallDualConstructor();
+        }
+        
+        protected override void ConstructorServer()
+        {
+            base.ConstructorServer();
             
             Module.Rigidbody.AddForce(Module.Rigidbody.transform.up * Module.JumpForce,
                 ForceMode.Impulse);
-            
         }
 
         public override MoveModuleState FixedUpdateOnServer(float deltaTime)
