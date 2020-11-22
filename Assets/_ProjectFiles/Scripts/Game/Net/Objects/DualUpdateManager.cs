@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Game.Net.Objects
 {
-    public class DualUpdateManager : Singleton<DualUpdateManager>
+    public sealed class DualUpdateManager : Singleton<DualUpdateManager>
     {
         #region Objects
 
