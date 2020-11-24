@@ -5,6 +5,7 @@ using Game.Entities;
 using Game.Entities.Controllers;
 using Game.Net;
 using Game.Net.Objects;
+using Game.Sessions.Actors;
 using Game.Sessions.Observers;
 using Game.World;
 using Gasanov.Core;
@@ -18,6 +19,30 @@ namespace Game.Sessions
     [LazyInstance(false)]
     public class ServerSession : SerializedSingleton<ServerSession>
     {   
+        /// <summary>
+        /// Вызывается при добавлении новой сущности игрока.
+        /// </summary>
+        public event Action<PlayerEntity> OnPlayerEntityAdd = delegate(PlayerEntity entity) {  };
+        /// <summary>
+        /// Вызывается при удалении сущности игрока.
+        /// </summary>
+        public event Action<PlayerEntity> OnPlayerEntityRemove = delegate(PlayerEntity entity) {  };
+
+        public event Action<UserHandler> OnUserLoaded = delegate(UserHandler handler) {  };
+        public event Action<UserHandler> OnUserDisconnected = delegate(UserHandler handler) {  };
+        
+        /// <summary>
+        /// Создает сообщение о сессии на основе текущего состояния.
+        /// </summary>
+        public SessionStateMessage StateMessage
+        {
+            get
+            {
+                var msg = new SessionStateMessage(){IsStarted = this.IsStarted};
+                return msg;
+            }
+        }
+        
         [NonSerialized] public EventNetworkManager NetworkManager;
         [NonSerialized] public ServerLobby ServerLobby;
         
@@ -34,50 +59,28 @@ namespace Game.Sessions
         /// <summary>
         /// Префаб сущности игрока.
         /// </summary>
-        private PlayerEntity _playerEntityPrefab;
-        
+        public PlayerEntity PlayerEntityPrefab { get; private set; }
+
         /// <summary>
         /// Префаб контроллера игрока.
         /// </summary>
-        private PlayerController _playerController;
-        
-        /// <summary>
-        /// Создает сообщение о сессии на основе текущего состояния.
-        /// </summary>
-        public SessionStateMessage StateMessage
-        {
-            get
-            {
-                var msg = new SessionStateMessage(){IsStarted = this.IsStarted};
-                return msg;
-            }
-        }
-        
+        public PlayerController PlayerController { get; private set; }
 
         /// <summary>
-        /// Список пользователей находящихся на сцене. ПЕРЕНЕСТИ В ЛОГИКУ СЦЕНЫ
+        /// Список пользователей находящихся на сцене.
         /// </summary>
-        private List<UserHandler> _userConnectionsInScene;
-
+        public List<UserHandler> UserHandlers { get; private set; } = new List<UserHandler>();
         /// <summary>
         /// Все текущие сущности игроков.
         /// </summary>
-        public List<PlayerEntity> PlayerEntities { get; private set; }
-        
-        /// <summary>
-        /// Вызывается при добавлении новой сущности игрока.
-        /// </summary>
-        public event Action<PlayerEntity> OnPlayerEntityAdd = delegate(PlayerEntity entity) {  };
-        /// <summary>
-        /// Вызывается при удалении сущности игрока.
-        /// </summary>
-        public event Action<PlayerEntity> OnPlayerEntityRemove = delegate(PlayerEntity entity) {  };
-
-        public List<SessionObserver> SessionObservers { get; private set; }
+        public List<PlayerEntity> PlayerEntities { get; private set; } = new List<PlayerEntity>();
+        public List<SessionObserver> Observers { get; private set; } = new List<SessionObserver>();
+        public List<Actor> Actors { get; private set; } = new List<Actor>();
 
         protected override void OnInstanceCreated()
         {
             base.OnInstanceCreated();
+            AlwaysExist = true;
             
             NetworkManager = Mirror.NetworkManager.singleton as EventNetworkManager;
             ServerLobby = ServerLobby.Instance;
@@ -85,24 +88,21 @@ namespace Game.Sessions
             NetworkManager.OnServerSceneChangedEvent += StartSession;
             ServerLobby.OnUserLoadedToScene += ProcessLoadedUser;
             
-            AlwaysExist = true;
+            CreateObservers(Observers);
+            CreateActors(Actors);
+            
+            LoadPrefabs();
         }
 
-        private void Start()
+        private void LoadPrefabs()
         {
-            _playerEntityPrefab = Resources.Load<PlayerEntity>("Prefabs/Player");
-            if(_playerEntityPrefab == null)
+            PlayerEntityPrefab = Resources.Load<PlayerEntity>("Prefabs/Player");
+            if(PlayerEntityPrefab == null)
                 throw new NullReferenceException();
 
-            _playerController = Resources.Load<PlayerController>("Prefabs/PC");
-            if (_playerController == null)
+            PlayerController = Resources.Load<PlayerController>("Prefabs/PC");
+            if (PlayerController == null)
                 throw new NullReferenceException();
-            
-            _userConnectionsInScene = new List<UserHandler>();
-            PlayerEntities = new List<PlayerEntity>();
-            SessionObservers = new List<SessionObserver>();
-            
-            SessionObservers.Add(new PlayerTransformObserver(this));
         }
 
         private void Update()
@@ -153,10 +153,24 @@ namespace Game.Sessions
         
         private void UpdateObservers()
         {
-            for (var i = 0; i < SessionObservers.Count; i++)
+            for (var i = 0; i < Observers.Count; i++)
             {
-                SessionObservers[i].Update(Time.deltaTime);
+                Observers[i].Update(Time.deltaTime);
             }   
+        }
+
+        private void CreateObservers(List<SessionObserver> observers)
+        {
+            observers.Add(new PlayerTransformObserver(this));
+        }
+
+        private void CreateActors(List<Actor> actors)
+        {
+            var playerCharactersActor = new PlayerCharactersActor(this);
+            var weaponsActor = new WeaponsActor(this, playerCharactersActor);
+            
+            actors.Add(playerCharactersActor);
+            actors.Add(weaponsActor);
         }
 
         /// <summary>
@@ -186,26 +200,29 @@ namespace Game.Sessions
             var userHandler = new UserHandler(userConnection);
             
             // Заносим в пользователей сцены.
-            _userConnectionsInScene.Add(userHandler);
+            UserHandlers.Add(userHandler);
             
-            // Спавним игрока
-            var playerEntity = Instantiate(_playerEntityPrefab);
-            playerEntity.gameObject.transform.position = SpawnPoint.SpawnPoints.Random().transform.position;
-            playerEntity.owner = userConnection.User;
-            NetworkFactory.SpawnForAll(playerEntity.gameObject, userConnection);
-            
-            // Спавн контроллера
-            var playerController = Instantiate(_playerController);
-            playerController.gameObject.name = $"PC [{playerEntity.owner.id}]";
-            NetworkFactory.SpawnForConnection(playerController.gameObject, userConnection);
-            playerController.SetPlayerEntity(playerEntity);
-            playerController.playerEntityId = playerEntity.netId;
+            //
+            // // Спавним игрока
+            // var playerEntity = Instantiate(_playerEntityPrefab);
+            // playerEntity.gameObject.transform.position = SpawnPoint.SpawnPoints.Random().transform.position;
+            // playerEntity.owner = userConnection.User;
+            // NetworkFactory.SpawnForAll(playerEntity.gameObject, userConnection);
+            //
+            // // Спавн контроллера
+            // var playerController = Instantiate(_playerController);
+            // playerController.gameObject.name = $"PC [{playerEntity.owner.id}]";
+            // NetworkFactory.SpawnForConnection(playerController.gameObject, userConnection);
+            // playerController.SetPlayerEntity(playerEntity);
+            // playerController.playerEntityId = playerEntity.netId;
+            //
+            // userHandler.RelatedPlayerEntity = playerEntity;
+            // userHandler.AddGameObject(playerEntity.gameObject);
+            // userHandler.AddGameObject(playerController.gameObject);
+            //
+            // AddPlayerEntity(playerEntity);
 
-            userHandler.RelatedPlayerEntity = playerEntity;
-            userHandler.AddGameObject(playerEntity.gameObject);
-            userHandler.AddGameObject(playerController.gameObject);
-            
-            AddPlayerEntity(playerEntity);
+            OnUserLoaded(userHandler);
         }
 
         /// <summary>
@@ -215,7 +232,7 @@ namespace Game.Sessions
         {
             Debug.Log("PROCESS_USER_DISCONNECTED");
             
-            var userHandler = _userConnectionsInScene.FirstOrDefault(x => x.UserConnection == uc);
+            var userHandler = UserHandlers.FirstOrDefault(x => x.UserConnection == uc);
             
             if (userHandler != null)
             {
@@ -224,10 +241,13 @@ namespace Game.Sessions
                     RemovePlayerEntity(userHandler.RelatedPlayerEntity);
                 }
                 
+                OnUserDisconnected(userHandler);
                 userHandler.DisposeAsServer();
-                _userConnectionsInScene.Remove(userHandler);
+                UserHandlers.Remove(userHandler);
             }
         }
+        
+        // Эти методы не особо нужны. Они создавались только для поддержки серверной сущности.
         
         public void AddPlayerEntity(PlayerEntity playerEntity)
         {
@@ -255,6 +275,8 @@ namespace Game.Sessions
 
         private void OnDestroy()
         {
+            // ДОБАВИТЬ РАСШИРЕНИЯ ДЛЯ КОЛЛЕКЦИЙ DISPOSEALL
+            
             NetworkManager.OnServerSceneChangedEvent -= StartSession;
             ServerLobby.OnUserLoadedToScene -= ProcessLoadedUser;
         }

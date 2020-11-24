@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Game.Entities.Controllers;
 using Game.Entities.Modules;
+using Game.EntitiesData.Team;
 using Game.Net;
 using Game.Net.Objects;
 using Game.Sessions;
@@ -25,14 +27,15 @@ namespace Game.Entities
         
         [BoxGroup("Modules/Animation")]
         [OdinSerialize] public PlayerAnimationModule AnimationModule { get; private set; }
-        
-        
 
         [FoldoutGroup("User", 100)]
         [SyncVar] public User owner;
+        [SyncVar(hook = nameof(OnTeamChanged))] public TeamType team;
         
         // SERVER
         private PlayerInputManager _playerInputManager;
+
+        private Dictionary<string, LogicModule> definedModules = new Dictionary<string, LogicModule>(); 
         
         public override void AwakeOnClient()
         {
@@ -47,9 +50,11 @@ namespace Game.Entities
             MoveModule.Setup(this, rigidBody);
             AnimationModule.Initialize(this);
             
-            // DontDestroyOnLoad(this);
+            definedModules.Add(BodyModule.ID,BodyModule);
+            definedModules.Add(MoveModule.ID,MoveModule);
+            definedModules.Add(AnimationModule.ID, AnimationModule);
         }
-        
+
         public override void AwakeOnServer()
         {
             var rigidBody = GetComponent<Rigidbody>();
@@ -59,14 +64,14 @@ namespace Game.Entities
             ServerSession.Instance.AddPlayerEntity(this);
             
             BodyModule.Initialize(this);
-            
             MoveModule.Initialize(this);
             MoveModule.Setup(this, rigidBody);
-
             AnimationModule.Initialize(this);
-        }
-        
 
+            BodyModule.OnStateChanged += OnStateChanged;
+            MoveModule.OnStateChanged += OnStateChanged;
+            AnimationModule.OnStateChanged += OnStateChanged;
+        }
 
         public void SetInput(PlayerInputManager playerInputManager)
         {
@@ -74,6 +79,35 @@ namespace Game.Entities
 
             MoveModule.PlayerInputManager = _playerInputManager;
             BodyModule.PlayerInputManager = _playerInputManager;
+        }
+
+        [TargetRpc]
+        public void TargetSyncState(NetworkConnection connection, string module, string state)
+        {
+            Debug.Log($"STATE SYNC : {module} -> {state}");
+            if (definedModules.ContainsKey(module))
+            {
+                var playerModule = definedModules[module];
+                
+                playerModule.RecognizeState(state);
+            }
+        }
+
+        private void OnTeamChanged(TeamType _old, TeamType _new)
+        {
+            Debug.Log($"{owner.name} changed team from {_old} to {_new}");
+        }
+
+        private void OnStateChanged(string module, string state)
+        {
+            if (state == null)
+                return;
+            
+            if (state == "null")
+                return;
+            
+            Debug.Log($"ONSTATECHANGED ({module}, {state})");
+            TargetSyncState(netIdentity.connectionToClient, module, state);
         }
         
 

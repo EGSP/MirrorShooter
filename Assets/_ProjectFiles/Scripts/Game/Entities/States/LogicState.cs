@@ -1,8 +1,23 @@
 ﻿using Game.Entities.Modules;
+using Game.Net.Objects;
 
 namespace Game.Entities.States
 {
-    public abstract class LogicState<TState, TModule>
+    public abstract class LogicState
+    {
+        protected LogicState()
+        {
+            CachedId = ID;
+        }
+        
+        /// <summary>
+        /// Идентификатор состояния.
+        /// </summary>
+        public string ID => this.GetType().Name;
+        public string CachedId { get; protected set; }
+    }
+    
+    public abstract class LogicState<TState, TModule> : LogicState
         where TState : LogicState<TState, TModule>
         where TModule : LogicModule<TState, TModule>
     {
@@ -11,9 +26,29 @@ namespace Game.Entities.States
         /// </summary>
         protected readonly TModule Module;
         
-        protected LogicState(TModule module)
+        protected LogicState(TModule module) : base()
         {
             Module = module;
+        }
+
+        protected void CallDualConstructor()
+        {
+            if (DualUpdateManager.IsServer)
+            {
+                ConstructorServer();
+            }
+            else if (DualUpdateManager.IsClient)
+            {
+                ConstructorClient();
+            }
+        }
+
+        protected virtual void ConstructorClient()
+        {
+        }
+
+        protected virtual void ConstructorServer()
+        {
         }
         
         /// <summary>
@@ -34,6 +69,16 @@ namespace Game.Entities.States
         }
         
         public virtual TState FixedUpdateOnServer(float deltaTime)
+        {
+            return ReturnThis();
+        }
+
+        public virtual TState UpdateOnClient(float deltaTime)
+        {
+            return ReturnThis();
+        }
+
+        public virtual TState FixedUpdateOnClient(float deltaTime)
         {
             return ReturnThis();
         }

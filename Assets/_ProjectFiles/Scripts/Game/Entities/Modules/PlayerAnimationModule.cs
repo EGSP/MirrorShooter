@@ -11,25 +11,12 @@ namespace Game.Entities.Modules
     {
         [SerializeField] private FlexNetworkAnimator _networkAnimator;
 
-        // /// <summary>
-        // /// Все хеши анимаций.
-        // /// </summary>
-        // private Dictionary<string, int> _animationHashes;
-
-        public override void Initialize(IUnityMethodsHook hook)
+        protected override void DefineStates()
         {
-            base.Initialize(hook);
-
-            // _animationHashes = new Dictionary<string, int>();
-            // var clips = _networkAnimator.Animator.runtimeAnimatorController.animationClips;
-            //
-            // // Запоминаем хеши.
-            // for (var i = 0; i < clips.Length; i++)
-            // {
-            //     var clip = clips[i];
-            //     _animationHashes.Add(clip.name, Animator.StringToHash(clip.name));
-            // }
-            
+            DefineState(typeof(AnimationModuleState).Name, () =>
+            {
+                return new AnimationModuleState(this);
+            });
         }
 
 
@@ -42,8 +29,6 @@ namespace Game.Entities.Modules
 
             if (_networkAnimator != null)
             {
-                // _networkAnimator.SetTrigger(hash);
-                
                 _networkAnimator.Animator.Play(hash);
             }
 

@@ -59,7 +59,6 @@ namespace Game.Entities.Modules
 
         public override void AwakeOnClient()
         {
-            // Debug.Log("AWAKE ON CLIENT");
             CommonAwake();
         }
 
@@ -77,7 +76,19 @@ namespace Game.Entities.Modules
                 throw new NullReferenceException();
 
             _cachedBodyRotation = BodyTransform.rotation;
-            // Debug.Log(_cachedBodyRotation);
+        }
+
+        protected override void DefineStates()
+        {
+            DefineState(typeof(BodyModuleInOutCrouch).Name+"_In", () =>
+            {
+                return new BodyModuleInOutCrouch(this,InOut.In);
+            });
+            
+            DefineState(typeof(BodyModuleInOutCrouch).Name+"_Out", () =>
+            {
+                return new BodyModuleInOutCrouch(this,InOut.Out);
+            });
         }
 
         public override void UpdateOnServer()
@@ -87,8 +98,13 @@ namespace Game.Entities.Modules
                 return;
             }
             
-            UpdateState();
+            UpdateStateOnServer();
             MoveCameraTarget();
+        }
+
+        public override void UpdateOnClient()
+        {
+            UpdateStateOnClient();
         }
 
         private void MoveCameraTarget()
@@ -105,7 +121,6 @@ namespace Game.Entities.Modules
             // Новое вращение тела
             _cachedBodyRotation *= Quaternion.Euler(0, deltaRotationY, 0);
             
-            // Debug.Log($"{_cachedBodyRotation.eulerAngles} -- {deltaRotationY} -- {_cachedBodyRotation}");
             // Поворот тела
             BodyTransform.rotation = _cachedBodyRotation;
         }

@@ -3,17 +3,21 @@ using UnityEngine;
 
 namespace Game.Entities.States.Player
 {
-    public class MoveModuleDodge : MoveModuleState
+    public class MoveModuleLongJump : MoveModuleState
     {
-        private readonly Vector3 _targetDirection;
-        private readonly float _baseSpeed;
+        /// <summary>
+        /// Направление взгляда в момент прыжка.
+        /// </summary>
+        private Vector3 _targetDirection;
 
-        public MoveModuleDodge(PlayerMoveModule moveModule, int horizontalInput, float baseSpeed) : base(moveModule)
+        private readonly float _baseSpeed;
+        
+        public MoveModuleLongJump(PlayerMoveModule moveModule, float baseSpeed) : base(moveModule)
         {
-            _targetDirection = Module.Rigidbody.transform.right * horizontalInput;;
+            Module.JumpInitiated();
+            
             _baseSpeed = baseSpeed;
             
-            Module.JumpInitiated();
             CallDualConstructor();
         }
         
@@ -23,8 +27,14 @@ namespace Game.Entities.States.Player
             
             Module.Rigidbody.AddForce(Module.Rigidbody.transform.up * Module.JumpForce,
                 ForceMode.Impulse);
-        }
+            
+            var vertical = ExtractVerticalInput();
+            _targetDirection += Module.Rigidbody.transform.forward * vertical;
 
+            var horizontal = ExtractHorizontalInput();
+            _targetDirection += Module.Rigidbody.transform.right * horizontal;
+        }
+        
         public override MoveModuleState FixedUpdateOnServer(float deltaTime)
         {
             // Если на земле.
@@ -42,22 +52,24 @@ namespace Game.Entities.States.Player
             
             ProcessMovement(deltaTime);
 
+            // Если в полете.
             return this;
         }
-
-        public void ProcessMovement(float deltaTime)
+        
+        private void ProcessMovement(float deltaTime)
         {
             var bodyCollider = Module.PlayerEntity.BodyModule.Collider;
             if (Physics.Raycast(bodyCollider.center+Module.Rigidbody.position,
                 Module.Rigidbody.transform.forward,
                 bodyCollider.radius + Module.WallCheckDistance, Module.GroundLayer))
             {
+                _targetDirection = Vector3.zero;
                 return;
             }
             
             Move(_targetDirection, _baseSpeed, deltaTime);
+            return;
+
         }
-        
-        
     }
 }

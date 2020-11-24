@@ -11,6 +11,12 @@ namespace Game.Entities.States.Player
         public MoveModuleCrouch(PlayerMoveModule moveModule) : base(moveModule)
         {
             _crouchTime = 0;
+            CallDualConstructor();
+        }
+
+        protected override void ConstructorServer()
+        {
+            base.ConstructorServer();
             
             // Нужно убрать, чтобы из-за нестыковки обновления физики не было сбоя.
             InputManager.RemoveKey(KeyCode.LeftControl);
