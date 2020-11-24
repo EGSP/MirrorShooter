@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Game.Entities.Controllers;
 using Game.Entities.Modules;
+using Game.EntitiesData.Team;
 using Game.Net;
 using Game.Net.Objects;
 using Game.Sessions;
@@ -26,11 +27,10 @@ namespace Game.Entities
         
         [BoxGroup("Modules/Animation")]
         [OdinSerialize] public PlayerAnimationModule AnimationModule { get; private set; }
-        
-        
 
         [FoldoutGroup("User", 100)]
         [SyncVar] public User owner;
+        [SyncVar(hook = nameof(OnTeamChanged))] public TeamType team;
         
         // SERVER
         private PlayerInputManager _playerInputManager;
@@ -72,8 +72,6 @@ namespace Game.Entities
             MoveModule.OnStateChanged += OnStateChanged;
             AnimationModule.OnStateChanged += OnStateChanged;
         }
-        
-        
 
         public void SetInput(PlayerInputManager playerInputManager)
         {
@@ -93,6 +91,11 @@ namespace Game.Entities
                 
                 playerModule.RecognizeState(state);
             }
+        }
+
+        private void OnTeamChanged(TeamType _old, TeamType _new)
+        {
+            Debug.Log($"{owner.name} changed team from {_old} to {_new}");
         }
 
         private void OnStateChanged(string module, string state)
