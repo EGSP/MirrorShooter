@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_ProjectFiles/Scenes/polygone.unity
     guid: 998bf8d0781e98844b10a7e23fedbdae
+  - enabled: 1
+    path: Assets/_ProjectFiles/Scenes/location.unity
+    guid: 9b547fa2e6233d046aabba24e52ba68b
   m_configObjects: {}
