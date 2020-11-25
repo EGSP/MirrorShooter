@@ -1726,7 +1726,6 @@ namespace Mirror
         /// <returns></returns>
         public T ReplaceVisibility<T>() where T : NetworkVisibility
         {
-            Debug.Log($"REPLACE VISIBILITY by {typeof(T).Name}");
             if (visibilityCache != null)
             {
                 DestroyImmediate(visibilityCache);

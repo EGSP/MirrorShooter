@@ -4,6 +4,9 @@ using Game.Entities;
 
 namespace Game.Sessions.Observers
 {
+    /// <summary>
+    /// Следит за объектами в сессии.
+    /// </summary>
     public abstract class SessionObserver
     {
         protected readonly ServerSession ServerSession;

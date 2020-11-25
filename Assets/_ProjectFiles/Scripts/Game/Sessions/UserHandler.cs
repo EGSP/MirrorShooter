@@ -37,6 +37,11 @@ namespace Game.Sessions
         private List<GameObject> relatedGameObjects;
 
         /// <summary>
+        /// Возвращает идентификатор, связанный с пользователем.
+        /// </summary>
+        public int Id => UserConnection?.User?.id ?? -1;
+
+        /// <summary>
         /// Добавление игрового объекта к пользователю.
         /// </summary>
         /// <param name="gameObject"></param>

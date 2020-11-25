@@ -57,8 +57,11 @@ namespace Game.Sessions
             if (playerController == null)
                 throw new NullReferenceException();
             
+            var weaponPicker = Resources.Load<WeaponPicker>("Prefabs/Weapons/weapon_picker");
+            
             list.Add(playerEntityPrefab.gameObject);
             list.Add(playerController.gameObject);
+            list.Add(weaponPicker.gameObject);
             
             return list;
         }

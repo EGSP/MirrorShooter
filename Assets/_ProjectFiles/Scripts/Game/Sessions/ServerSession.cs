@@ -178,13 +178,13 @@ namespace Game.Sessions
         /// </summary>
         private void ProcessReadyUser(UserConnection userConnection)
         {
-            Debug.Log($"PROCESS_USER_READY: {userConnection.User.id} / {userConnection.User.name}");
+            // Debug.Log($"PROCESS_USER_READY: {userConnection.User.id} / {userConnection.User.name}");
 
             // Если пользователь уже на сцене, то ничего не делаем.
             if (userConnection.SceneState != UserConnection.UserSceneState.NotLoaded)
                 return;
             
-            Debug.Log("CHANGE SCENE FOR USER");
+            // Debug.Log("CHANGE SCENE FOR USER");
             
             // Добавить в серверную сцену автоматический редирект. !!!!!!!!!!!!!!!!
             ServerLobby.Scene.ChangeUserScene(userConnection);
@@ -201,26 +201,6 @@ namespace Game.Sessions
             
             // Заносим в пользователей сцены.
             UserHandlers.Add(userHandler);
-            
-            //
-            // // Спавним игрока
-            // var playerEntity = Instantiate(_playerEntityPrefab);
-            // playerEntity.gameObject.transform.position = SpawnPoint.SpawnPoints.Random().transform.position;
-            // playerEntity.owner = userConnection.User;
-            // NetworkFactory.SpawnForAll(playerEntity.gameObject, userConnection);
-            //
-            // // Спавн контроллера
-            // var playerController = Instantiate(_playerController);
-            // playerController.gameObject.name = $"PC [{playerEntity.owner.id}]";
-            // NetworkFactory.SpawnForConnection(playerController.gameObject, userConnection);
-            // playerController.SetPlayerEntity(playerEntity);
-            // playerController.playerEntityId = playerEntity.netId;
-            //
-            // userHandler.RelatedPlayerEntity = playerEntity;
-            // userHandler.AddGameObject(playerEntity.gameObject);
-            // userHandler.AddGameObject(playerController.gameObject);
-            //
-            // AddPlayerEntity(playerEntity);
 
             OnUserLoaded(userHandler);
         }
@@ -230,7 +210,7 @@ namespace Game.Sessions
         /// </summary>
         private void ProcessDisconnectedUser(UserConnection uc)
         {
-            Debug.Log("PROCESS_USER_DISCONNECTED");
+            // Debug.Log("PROCESS_USER_DISCONNECTED");
             
             var userHandler = UserHandlers.FirstOrDefault(x => x.UserConnection == uc);
             
@@ -273,9 +253,24 @@ namespace Game.Sessions
             }
         }
 
+        public bool GetUserHandler(PlayerEntity playerEntity, out UserHandler userHandler)
+        {
+            userHandler = null;
+            var coincidence = UserHandlers.FirstOrDefault(x =>
+                x.Id == playerEntity.owner.id);
+
+            if (coincidence == null)
+                return false;
+
+            userHandler = coincidence;
+            return true;
+        }
+
+
+
         private void OnDestroy()
         {
-            // ДОБАВИТЬ РАСШИРЕНИЯ ДЛЯ КОЛЛЕКЦИЙ DISPOSEALL
+            // ДОБАВИТЬ РАСШИРЕНИЯ ДЛЯ КОЛЛЕКЦИЙ DISPOSEALL !!!!!!!!!!!
             
             NetworkManager.OnServerSceneChangedEvent -= StartSession;
             ServerLobby.OnUserLoadedToScene -= ProcessLoadedUser;
