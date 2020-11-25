@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Fire
+  m_Shader: {fileID: 4800000, guid: 4b8e1c715775b2e4da103c23f591ec31, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Alpha:
+        m_Texture: {fileID: 2800000, guid: af3b80fe4fafd5646940f760f00fa2bd, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 2140d5caeca76404cadd35cc48f45f10, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _texcoord:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _AlphaSoftness: 1
+    - _BlueFireLength: 1
+    - _BlueFireMax: 0.445
+    - _BlueFireMin: 0.267
+    - _DepthFade: 0.04
+    - _Float0: 0
+    - _NoiseSoftness: 0.562
+    - _Opacity: 1
+    - _RandomRotationAmount: 360
+    - _Rotation: 0
+    - _Softness: 1
+    m_Colors:
+    - _BlurFireColor: {r: 0.34433952, g: 0.84428024, b: 1, a: 1}
+    - _Color0: {r: 31.626795, g: 11.922143, b: 2.6493652, a: 1}
+    - _Color1: {r: 1, g: 1, b: 1, a: 1}
+    - _NoiseSpeed: {r: 0, g: -0.8, b: 0, a: 0}
+    - _NoiseTiling: {r: 5, g: 5, b: 0, a: 0}
+    - _Offset: {r: 1, g: 1, b: 0, a: 0}
+    - _Rotation: {r: 360, g: 0, b: 0, a: 0}
