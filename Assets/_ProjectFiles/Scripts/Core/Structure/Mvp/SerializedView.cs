@@ -1,21 +1,41 @@
 ﻿using System;
 using Game.Views;
 using Sirenix.OdinInspector;
+using Sirenix.Serialization;
+using UnityEngine;
 
 namespace Gasanov.Core.Mvp
 {
     public abstract class SerializedView: SerializedMonoBehaviour, IView
     {
+        [OdinSerialize][InfoBox("Канвас, который будет отключаться или включаться. Если его не будет," +
+                                " то эти действия будут применены к текущему объекту.")]
+        public Canvas CanvasToUse { get; private set; }
+        
         public bool Unloading { get; set; }
         
         public virtual void Enable()
         {
-            gameObject.SetActive(true);   
+            if (CanvasToUse != null)
+            {
+                CanvasToUse.gameObject.SetActive(true);  
+            }
+            else
+            {
+                gameObject.SetActive(true);
+            }
         }
 
         public virtual void Disable()
         {
-            gameObject.SetActive(false);
+            if (CanvasToUse != null)
+            {
+                CanvasToUse.gameObject.SetActive(false);    
+            }
+            else
+            {
+                gameObject.SetActive(false);
+            }
         }
 
         public void OnDestroy()

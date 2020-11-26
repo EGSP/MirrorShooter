@@ -54,7 +54,7 @@ namespace Game.Presenters.Server
             OpenMenu();
         }
 
-        private void Dispose()
+        protected override void Dispose()
         {
             View.Disable();
             View.OnExitButton -= Exit;

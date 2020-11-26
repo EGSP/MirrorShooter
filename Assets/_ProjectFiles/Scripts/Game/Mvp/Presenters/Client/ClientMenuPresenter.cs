@@ -62,7 +62,7 @@ namespace Game.Presenters
             OpenMenu();
         }
 
-        private void Dispose()
+        protected override void Dispose()
         {
             Model.OnConnected -= OnConnectedToServer;
             
