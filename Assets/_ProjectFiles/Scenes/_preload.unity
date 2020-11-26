@@ -475,7 +475,7 @@ MonoBehaviour:
       Data: _gamestarter
     - Name: OfflineScene
       Entry: 1
-      Data: _gamestarter
+      Data: main_menu
 --- !u!1 &1445841844
 GameObject:
   m_ObjectHideFlags: 0

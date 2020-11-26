@@ -70,6 +70,7 @@ namespace Game.Presenters
                 Model.OnAddUser -= AddUser;
                 Model.OnDisconnectUser -= RemoveUser;
                 Model.OnDisconnect -= Disconnect;
+                Model.OnServerSession -= OnSessionChanged;
             }
         }
 

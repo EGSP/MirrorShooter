@@ -39,7 +39,7 @@ namespace Game.Sessions
         public void StopSession()
         {
             ClientLobby.OnDisconnect -= StopSession;
-            ClientLobby.ChangeScene(Preloader.Instance.OfflineScene);
+            ClientLobby.LoadMenuScene();
         }
     }
     

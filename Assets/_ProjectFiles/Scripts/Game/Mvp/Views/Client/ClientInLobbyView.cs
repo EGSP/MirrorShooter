@@ -71,8 +71,6 @@ public class ClientInLobbyView : SerializedView
     public void ShowSession(SessionStateMessage msg)
     {
         sessionStarted.text = $"Started = {msg.IsStarted}.";
-        
-        Debug.Log($"IS STARTED {msg.IsStarted}");
 
         if (msg.IsStarted)
         {

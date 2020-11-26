@@ -241,7 +241,7 @@ namespace Mirror
         /// <param name="prefab">NetworkIdentity on Prefab GameObject</param>
         static void RegisterPrefabIdentity(NetworkIdentity prefab)
         {
-            Debug.Log($"Register prefab {prefab.name}");
+            // Debug.Log($"Register prefab {prefab.name}");
             if (prefab.assetId == Guid.Empty)
             {
                 logger.LogError($"Can not Register '{prefab.name}' because it had empty assetid. If this is a scene Object use RegisterSpawnHandler instead");
@@ -728,13 +728,8 @@ namespace Mirror
 
         internal static void ApplySpawnPayload(NetworkIdentity identity, SpawnMessage msg)
         {
-            Debug.Log("APPLY SPAWN PAYLOAD");
+            // Debug.Log("APPLY SPAWN PAYLOAD");
 
-            if (msg.netId == 1)
-            {
-                
-            }
-            
             if (msg.assetId != Guid.Empty)
                 identity.assetId = msg.assetId;
 
@@ -770,7 +765,7 @@ namespace Mirror
             // objects spawned as part of initial state are started on a second pass
             if (isSpawnFinished)
             {
-                Debug.Log("SpawnFinished ApplyPayload");
+                // Debug.Log("SpawnFinished ApplyPayload");
                 identity.NotifyAuthority();
                 identity.OnStartClient();
                 CheckForLocalPlayer(identity);
@@ -779,7 +774,7 @@ namespace Mirror
 
         internal static void OnSpawn(SpawnMessage msg)
         {
-            Debug.Log($"SPAWN MESSAGE {msg.assetId} : netId {msg.netId}");
+            // Debug.Log($"SPAWN MESSAGE {msg.assetId} : netId {msg.netId}");
             
             if (logger.LogEnabled()) logger.Log($"Client spawn handler instantiating netId={msg.netId} assetID={msg.assetId} sceneId={msg.sceneId} pos={msg.position}");
 
