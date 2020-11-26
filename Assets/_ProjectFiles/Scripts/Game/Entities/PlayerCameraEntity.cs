@@ -59,10 +59,10 @@ namespace Game.Entities
             
             var tr = CameraComponent.transform;
             
-            tr.localPosition = Vector3.Slerp(tr.localPosition, _target.position, FollowRate);
+            tr.position = Vector3.Slerp(tr.position, _target.position, FollowRate);
 
             // Поворот относительно тела.
-            tr.localRotation = _target.rotation * _cachedCameraRotation;
+            tr.rotation = _target.rotation * _cachedCameraRotation;
         }
 
         /// <summary>
@@ -79,10 +79,11 @@ namespace Game.Entities
             
             CameraComponent = cameraComponent;
             
-            CameraComponent.transform.localRotation = Quaternion.identity;
-            CameraComponent.transform.localPosition = Vector3.zero;
+            CameraComponent.transform.SetParent(null);
+            CameraComponent.transform.rotation = Quaternion.identity;
+            CameraComponent.transform.position = Vector3.zero;
 
-            _cachedCameraRotation = CameraComponent.transform.localRotation;
+            _cachedCameraRotation = CameraComponent.transform.rotation;
 
             _target = target;
         }
@@ -101,7 +102,7 @@ namespace Game.Entities
             // Новое вращение камеры.
             _cachedCameraRotation = Quaternion.Euler(_cameraVerticalRotation, 0, 0);
             // Вращаем корневой объект.
-            CameraComponent.transform.localRotation = _cachedCameraRotation;
+            CameraComponent.transform.rotation = _cachedCameraRotation;
         }
     }
 }
