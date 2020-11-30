@@ -21,15 +21,13 @@ namespace Game.Presenters
 
         private void OnServerLaunch()
         {
-            Debug.Log("STARTER PRESENTER");
             Model.StartAsServer();
         }
 
         public override string Key => "gamestarter";
 
-        protected override void OnDestroy()
+        protected override void Dispose()
         {
-            base.OnDestroy();
             View.OnClientLaunch -= OnClientLaunch;
             View.OnServerLaucnh -= OnServerLaunch;
         }

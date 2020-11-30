@@ -24,7 +24,7 @@ namespace Mirror
     [HelpURL("https://mirror-networking.com/docs/Components/NetworkManager.html")]
     public class NetworkManager : MonoBehaviour
     {
-        protected static readonly ILogger logger = LogFactory.GetLogger<NetworkManager>();
+        protected static readonly ILogger logger = LogFactory.GetLogger<NetworkManager>(LogType.Error);
 
         /// <summary>
         /// A flag to control whether the NetworkManager object is destroyed when the scene changes.
@@ -643,15 +643,16 @@ namespace Mirror
             // doesn't think we need initialize anything.
             mode = NetworkManagerMode.Offline;
 
-            // If this is the host player, StopServer will already be changing scenes.
-            // Check loadingSceneAsync to ensure we don't double-invoke the scene change.
-            // Check if NetworkServer.active because we can get here via Disconnect before server has started to change scenes.
-            if (!string.IsNullOrEmpty(offlineScene) && !IsSceneActive(offlineScene) && loadingSceneAsync == null && !NetworkServer.active)
-            {
-                ClientChangeScene(offlineScene, SceneOperation.Normal);
-            }
-
-            networkSceneName = "";
+            // Загрузка сцен управляется вручную.
+            // // If this is the host player, StopServer will already be changing scenes.
+            // // Check loadingSceneAsync to ensure we don't double-invoke the scene change.
+            // // Check if NetworkServer.active because we can get here via Disconnect before server has started to change scenes.
+            // if (!string.IsNullOrEmpty(offlineScene) && !IsSceneActive(offlineScene) && loadingSceneAsync == null && !NetworkServer.active)
+            // {
+            //     ClientChangeScene(offlineScene, SceneOperation.Normal);
+            // }
+            //
+            // networkSceneName = "";
         }
 
         /// <summary>

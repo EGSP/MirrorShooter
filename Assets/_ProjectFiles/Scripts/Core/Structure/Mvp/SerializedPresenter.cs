@@ -18,7 +18,7 @@ namespace Gasanov.Core.Mvp
         {
             if (GetViewFromObject)
             {
-                View = GetComponent<TView>();
+                View = GetComponentInChildren<TView>(true);
             }
             
             Share();
@@ -46,9 +46,12 @@ namespace Gasanov.Core.Mvp
 
         protected abstract void OnResponse();
 
+        protected abstract void Dispose();
+
         protected virtual void OnDestroy()
         {
             PresenterMediator.Unregister(this);
+            Dispose();
         }
         
     }

@@ -54,8 +54,8 @@ namespace Game.Presenters
         {
             View.RemoveUser(userConnection.User);
         }
-        
-        public void Dispose()
+
+        protected override void Dispose()
         {
             View.OnShutdown -= Shutdown;
             View.OnLoadScene -= LoadScene;
@@ -67,12 +67,6 @@ namespace Game.Presenters
                 Model.OnUserConnected -= AddUser;
                 Model.OnUserDisconnected -= RemoveUser;
             }
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-            Dispose();
         }
 
         public override void OnAwake()

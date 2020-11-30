@@ -10,13 +10,16 @@ namespace Game.Entities
         /// <summary>
         /// Разрешенные оружия.
         /// </summary>
-        [SyncVar(hook = nameof(OnAllowedWeaponsChanged))] 
         private SyncListString _allowedWeaponsId;
- 
-        
-        private void OnAllowedWeaponsChanged(string[] oldIds, string[] newIds)
+
+        public override void AwakeOnClient()
         {
-            Debug.Log(string.Join("; ", newIds));
+            _allowedWeaponsId.Callback += OnAllowedWeaponsChanged;
+        }
+
+        private void OnAllowedWeaponsChanged(SyncList<string>.Operation op, int itemindex, string olditem, string newitem)
+        {
+            Debug.Log($"Allowed weapon {newitem}");
         }
         
         /// <summary>

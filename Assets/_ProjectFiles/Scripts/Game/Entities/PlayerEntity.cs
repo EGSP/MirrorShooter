@@ -81,8 +81,11 @@ namespace Game.Entities
             BodyModule.PlayerInputManager = _playerInputManager;
         }
 
-        [TargetRpc]
-        public void TargetSyncState(NetworkConnection connection, string module, string state)
+        
+        /// <param name="module">Идентификатор модуля.</param>
+        /// <param name="state">Идентификатор состояния.</param>
+        [ClientRpc]
+        public void RpcSyncState(string module, string state)
         {
             Debug.Log($"STATE SYNC : {module} -> {state}");
             if (definedModules.ContainsKey(module))
@@ -106,8 +109,8 @@ namespace Game.Entities
             if (state == "null")
                 return;
             
-            Debug.Log($"ONSTATECHANGED ({module}, {state})");
-            TargetSyncState(netIdentity.connectionToClient, module, state);
+            // Debug.Log($"ONSTATECHANGED ({module}, {state})");
+            RpcSyncState(module, state);
         }
         
 

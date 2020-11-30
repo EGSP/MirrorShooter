@@ -61,7 +61,7 @@ namespace Game.Presenters
             Model.ReadyForChangeScene();
         }
 
-        public void Dispose()
+        protected override void Dispose()
         {
             View.OnDisconnect -= DisconnectInput;
 
@@ -70,13 +70,8 @@ namespace Game.Presenters
                 Model.OnAddUser -= AddUser;
                 Model.OnDisconnectUser -= RemoveUser;
                 Model.OnDisconnect -= Disconnect;
+                Model.OnServerSession -= OnSessionChanged;
             }
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-            Dispose();
         }
 
         public override void OnAwake()
