@@ -109,6 +109,9 @@ namespace Game.Entities.Controllers
                 up.Add((int) code);
             }
 
+            if (GlobalInput.Mode == GlobalInput.InputMode.Interface)
+                return;
+            
             if (Input.GetKeyDown(code))
             {
                 down.Add((int) code);

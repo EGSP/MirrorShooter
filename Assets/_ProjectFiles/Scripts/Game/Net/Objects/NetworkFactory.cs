@@ -74,6 +74,33 @@ namespace Game.Net.Objects
             throw new NotServerException();
         }
 
+        public static void Destroy(GameObject obj)
+        {
+            if (LaunchInfo.IsServer)
+            {
+                if (CheckIdentity(obj))
+                {
+                    NetworkServer.Destroy(obj);
+                }
+                else
+                {
+                    UnityEngine.Object.Destroy(obj);    
+                }
+
+                return;
+            }
+            
+            throw new NotServerException();
+        }
+        
+        private static bool CheckIdentity(GameObject obj)
+        {
+            if (obj.GetComponent<NetworkIdentity>() != null)
+                return true;
+
+            return false;
+        }
+
         private static void AddLoadedVisibility(GameObject obj)
         {
             var identity = obj.GetComponent<NetworkIdentity>();
