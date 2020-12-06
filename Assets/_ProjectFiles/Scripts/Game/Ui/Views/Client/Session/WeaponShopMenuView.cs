@@ -1,8 +1,8 @@
 ﻿using System;
+using Egsp.Core;
+using Egsp.Core.Ui;
 using Game.Entities;
 using Game.Ui.Elements;
-using Gasanov.Core.Mvp;
-using Gasanov.Core.Pooling;
 
 namespace Game.Views.Client.Session
 {

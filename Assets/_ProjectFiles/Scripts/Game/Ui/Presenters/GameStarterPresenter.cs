@@ -1,6 +1,6 @@
 ﻿using System;
+using Egsp.Core.Ui;
 using Game.Views;
-using Gasanov.Core.Mvp;
 using UnityEngine;
 
 namespace Game.Presenters

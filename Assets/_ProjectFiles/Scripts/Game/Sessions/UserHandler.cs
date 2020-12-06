@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Game.Entities;
 using Game.Net;
-using Gasanov.Extensions.Linq;
 using Gasanov.Utils.GameObjectUtilities;
 using Mirror;
 using UnityEngine;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Game.Configuration;
 using Game.Net.Objects;
 using Game.Views.Client.Session;
-using Gasanov.Core.Mvp;
+using Egsp.Core.Ui;
 using Mirror;
 using UnityEngine;
 

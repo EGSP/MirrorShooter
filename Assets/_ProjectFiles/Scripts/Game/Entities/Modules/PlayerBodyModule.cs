@@ -1,8 +1,8 @@
 ﻿using System;
+using Egsp.Other;
 using Game.Entities.Controllers;
 using Game.Entities.States.Player;
 using Game.Entities.States.Player.Body;
-using Gasanov.Extensions.Curves;
 using Mirror;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;

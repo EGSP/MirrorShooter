@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Egsp.Core;
 using Game;
-using Gasanov.Core;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using UnityEngine;
@@ -36,7 +36,5 @@ namespace Game
         {
             SceneManager.LoadScene(sceneName);
         }
-        
-        
     }
 }

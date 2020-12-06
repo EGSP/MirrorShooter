@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Egsp.Core.Ui;
 using Game.Net;
-using Gasanov.Core.Mvp;
 using Sirenix.OdinInspector;
 using Sirenix.Utilities;
 using TMPro;

@@ -1,5 +1,5 @@
 ﻿using System;
-using Gasanov.Core.Mvp;
+using Egsp.Core.Ui;
 using Sirenix.OdinInspector;
 using Sirenix.Utilities;
 using TMPro;

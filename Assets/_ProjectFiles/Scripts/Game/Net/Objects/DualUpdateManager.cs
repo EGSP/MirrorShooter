@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Egsp.Core;
 using Game.Configuration;
-using Gasanov.Core;
 using Mirror;
 using UnityEngine;
 

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using Egsp.Core;
 using Game.Entities;
 using Game.Entities.Controllers;
 using Game.Net;
 using Game.Net.Objects;
 using Game.Net.Resources;
-using Gasanov.Core;
 using Mirror;
 using Sirenix.OdinInspector;
 using UnityEngine;

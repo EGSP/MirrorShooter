@@ -1,9 +1,9 @@
 ﻿using System;
+using Egsp.Core.Ui;
 using Game.Entities.Controllers;
 using Game.Net;
 using Game.Sessions;
 using Game.Views.Client.Session;
-using Gasanov.Core.Mvp;
 
 namespace Game.Presenters.Session
 {

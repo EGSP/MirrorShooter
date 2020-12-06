@@ -1,7 +1,7 @@
 ﻿using System;
+using Egsp.Core.Ui;
 using Game.Net;
 using Game.Views.Client;
-using Gasanov.Core.Mvp;
 
 namespace Game.Presenters
 {

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections;
+using Egsp.Core.Ui;
 using Game.Net;
-using Gasanov.Core;
-using Gasanov.Core.Mvp;
-using Gasanov.Extensions.Mono;
 using Sirenix.Serialization;
 using UnityEngine;
 
