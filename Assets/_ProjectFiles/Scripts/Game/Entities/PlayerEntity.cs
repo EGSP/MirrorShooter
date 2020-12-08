@@ -29,8 +29,11 @@ namespace Game.Entities
         [OdinSerialize] public PlayerAnimationModule AnimationModule { get; private set; }
 
         [FoldoutGroup("User", 100)]
-        [SyncVar] public User owner;
-        [SyncVar(hook = nameof(OnTeamChanged))] public TeamType team;
+        // [SyncVar]
+        public User owner;
+        [FoldoutGroup("User", 100)]
+        // [SyncVar(hook = nameof(OnTeamChanged))]
+        public TeamType team;
         
         // SERVER
         private PlayerInputManager _playerInputManager;
@@ -84,16 +87,16 @@ namespace Game.Entities
         
         /// <param name="module">Идентификатор модуля.</param>
         /// <param name="state">Идентификатор состояния.</param>
-        [ClientRpc]
+        // [ClientRpc]
         public void RpcSyncState(string module, string state)
         {
-            Debug.Log($"STATE SYNC : {module} -> {state}");
-            if (definedModules.ContainsKey(module))
-            {
-                var playerModule = definedModules[module];
-                
-                playerModule.RecognizeState(state);
-            }
+            // Debug.Log($"STATE SYNC : {module} -> {state}");
+            // if (definedModules.ContainsKey(module))
+            // {
+            //     var playerModule = definedModules[module];
+            //     
+            //     playerModule.RecognizeState(state);
+            // }
         }
 
         private void OnTeamChanged(TeamType _old, TeamType _new)

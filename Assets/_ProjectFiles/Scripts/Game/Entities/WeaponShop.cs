@@ -23,7 +23,7 @@ namespace Game.Entities
         /// <summary>
         /// Разрешенные оружия.
         /// </summary>
-        private SyncListString _allowedWeaponsId;
+        private SyncList<string> _allowedWeaponsId = new SyncList<string>();
         
         
         

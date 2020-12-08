@@ -6,7 +6,7 @@ namespace Game.Net
     /// Если это сообщение отправлено пользователем, значит он запрашивает информацию о сессии.
     /// Сервер отвечает сообщением этого же типа.
     /// </summary>
-    public class SessionStateMessage : MessageBase
+    public struct SessionStateMessage : NetworkMessage
     {
         /// <summary>
         /// Началась ли сессия.

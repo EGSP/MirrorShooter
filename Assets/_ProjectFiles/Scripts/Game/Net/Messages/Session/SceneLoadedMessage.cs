@@ -3,7 +3,7 @@
 namespace Game.Net
 {
     // Сообщение об окончании загрузки сцены у пользователя.
-    public struct SceneLoadedMessage : IMessageBase
+    public struct SceneLoadedMessage : NetworkMessage
     {
         public void Deserialize(NetworkReader reader)
         {

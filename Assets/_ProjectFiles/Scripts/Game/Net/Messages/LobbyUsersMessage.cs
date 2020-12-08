@@ -3,8 +3,8 @@ using Mirror;
 
 namespace Game.Net
 {
-    public class LobbyUsersMessage : MessageBase
+    public struct LobbyUsersMessage : NetworkMessage
     {
-        public List<AddUserMessage> AddUserMessages = new List<AddUserMessage>();
+        public List<AddUserMessage> AddUserMessages;
     }
 }

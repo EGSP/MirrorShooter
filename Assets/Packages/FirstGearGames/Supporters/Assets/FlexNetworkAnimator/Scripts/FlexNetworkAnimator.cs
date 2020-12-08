@@ -346,7 +346,7 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkAnimators
         bool WriteParameters(NetworkWriter writer, bool forceAll = false)
         {
             ulong dirtyBits = forceAll ? (~0ul) : NextDirtyBits();
-            writer.WritePackedUInt64(dirtyBits);
+            writer.WriteUInt64(dirtyBits);
             for (int i = 0; i < parameters.Length; i++)
             {
                 if ((dirtyBits & (1ul << i)) == 0)
@@ -356,7 +356,7 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkAnimators
                 if (par.type == AnimatorControllerParameterType.Int)
                 {
                     int newIntValue = _animator.GetInteger(par.nameHash);
-                    writer.WritePackedInt32(newIntValue);
+                    writer.WriteInt32(newIntValue);
                 }
                 else if (par.type == AnimatorControllerParameterType.Float)
                 {
@@ -374,7 +374,7 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkAnimators
 
         void ReadParameters(NetworkReader reader)
         {
-            ulong dirtyBits = reader.ReadPackedUInt64();
+            ulong dirtyBits = reader.ReadUInt64();
             for (int i = 0; i < parameters.Length; i++)
             {
                 if ((dirtyBits & (1ul << i)) == 0)
@@ -383,7 +383,7 @@ namespace FirstGearGames.Mirrors.Assets.FlexNetworkAnimators
                 AnimatorControllerParameter par = parameters[i];
                 if (par.type == AnimatorControllerParameterType.Int)
                 {
-                    int newIntValue = reader.ReadPackedInt32();
+                    int newIntValue = reader.ReadInt32();
                     _animator.SetInteger(par.nameHash, newIntValue);
                 }
                 else if (par.type == AnimatorControllerParameterType.Float)

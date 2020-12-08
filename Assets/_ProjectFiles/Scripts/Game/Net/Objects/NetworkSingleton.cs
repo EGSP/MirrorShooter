@@ -8,22 +8,21 @@ using UnityEngine;
 /// При появлении объект сразу устанавливает на себя ссылку.
 /// Нужен для объектов, создание которых контроллирует сервер.
 /// </summary>
-public class NetworkSingleton<TSingleton> : DualNetworkBehaviour
-    where TSingleton : NetworkSingleton<TSingleton>
+public class NetworkSingleton : DualNetworkBehaviour
 {
     /// <summary>
     /// Текущий экземпляр объекта. Может быть NULL, до момента создания.
     /// </summary>
-    public static TSingleton Instance { get; private set; }
+    public static object Instance { get; private set; }
 
     /// <summary>
     /// Вызывается при появлении в мире объекта данного типа.
     /// </summary>
-    public static event Action<TSingleton> OnInstanceCreated;
+    public static event Action<object> OnInstanceCreated;
 
     protected override void Awake()
     {
-        Instance = this as TSingleton;
+        Instance = this;
         OnInstanceCreated(Instance);
         
         base.Awake();

@@ -16,4 +16,86 @@ MonoBehaviour:
   defaultEditorBehaviour: 11
   processMouseMoveInInspector: 1
   drawingConfig:
-    configs: []
+    configs:
+    - DrawnTypeName: Mirror.EnterPlayModeSettingsCheck, Mirror.Editor
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.FallbackTransport, Mirror
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Ignorance, Mirror
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.IgnoranceNew, Mirror
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.IgnoranceThreaded, Mirror
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.IgnoranceTransport, Mirror
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.MultiplexTransport, Mirror
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.NetworkIdentity, Mirror
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.NetworkManagerHUD, Mirror
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.NetworkPingDisplay, Mirror.Components
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.NetworkScenePostProcess, Mirror.Editor
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.NetworkStartPosition, Mirror
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.TelepathyTransport, Mirror
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Authenticators.BasicAuthenticator, Mirror.Authenticators
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Authenticators.TimeoutAuthenticator, Mirror.Authenticators
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Cloud.ApiConnector, Mirror.Cloud
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Cloud.Example.ApiUpdater, Mirror.Examples.Cloud.GUI
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Cloud.Example.QuickListServerDebug, Mirror.Examples.Cloud.GUI
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Cloud.Example.ServerListManager, Mirror.Examples.Cloud.GUI
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Cloud.Example.ServerListUI, Mirror.Examples.Cloud.GUI
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Cloud.Example.ServerListUIItem, Mirror.Examples.Cloud.GUI
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Cloud.Examples.InstantiateNetworkManager, Mirror.Examples.Cloud.GUI
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Discovery.NetworkDiscovery, Mirror.Components
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Discovery.NetworkDiscoveryHUD, Mirror.Components
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Examples.Additive.ZoneHandler, Mirror.Examples
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Examples.Basic.PlayerUI, Mirror.Examples
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Examples.Chat.ChatWindow, Mirror.Examples
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Examples.MultipleAdditiveScenes.PhysicsSimulator, Mirror.Examples
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Examples.MultipleAdditiveScenes.Spawner, Mirror.Examples
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Examples.NetworkRoom.Spawner, Mirror.Examples
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Examples.Pong.QuitButtonHUD, Mirror.Examples.Cloud.GUI
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Logging.NetworkHeadlessLogger, Mirror
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.SimpleWeb.SimpleWebTransport, SimpleWebTransport
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Tests.MemoryTransport, Mirror.Tests.Common
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Tests.MyMiddleware, Mirror.Tests
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Tests.MyScriptableObject, Mirror.Tests
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Tests.Generated.Attributes.AttributeBehaviour_MonoBehaviour,
+        Mirror.Tests
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Tests.Runtime.ClientSceneTests.BadBehaviour, Mirror.Tests.Runtime
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Tests.Runtime.ClientSceneTests.TestListenerBehaviour,
+        Mirror.Tests.Runtime
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor
+    - DrawnTypeName: Mirror.Weaver.Tests.WeaverAssembler, Mirror.Tests
+      EditorTypeName: Sirenix.OdinInspector.Editor.OdinEditor, Sirenix.OdinInspector.Editor

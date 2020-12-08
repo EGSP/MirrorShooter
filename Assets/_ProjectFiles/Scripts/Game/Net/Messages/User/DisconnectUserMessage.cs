@@ -2,7 +2,7 @@
 
 namespace Game.Net
 {
-    public class DisconnectUserMessage : MessageBase
+    public struct DisconnectUserMessage : NetworkMessage
     {
         public User user;
     }

@@ -511,7 +511,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3df3051c63aa445186b49b06a8e58df3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  transport: {fileID: 1445841846}
+  transport: {fileID: 0}
 --- !u!114 &1445841846
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -524,37 +524,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec862738267237f4d91e6454ff15f4ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OnClientConnected:
-    m_PersistentCalls:
-      m_Calls: []
-  OnClientDataReceived:
-    m_PersistentCalls:
-      m_Calls: []
-  OnClientError:
-    m_PersistentCalls:
-      m_Calls: []
-  OnClientDisconnected:
-    m_PersistentCalls:
-      m_Calls: []
-  OnServerConnected:
-    m_PersistentCalls:
-      m_Calls: []
-  OnServerDataReceived:
-    m_PersistentCalls:
-      m_Calls: []
-  OnServerError:
-    m_PersistentCalls:
-      m_Calls: []
-  OnServerDisconnected:
-    m_PersistentCalls:
-      m_Calls: []
   DebugEnabled: 1
   ServerBindAll: 1
   ServerBindAddress: 127.0.0.1
   CommunicationPort: 7777
   MaximumPeerCCU: 100
-  EnetPollTimeout: 1
-  MaxPacketSizeInKb: 4
+  EnetServerPollTimeout: 1
+  EnetClientPollTimeout: 1
+  MaximumPacketSize: 1500
   Channels: 0100000002000000
   StatisticsCalculationInterval: 3
 --- !u!114 &1445841847

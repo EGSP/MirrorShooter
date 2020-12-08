@@ -5,7 +5,7 @@ namespace Game.Net
     /// <summary>
     /// Это сообщение отправляется только с сервера, чтобы передать данные клиенту об аккаунте.
     /// </summary>
-    public class UpdateUserMessage : MessageBase
+    public struct UpdateUserMessage : NetworkMessage
     {
         public User updatedUser;
     }

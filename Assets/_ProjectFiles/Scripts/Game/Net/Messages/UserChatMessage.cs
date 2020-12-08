@@ -2,7 +2,7 @@
 
 namespace Game.Net
 {
-    public class UserChatMessage : MessageBase
+    public struct UserChatMessage : NetworkMessage
     {
         public User From;
 

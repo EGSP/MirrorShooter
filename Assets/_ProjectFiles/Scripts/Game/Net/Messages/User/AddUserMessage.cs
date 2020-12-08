@@ -2,7 +2,7 @@
 
 namespace Game.Net
 {
-    public class AddUserMessage : MessageBase
+    public struct AddUserMessage : NetworkMessage
     {
         public User user;
     }

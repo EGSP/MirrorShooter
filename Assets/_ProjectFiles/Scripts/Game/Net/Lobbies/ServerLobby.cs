@@ -346,7 +346,7 @@ namespace Game.Net
         /// Отправка сообщения всем пользователям.
         /// </summary>
         public void SendToAll<TMessage>(TMessage message)
-            where TMessage: IMessageBase
+            where TMessage: struct, NetworkMessage
         {
             for (var i = 0; i < Connections.Count; i++)
             {
@@ -362,7 +362,7 @@ namespace Game.Net
         }
 
         public void SendToAll<TMessage>(TMessage message, Predicate<User> excludePredicate)
-            where TMessage: IMessageBase
+            where TMessage: struct, NetworkMessage
         {
             for (var i = 0; i < Connections.Count; i++)
             {

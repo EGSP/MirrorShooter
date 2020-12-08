@@ -8,6 +8,8 @@ namespace Game.Net
     {
         public IgnoranceThreaded transport;
 
+        // public TelepathyTransport transoprt;
+        
         private void Awake()
         {
             this.ValidateComponentRef(ref transport);
@@ -18,8 +20,8 @@ namespace Game.Net
         public override void SetPort(string port)
         {
             int portValue;
-            if (int.TryParse(port, out portValue))
-                transport.CommunicationPort = portValue;
+            // if (int.TryParse(port, out portValue))
+                // transport.CommunicationPort = portValue;
         }
     }
 }

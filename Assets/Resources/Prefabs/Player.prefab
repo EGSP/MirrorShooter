@@ -357,7 +357,7 @@ MonoBehaviour:
       Data: 3
     - Name: InOutCrouch
       Entry: 7
-      Data: 1|Gasanov.Extensions.Curves.CurveHandler, Assembly-CSharp
+      Data: 1|Egsp.Other.CurveHandler, Assembly-CSharp
     - Name: curve
       Entry: 7
       Data: 2|UnityEngine.AnimationCurve, UnityEngine.CoreModule
@@ -468,7 +468,7 @@ MonoBehaviour:
       Data: 
     - Name: InSprint
       Entry: 7
-      Data: 4|Gasanov.Extensions.Curves.CurveHandler, Assembly-CSharp
+      Data: 4|Egsp.Other.CurveHandler, Assembly-CSharp
     - Name: curve
       Entry: 7
       Data: 5|UnityEngine.AnimationCurve, UnityEngine.CoreModule
@@ -651,6 +651,7 @@ MonoBehaviour:
   owner:
     name: 
     id: 0
+  team: 0
 --- !u!54 &1183391729
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -688,7 +689,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 993505848647887761}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2c6e8001e79980341af98dc404133ebd, type: 3}
   m_Name: 
@@ -730,7 +731,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 993505848647887761}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6f40779ebc4fb2f4f9537d4d162bb1d2, type: 3}
   m_Name: 
@@ -773,7 +774,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 993505848647887761}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: af0d5a2ff8cdee54eaea8b44788bff79, type: 3}
   m_Name: 

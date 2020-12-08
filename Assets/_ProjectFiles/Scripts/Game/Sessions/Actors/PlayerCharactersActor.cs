@@ -28,16 +28,16 @@ namespace Game.Sessions.Actors
             playerEntity.team = TeamType.Chaos;
             NetworkFactory.SpawnForAll(playerEntity.gameObject, userHandler.UserConnection);
             
-            // Спавн контроллера
-            var playerController =  Object.Instantiate(Session.PlayerController);
-            playerController.gameObject.name = $"PC [{playerEntity.owner.id}]";
-            NetworkFactory.SpawnForConnection(playerController.gameObject, userHandler.UserConnection);
-            playerController.SetPlayerEntity(playerEntity);
-            playerController.playerEntityId = playerEntity.netId;
+            // // Спавн контроллера
+            // var playerController =  Object.Instantiate(Session.PlayerController);
+            // playerController.gameObject.name = $"PC [{playerEntity.owner.id}]";
+            // NetworkFactory.SpawnForConnection(playerController.gameObject, userHandler.UserConnection);
+            // playerController.SetPlayerEntity(playerEntity);
+            // playerController.playerEntityId = playerEntity.netId;
             
             userHandler.RelatedPlayerEntity = playerEntity;
             userHandler.AddGameObject(playerEntity.gameObject);
-            userHandler.AddGameObject(playerController.gameObject);
+            // userHandler.AddGameObject(playerController.gameObject);
             
             Session.AddPlayerEntity(playerEntity);
             OnPlayerEntitySpawned(playerEntity);
