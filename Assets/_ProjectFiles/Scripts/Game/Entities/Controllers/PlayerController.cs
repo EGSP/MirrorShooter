@@ -12,7 +12,7 @@ namespace Game.Entities.Controllers
     public class PlayerController : DualNetworkBehaviour
     {
         [SerializeField] protected Vector2 mouseSensivity;
-
+        [SerializeField] private GameObject[] MeshBody;
         [SyncVar(hook = nameof(OnEntityChanged))]
         public uint playerEntityId;
 
@@ -173,6 +173,8 @@ namespace Game.Entities.Controllers
             if (NetworkIdentity.spawned.TryGetValue(newEntity, out NetworkIdentity identity))
             {
                 // Debug.Log($"ENTITY FINDED with netID {identity.netId}");
+                for (int i = 0; i < MeshBody.Length; i++)
+                    MeshBody[i].SetActive(false);
                 PlayerEntity = identity.GetComponent<PlayerEntity>();
                 PlayerEntity.netIdentity.isLocalRepresenter = true;
 
