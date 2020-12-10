@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using Egsp.Core;
 using Game.Entities;
 using Game.Entities.Controllers;
 using Game.Net;
 using Game.Net.Objects;
 using Game.Net.Resources;
-using Gasanov.Core;
 using Mirror;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -39,7 +39,7 @@ namespace Game.Sessions
         public void StopSession()
         {
             ClientLobby.OnDisconnect -= StopSession;
-            ClientLobby.ChangeScene(Preloader.Instance.OfflineScene);
+            ClientLobby.LoadMenuScene();
         }
     }
     
@@ -57,8 +57,11 @@ namespace Game.Sessions
             if (playerController == null)
                 throw new NullReferenceException();
             
+            var weaponPicker = Resources.Load<WeaponShop>("Prefabs/Weapons/weapon_picker");
+            
             list.Add(playerEntityPrefab.gameObject);
             list.Add(playerController.gameObject);
+            list.Add(weaponPicker.gameObject);
             
             return list;
         }

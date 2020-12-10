@@ -21,11 +21,24 @@ namespace Game.Entities.States.Player.Body
         {
             _inOut = (int) inOut;
             _crouchingTime = 0f;
+
+            CachedId = ID + $"_{inOut.ToString()}";
+            Debug.Log(CachedId);
         }
 
         private float _crouchingTime;
-
+        
         public override BodyModuleState UpdateOnServer(float deltaTime)
+        {
+            return CommonUpdate(deltaTime);
+        }
+        
+        public override BodyModuleState UpdateOnClient(float deltaTime)
+        {
+            return CommonUpdate(deltaTime);
+        }
+
+        private BodyModuleState CommonUpdate(float deltaTime)
         {
             if (_crouchingTime > Module.InOutCrouchTime)
             {
@@ -35,10 +48,8 @@ namespace Game.Entities.States.Player.Body
                     return null;
             }
             
-            // Debug.Log($"Crouch {(InOut)_inOut}");
-            
             _crouchingTime += deltaTime;
-
+            
             // На какой мы точке.
             var opacity = Mathf.Clamp(_crouchingTime / Module.InOutCrouchTime, 0,1);
 
@@ -46,20 +57,13 @@ namespace Game.Entities.States.Player.Body
             Module.CurrentCrouchOpacity = opacity;
             
             var height = Module.InOutCrouch.Get(opacity);
-            
-            // Debug.Log($"Height {height}");
 
             Module.Collider.height = height;
+            Module.Collider.center =
+                new Vector3(0, Mathf.Lerp(Module.CrouchY.y, Module.CrouchY.x, opacity), 0);
 
-           
-                Module.Collider.center =
-                    new Vector3(0, Mathf.Lerp(Module.CrouchY.y, Module.CrouchY.x, opacity), 0);
-            
-            
-            // var boundsSize = Module.Collider.bounds.size;
-            // Module.Collider.bounds.Expand(new Vector3(boundsSize.x,height,boundsSize.z));
-            
             return this;
         }
+        
     }
 }

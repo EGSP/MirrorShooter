@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Game.Configuration;
 using Game.Net.Objects;
+using Game.Views.Client.Session;
+using Egsp.Core.Ui;
 using Mirror;
 using UnityEngine;
 
@@ -28,15 +30,33 @@ namespace Game.Entities.Controllers
         /// </summary>
         protected List<int> up = new List<int>();
 
+        public override void AwakeOnClient()
+        {
+            CreatePlayerUi();
+            CommonAwake();
+        }
+
+        private void CommonAwake()
+        {
+            GlobalInput.SetCharacterMode();
+        }
+
         public override void AwakeOnServer()
         {
             if (PlayerInputManager == null)
                 PlayerInputManager = new PlayerInputManager();
+            
+            CommonAwake();
         }
 
         public override void UpdateOnClient()
         {
             if (PlayerEntity == null)
+                return;
+
+            // TODO: Выделить для всех контроллеров интерфейс. GlobalInput просто включал бы и выключал группы.
+            // TODO: Для плеер менеджера сделать метод, который бы сбрасывал нажатие кнопок.
+            if (GlobalInput.Mode == GlobalInput.InputMode.Interface)
                 return;
             
             // Mouse rotation Input
@@ -89,6 +109,9 @@ namespace Game.Entities.Controllers
                 up.Add((int) code);
             }
 
+            if (GlobalInput.Mode == GlobalInput.InputMode.Interface)
+                return;
+            
             if (Input.GetKeyDown(code))
             {
                 down.Add((int) code);
@@ -146,10 +169,10 @@ namespace Game.Entities.Controllers
         
         public void OnEntityChanged(uint _, uint newEntity)
         {
-            Debug.Log("ENTITY CHANGED");
+            // Debug.Log("ENTITY CHANGED");
             if (NetworkIdentity.spawned.TryGetValue(newEntity, out NetworkIdentity identity))
             {
-                Debug.Log($"ENTITY FINDED with netID {identity.netId}");
+                // Debug.Log($"ENTITY FINDED with netID {identity.netId}");
                 PlayerEntity = identity.GetComponent<PlayerEntity>();
                 PlayerEntity.netIdentity.isLocalRepresenter = true;
 
@@ -177,6 +200,12 @@ namespace Game.Entities.Controllers
         public void SetPlayerEntityCamera()
         {
             PlayerEntity.CameraEntity.SetCamera(Camera.main, PlayerEntity.BodyModule.CameraTarget);
+        }
+
+        public void CreatePlayerUi()
+        {
+            var view = ViewFactory.LoadAndInstantiateView<ClientQuickMenuView>("quick_menu",
+                false);
         }
         
     }

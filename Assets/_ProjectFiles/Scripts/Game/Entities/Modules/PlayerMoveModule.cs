@@ -86,6 +86,29 @@ namespace Game.Entities.Modules
             CurrentState = new MoveModuleWalk(this);
         }
 
+        protected override void DefineStates()
+        {
+            DefineState(typeof(MoveModuleWalk).Name, () =>
+            {
+                return new MoveModuleWalk(this);
+            });
+            
+            DefineState(typeof(MoveModuleRun).Name, () =>
+            {
+                return new MoveModuleRun(this);
+            });
+            
+            DefineState(typeof(MoveModuleJump).Name, () =>
+            {
+                return new MoveModuleJump(this, 0, 0);
+            });
+            
+            DefineState(typeof(MoveModuleLongJump).Name, () => new MoveModuleLongJump(this,0));
+            DefineState(typeof(MoveModuleDodge).Name, () => new MoveModuleDodge(this,0,0));
+            DefineState(typeof(MoveModuleCrouch).Name, () => new MoveModuleCrouch(this));
+            DefineState(typeof(MoveModuleSprint).Name, () => new MoveModuleSprint(this));
+        }
+
         public override void UpdateOnServer()
         {
             if (PlayerInputManager == null)
@@ -93,7 +116,8 @@ namespace Game.Entities.Modules
                 return;
             }
 
-            UpdateState();
+            UpdateStateOnClient();
+            UpdateStateOnServer();
             
             CheckJumpInterval();
             
@@ -108,7 +132,8 @@ namespace Game.Entities.Modules
                 return;
             }
 
-            FixedUpdateState();
+            FixedUpdateStateOnClient();
+            FixedUpdateStateOnServer();
         }
 
         /// <summary>

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Game.Entities;
 using Game.Net;
-using Gasanov.Extensions.Linq;
 using Gasanov.Utils.GameObjectUtilities;
 using Mirror;
 using UnityEngine;
@@ -35,6 +34,11 @@ namespace Game.Sessions
         /// Связанные игровые объекты.
         /// </summary>
         private List<GameObject> relatedGameObjects;
+
+        /// <summary>
+        /// Возвращает идентификатор, связанный с пользователем.
+        /// </summary>
+        public int Id => UserConnection?.User?.id ?? -1;
 
         /// <summary>
         /// Добавление игрового объекта к пользователю.

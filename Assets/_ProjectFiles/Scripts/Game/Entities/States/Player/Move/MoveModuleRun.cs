@@ -60,8 +60,8 @@ namespace Game.Entities.States.Player
                         // Длинный прыжок.
                         if (isLongJump)
                         {
-                            var jumpState = new MoveModuleJump(Module,
-                                Module.MoveSpeed * Module.RunSpeedModifier, isWalking, isLongJump);
+                            var jumpState = new MoveModuleLongJump(Module,
+                                Module.MoveSpeed * Module.RunSpeedModifier);
 
                             jumpState.SetNext(new MoveModuleRun(Module));
                             return jumpState;

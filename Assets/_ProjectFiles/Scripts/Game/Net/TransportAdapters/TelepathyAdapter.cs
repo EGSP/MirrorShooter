@@ -1,5 +1,5 @@
 ﻿using System;
-using Gasanov.Extensions.Mono;
+using Egsp.Extensions.Mono;
 using Mirror;
 
 namespace Game.Net

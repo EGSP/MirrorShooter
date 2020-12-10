@@ -1,0 +1,3 @@
+[submodule "Assets/SubModules/Package-Unity"]
+	path = Assets/SubModules/Package-Unity
+	url = https://github.com/EveryGameSPlay/Package-Unity

@@ -132,6 +132,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: '[Tool] IngameDebugConsole'
       objectReference: {fileID: 0}
+    - target: {fileID: 132536, guid: 67117722a812a2e46ab8cb8eafbf5f5e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 11414302, guid: 67117722a812a2e46ab8cb8eafbf5f5e, type: 3}
       propertyPath: m_Value
       value: 1
@@ -475,7 +479,7 @@ MonoBehaviour:
       Data: _gamestarter
     - Name: OfflineScene
       Entry: 1
-      Data: _gamestarter
+      Data: main_menu
 --- !u!1 &1445841844
 GameObject:
   m_ObjectHideFlags: 0

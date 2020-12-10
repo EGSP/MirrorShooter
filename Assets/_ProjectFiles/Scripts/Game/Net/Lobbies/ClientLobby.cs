@@ -1,17 +1,18 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Egsp.Core;
+using Egsp.Core.Ui;
 using Game.Configuration;
 using Game.Sessions;
 using Game.Views;
 using Game.Views.Client;
-using Gasanov.Core;
-using Gasanov.Core.Mvp;
-using Gasanov.Extensions.Mono;
 using Mirror;
 using Sirenix.Serialization;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Object = System.Object;
 
 namespace Game.Net
 {
@@ -58,7 +59,7 @@ namespace Game.Net
         [OdinSerialize]
         public List<User> LobbyUsers { get; private set; }
 
-
+        public ClientLobbyScene Scene { get; private set; }
 
 
         #region Setup
@@ -74,13 +75,15 @@ namespace Game.Net
         {
             if (IsInitialized == true)
                 return;
-            
+
             NetworkManager.OnConnectedToServer += Connected;
             NetworkManager.OnDisconnectedFromServer += DisconnectedFromServer;
             // NetworkManager.OnClientChangeSceneEvent += CreateSession;
             NetworkManager.OnClientSceneChangedEvent += StartSession;
             NetworkManager.OnClientSceneChangedEvent += SceneChanged;
 
+            Scene = new ClientLobbyScene(this);
+            
             IsInitialized = true;
             
             InitializeView();
@@ -90,7 +93,6 @@ namespace Game.Net
         {
             var view = ViewFactory.LoadAndInstantiateView<ClientMenuView>("client_menu");
             ViewFactory.LoadAndInstantiateView<ClientInLobbyView>("client_lobby", false);
-            
         }
 
         /// <summary>
@@ -122,7 +124,7 @@ namespace Game.Net
         /// <param name="conn"></param>
         private void Connected(NetworkConnection conn)
         {
-            Debug.Log($"Client lobby connected to {NetworkClient.serverIp}");
+            Debug.Log($"Client lobby: connected to {NetworkClient.serverIp}");
             OnConnected();
             
             ConnectAsUser();
@@ -189,7 +191,7 @@ namespace Game.Net
                 LobbyUsers.Add(message.user);
                 
                 
-                Debug.Log($"New User {message.user.name} : {LobbyUsers.Count}");
+                // Debug.Log($"New User {message.user.name} : {LobbyUsers.Count}");
                 OnAddUser(message.user);
                 return;
             }
@@ -267,9 +269,8 @@ namespace Game.Net
         
         private void SceneChanged()
         {
-            Debug.Log("Scene Changed");
+            // Debug.Log($"SCENE CHANGED TO {SceneManager.GetActiveScene().name}");
             NetworkClient.Send<SceneLoadedMessage>(new SceneLoadedMessage());
-            // SetReady();
         }
         
         /// <summary>
@@ -337,6 +338,54 @@ namespace Game.Net
             ClientSession.Instance.StartSession();
         }
 
+        public void LoadMenuScene()
+        {
+            Scene.LoadMenuScene().With(InitializeView);
+        }
+
         #endregion
+    }
+
+    public class ClientLobbyScene
+    {
+        private readonly ClientLobby lobby;
+        
+        public ClientLobbyScene(ClientLobby lobby)
+        {
+            this.lobby = lobby;
+        }
+        
+        // public string Name { get; private set; }
+
+        private IEnumerator sceneLoadRoutine;
+        
+        public CallBack LoadMenuScene()
+        {
+            var cb = new CallBack();
+
+            if (sceneLoadRoutine != null)
+                return cb;
+
+            sceneLoadRoutine = LoadSceneRoutine(Preloader.Instance.OfflineScene, cb);
+            lobby.StartCoroutine(sceneLoadRoutine);
+            return cb;
+        }
+
+        private IEnumerator LoadSceneRoutine(string sceneName, CallBack callBack)
+        {
+            var sceneAo = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
+
+            while (!sceneAo.isDone)
+            {
+                yield return null;
+            }
+
+            // Ожидание в одну секунду.
+            yield return new WaitForSeconds(0.2f);
+            sceneLoadRoutine = null;
+            
+            callBack.On();
+        }
+        
     }
 }

@@ -5,12 +5,16 @@ using UnityEngine;
 
 namespace Game.Net.Objects
 {
-    
+    /// <summary>
+    /// Объект типа NetworkBehaviour с разделенной логикой (клиент-сервер).
+    /// Для написания общей логики для клиента или сервера нужно переопределить базовые методы Unity.
+    /// При переопределении обязательно нужно вызывать базовое определение методов.
+    /// </summary>
     public abstract class DualNetworkBehaviour : NetworkBehaviour, IDualObject, IUnityMethodsHook
     {
         private DualUpdateManager _cachedUpdateManager;
         
-        private void Awake()
+        protected virtual void Awake()
         {
             // Кешируем значение менеджера.
             _cachedUpdateManager = DualUpdateManager.Instance;
@@ -20,40 +24,40 @@ namespace Game.Net.Objects
             OnAwakeEvent();
         }
 
-        private void Start()
+        protected virtual void Start()
         {
             _cachedUpdateManager.StartMe(this);
 
             OnStartEvent();
         }
 
-        private void Update()
+        protected virtual void Update()
         {
             _cachedUpdateManager.UpdateMe(this);
 
             OnUpdateEvent();
         }
 
-        private void FixedUpdate()
+        protected virtual void FixedUpdate()
         {
             _cachedUpdateManager.FixedUpdateMe(this);
 
             OnFixedUpdateEvent();
         }
         
-        private void LateUpdate()
+        protected virtual void LateUpdate()
         {
             _cachedUpdateManager.LateUpdateMe(this);
         }
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             _cachedUpdateManager.EnableMe(this);
 
             OnEnableEvent();
         }
 
-        private void OnDisable()
+        protected virtual  void OnDisable()
         {    
             _cachedUpdateManager.DisableMe(this);
 

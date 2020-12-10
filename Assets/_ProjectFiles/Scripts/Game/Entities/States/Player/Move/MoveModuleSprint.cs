@@ -11,6 +11,12 @@ namespace Game.Entities.States.Player
         public MoveModuleSprint(PlayerMoveModule moveModule) : base(moveModule)
         {
             _sprintTime = 0;
+            CallDualConstructor();
+        }
+
+        protected override void ConstructorServer()
+        {
+            base.ConstructorServer();
             
             Module.PlayerEntity.BodyModule
                 .SetState(new BodyModuleInOutCrouch(Module.PlayerEntity.BodyModule, InOut.Out));
@@ -65,8 +71,7 @@ namespace Game.Entities.States.Player
             {
                 // Над головой нет препятствия.
                 if (Module.IsHeadUnderObstacle == false)
-                    return new MoveModuleJump(Module, Module.MoveSpeed * Module.RunSpeedModifier,
-                        isWalking, true);
+                    return new MoveModuleLongJump(Module, Module.MoveSpeed * Module.RunSpeedModifier);
             }
             
             // Вышло время спринта.
